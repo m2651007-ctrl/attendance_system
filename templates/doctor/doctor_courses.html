@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>مقرراتي</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="header">
+    📘 مقرراتي
+</div>
+
+<div class="card center">
+
+    <table>
+        <tr>
+            <th>رمز المقرر</th>
+            <th>اسم المقرر</th>
+            <th>الشعبة</th>
+        </tr>
+
+        {% for c in courses %}
+        <tr>
+            <td>{{ c.course_code }}</td>
+            <td>{{ c.course_name }}</td>
+            <td>{{ c.section_name }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3">لا توجد مقررات مسندة</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة المقررات</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="header">
+    📚 إدارة المقررات (Sessions)
+</div>
+
+<div class="card">
+
+    <h2>➕ إضافة مقرر (Session)</h2>
+    <form method="post" action="/admin/sessions/add">
+        <input name="course_name" placeholder="اسم المقرر (CS401)" required>
+
+        <select name="doctor_id" required>
+            <option value="">اختر الدكتور</option>
+            {% for d in doctors %}
+                <option value="{{ d[0] }}">{{ d[1] }}</option>
+            {% endfor %}
+        </select>
+
+        <label style="display:block; margin-top:10px;">وقت بداية المحاضرة</label>
+        <input type="time" name="start_time" required>
+
+        <label style="display:block; margin-top:10px;">وقت نهاية المحاضرة</label>
+        <input type="time" name="end_time" required>
+
+        <button class="btn">إضافة</button>
+    </form>
+
+    <hr>
+
+    <h2>📋 المقررات المضافة</h2>
+    <table>
+        <tr>
+            <th>المقرر</th>
+            <th>الدكتور</th>
+            <th>البداية</th>
+            <th>النهاية</th>
+            <th>الحالة</th>
+            <th>حذف</th>
+        </tr>
+
+        {% for s in sessions %}
+        <tr>
+            <td>{{ s[1] }}</td>
+            <td>{{ s[2] }}</td>
+            <td>{{ s[4] }}</td>
+            <td>{{ s[5] }}</td>
+            <td>{{ "نشطة" if s[3] == 1 else "مغلقة" }}</td>
+            <td>
+                <a href="/admin/sessions/delete/{{ s[0] }}"
+                   onclick="return confirm('متأكد؟')">❌</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+</body>
+</html>

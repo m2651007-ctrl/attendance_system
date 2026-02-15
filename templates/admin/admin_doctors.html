@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة الدكاترة</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+</head>
+<body>
+
+<div class="header">
+    👨‍🏫 إدارة الدكاترة
+</div>
+
+<div class="card">
+
+    <h2 class="center">➕ إضافة دكتور</h2>
+
+    <form method="post" action="/admin/doctors/add" class="center">
+        <input type="text" name="name" placeholder="اسم الدكتور" required>
+        <br><br>
+
+        <input type="email" name="email" placeholder="البريد الإلكتروني" required>
+        <br><br>
+
+        <input type="text" name="username" placeholder="اسم المستخدم" required>
+        <br><br>
+
+        <input type="password" name="password" placeholder="كلمة المرور" required>
+        <br><br>
+
+        <button class="btn">إضافة</button>
+    </form>
+
+    <hr style="margin:30px 0;">
+
+    <h2 class="center">📋 قائمة الدكاترة</h2>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>الاسم</th>
+            <th>الإيميل</th>
+            <th>اسم المستخدم</th>
+            <th>حذف</th>
+        </tr>
+
+        {% for d in doctors %}
+        <tr>
+            <td>{{ d[0] }}</td>
+            <td>{{ d[1] }}</td>
+            <td>{{ d[2] }}</td>
+            <td>{{ d[3] }}</td>
+            <td>
+                <a href="/admin/doctors/delete/{{ d[0] }}"
+                   onclick="return confirm('هل أنت متأكد من الحذف؟')">
+                    ❌
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>دخول الدكتور</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="header">
+    جامعة حائل | دخول الدكتور
+</div>
+
+<div class="card center">
+
+    <h2 class="title">🔐 تسجيل دخول الدكتور</h2>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+
+        <input type="text"
+               name="username"
+               placeholder="اسم المستخدم"
+               required>
+
+        <input type="password"
+               name="password"
+               placeholder="كلمة المرور"
+               required>
+
+        <button class="btn" type="submit">
+            تسجيل الدخول
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

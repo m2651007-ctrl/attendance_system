@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="header">
+    جامعة حائل | د. {{ doctor_name }}
+</div>
+
+<div class="dashboard">
+
+    <div class="box">
+        <h3>📘 مقرراتي</h3>
+        <p>المقررات والشعب المسندة لك</p>
+        <a href="/doctor/courses">عرض</a>
+    </div>
+
+    <div class="box">
+        <h3>🕒 الحضور</h3>
+        <p>حضور الطلاب</p>
+        <a href="/doctor/attendance">عرض</a>
+    </div>
+
+    <div class="box">
+        <h3>🟠 تسجيل الانصراف</h3>
+        <p>تسجيل خروج الطلاب من المحاضرة</p>
+        <a href="/doctor/attendance/checkout_page">عرض</a>
+    </div>
+
+    <div class="box">
+        <h3>🚪 تسجيل خروج</h3>
+        <p>تسجيل خروج الدكتور من النظام</p>
+        <a href="/doctor/logout">خروج</a>
+    </div>
+
+</div>
+
+</body>
+</html>

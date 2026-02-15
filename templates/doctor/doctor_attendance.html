@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>تسجيل الحضور</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .video-wrap{
+      position: relative;
+      display: inline-block;
+      width: 640px;
+      height: 480px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 0;
+      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+      background: #000;
+    }
+
+    #video{
+      width: 100%;
+      height: 100%;
+      display:block;
+      object-fit: cover;
+    }
+
+    #overlay{
+      position:absolute;
+      top:0;
+      left:0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      pointer-events:none;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    #exportBtn{
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #1abc9c;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    #exportBtn:disabled{
+      opacity: .5;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">جامعة حائل | تسجيل الحضور</div>
+
+<div class="card center" style="width: 900px; max-width: 95%;">
+  <h3 class="title">🟢 بث مباشر لتسجيل الحضور</h3>
+
+  <select id="session_id">
+    <option value="">-- اختر المحاضرة --</option>
+    {% for s in sessions %}
+      <option value="{{ s[0] }}">{{ s[1] }}</option>
+    {% endfor %}
+  </select>
+
+  <div class="actions">
+    <button id="exportBtn" disabled>⬇️ تصدير CSV للأدمن</button>
+    <span style="color:#666;">اختر المحاضرة ثم مرّر الطلاب أمام الكاميرا.</span>
+  </div>
+
+  <div class="video-wrap" id="videoWrap" style="margin-top:15px;">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="overlay"></canvas>
+  </div>
+
+  <!-- canvas للإرسال (ثابت 640x480) -->
+  <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+  <hr style="margin:25px 0;">
+
+  <h3 class="title">✅ الطلاب الذين تم تسجيل حضورهم</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>الاسم</th>
+        <th>الرقم الجامعي</th>
+        <th>ID</th>
+        <th>وقت الدخول</th>
+        <th>الحالة</th>
+      </tr>
+    </thead>
+    <tbody id="attBody">
+      <tr><td colspan="5">اختر محاضرة لعرض الحضور</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");     // للإرسال (640x480)
+const overlay = document.getElementById("overlay");   // للرسم فوق الفيديو
+const octx = overlay.getContext("2d");
+
+const sessionSelect = document.getElementById("session_id");
+const attBody = document.getElementById("attBody");
+const exportBtn = document.getElementById("exportBtn");
+
+let timer = null;
+let busy = false;
+let lastDrawAt = 0;
+
+// ==== منع التكرار ====
+const seenToday = new Set();
+const lastSeenAt = {};
+const cooldownMs = 10000;
+
+// أبعاد الصورة اللي نرسلها للسيرفر (لازم تطابق box اللي يرجع)
+const SEND_W = 640;
+const SEND_H = 480;
+
+function resetAntiDuplicateState(){
+  seenToday.clear();
+  for (const k in lastSeenAt) delete lastSeenAt[k];
+}
+
+// تشغيل الكاميرا
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => { video.srcObject = stream; })
+  .catch(err => {
+    alert("❌ لم يتم تشغيل الكاميرا");
+    console.error(err);
+  });
+
+// خلى overlay نفس مقاس الفيديو المعروض
+function resizeOverlayToVideo(){
+  const rect = video.getBoundingClientRect();
+  overlay.width = Math.round(rect.width);
+  overlay.height = Math.round(rect.height);
+}
+window.addEventListener("resize", resizeOverlayToVideo);
+video.addEventListener("loadedmetadata", () => resizeOverlayToVideo());
+
+// ===== أدوات رسم =====
+function clearOverlay() {
+  octx.clearRect(0, 0, overlay.width, overlay.height);
+}
+
+function roundedRect(ctx, x, y, w, h, r){
+  const radius = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
+}
+
+function drawFaceBox(box, labelText) {
+  resizeOverlayToVideo();
+  clearOverlay();
+
+  // box جاية على SEND_W x SEND_H، نحولها لمقاس العرض الحالي
+  const rect = video.getBoundingClientRect();
+  const sx = rect.width / SEND_W;
+  const sy = rect.height / SEND_H;
+
+  let x = box[0] * sx;
+  let y = box[1] * sy;
+  let w = box[2] * sx;
+  let h = box[3] * sy;
+
+  // حدود آمنة
+  x = Math.max(0, x);
+  y = Math.max(0, y);
+  w = Math.min(overlay.width - x, w);
+  h = Math.min(overlay.height - y, h);
+
+  // ===== إطار احترافي =====
+  octx.save();
+  octx.shadowColor = "rgba(0,0,0,0.35)";
+  octx.shadowBlur = 12;
+  octx.shadowOffsetY = 4;
+
+  octx.lineWidth = 4;
+  octx.strokeStyle = "#22c55e";
+  roundedRect(octx, x, y, w, h, 14);
+  octx.stroke();
+
+  octx.shadowColor = "transparent";
+  octx.lineWidth = 1;
+  octx.strokeStyle = "rgba(255,255,255,0.65)";
+  roundedRect(octx, x + 1, y + 1, w - 2, h - 2, 13);
+  octx.stroke();
+
+  // ===== Label بالنص فوق الوجه =====
+  if (labelText) {
+    octx.font = "600 16px Arial";
+    octx.textBaseline = "middle";
+    octx.textAlign = "center";
+
+    const padX = 12;
+    const padY = 8;
+    const textW = octx.measureText(labelText).width;
+    const labelW = textW + (padX * 2) + 18; // + مساحة نقطة
+    const labelH = 34;
+
+    // ✅ بالنص تماماً فوق البوكس
+    const centerX = x + (w / 2);
+    let lx = centerX - (labelW / 2);
+    let ly = y - labelH - 10;
+
+    // حدود
+    lx = Math.max(6, Math.min(lx, overlay.width - labelW - 6));
+    if (ly < 6) ly = y + 10;
+
+    // خلفية
+    octx.shadowColor = "rgba(0,0,0,0.35)";
+    octx.shadowBlur = 10;
+
+    octx.fillStyle = "rgba(17,24,39,0.82)";
+    octx.strokeStyle = "rgba(34,197,94,0.95)";
+    octx.lineWidth = 2;
+
+    roundedRect(octx, lx, ly, labelW, labelH, 10);
+    octx.fill();
+    octx.stroke();
+
+    // نقطة
+    octx.shadowBlur = 0;
+    octx.fillStyle = "#22c55e";
+    octx.beginPath();
+    octx.arc(lx + 14, ly + (labelH / 2), 5, 0, Math.PI * 2);
+    octx.fill();
+
+    // النص بالنص
+    octx.fillStyle = "#ffffff";
+    octx.fillText(labelText, lx + (labelW / 2) + 6, ly + (labelH / 2));
+  }
+
+  octx.restore();
+
+  lastDrawAt = Date.now();
+  setTimeout(() => {
+    if (Date.now() - lastDrawAt >= 1900) clearOverlay();
+  }, 2000);
+}
+
+// ===== تشغيل/إيقاف =====
+sessionSelect.addEventListener("change", () => {
+  stopLive();
+  clearOverlay();
+  resetAntiDuplicateState();
+
+  exportBtn.disabled = !sessionSelect.value;
+
+  if (sessionSelect.value) {
+    refreshTable(true);
+    startLive();
+  } else {
+    attBody.innerHTML = `<tr><td colspan="5">اختر محاضرة لعرض الحضور</td></tr>`;
+  }
+});
+
+exportBtn.addEventListener("click", () => {
+  if (!sessionSelect.value) return alert("اختر المحاضرة أولاً");
+  window.location.href = `/doctor/attendance/export?session_id=${sessionSelect.value}`;
+});
+
+function startLive() { timer = setInterval(captureAndSend, 900); }
+function stopLive() { if (timer) clearInterval(timer); timer = null; }
+
+// ===== إرسال الصور =====
+async function captureAndSend() {
+  if (!sessionSelect.value || busy) return;
+  busy = true;
+
+  try {
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, SEND_W, SEND_H);
+    const image = canvas.toDataURL("image/jpeg", 0.75);
+
+    const res = await fetch("/doctor/attendance/capture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image, session_id: sessionSelect.value })
+    });
+
+    const data = await res.json();
+
+    if (data.box && Array.isArray(data.box)) {
+      if (data.recognized && data.student) {
+        const uid = String(data.student.university_id || "");
+        const now = Date.now();
+
+        const label = `${data.student.name} | ${data.student.academic_number}`;
+
+        // لو مسجل
+        if (uid && seenToday.has(uid)) {
+          drawFaceBox(data.box, label);
+          return;
+        }
+
+        // كول داون
+        if (uid && lastSeenAt[uid] && (now - lastSeenAt[uid] < cooldownMs)) return;
+        if (uid) lastSeenAt[uid] = now;
+
+        drawFaceBox(data.box, label);
+
+        if (data.new_record === true) {
+          if (uid) seenToday.add(uid);
+          refreshTable(false);
+        }
+      } else {
+        drawFaceBox(data.box, "Unknown");
+      }
+    }
+
+  } catch (e) {
+    console.error(e);
+  } finally {
+    busy = false;
+  }
+}
+
+// ===== جدول الحضور =====
+async function refreshTable(fillSeenSet) {
+  const res = await fetch(`/doctor/attendance/list?session_id=${sessionSelect.value}`);
+  const data = await res.json();
+  if (!data.ok) return;
+
+  if (!data.rows.length) {
+    attBody.innerHTML = `<tr><td colspan="5">لا يوجد حضور مسجل بعد</td></tr>`;
+    return;
+  }
+
+  if (fillSeenSet) {
+    for (const r of data.rows) {
+      if (r.university_id) seenToday.add(String(r.university_id));
+    }
+  }
+
+  attBody.innerHTML = data.rows.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td>${r.academic_number}</td>
+      <td>${r.university_id}</td>
+      <td>${r.check_in}</td>
+      <td>${r.status}</td>
+    </tr>
+  `).join("");
+}
+</script>
+
+</body>
+</html>

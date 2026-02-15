@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تسجيل وجوه الطلاب</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    .wrap{max-width:980px;margin:30px auto;padding:0 14px;}
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start;}
+    @media(max-width:980px){.grid{grid-template-columns:1fr;}}
+    .panel{background:#fff;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.08);padding:18px;}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .hint{color:#666;font-size:14px;margin:8px 0 0}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f4f6f9;color:#0b3c5d;font-size:13px}
+    .badge b{font-weight:700}
+    .video-wrap{position:relative;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+    video{width:100%;height:auto;display:block;object-fit:cover}
+    #overlay{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      z-index:5; pointer-events:none;
+    }
+    canvas{display:none}
+    .preview{width:100%;border-radius:12px;border:1px solid #eee;background:#fafafa;min-height:140px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .preview img{width:100%;height:auto;display:block}
+    .btn2{
+      background:#0b3c5d;color:#fff;border:none;border-radius:10px;
+      padding:10px 14px;cursor:pointer;font-size:15px
+    }
+    .btn2:disabled{opacity:.55;cursor:not-allowed}
+    .btn2.alt{background:#c9a24d}
+    .btn2.danger{background:#c0392b}
+    .stat{font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12.5px; background:#0b3c5d0d; padding:10px; border-radius:10px; overflow:auto}
+    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+    @media(max-width:600px){.kpi{grid-template-columns:1fr}}
+    .kpi .boxx{background:#f7f9fc;border:1px solid #eef2f7;border-radius:12px;padding:10px}
+    .kpi .boxx .t{font-size:12px;color:#555}
+    .kpi .boxx .v{font-size:18px;font-weight:800;color:#0b3c5d;margin-top:4px}
+  </style>
+</head>
+
+<body dir="rtl">
+  <div class="header">جامعة حائل | تسجيل وجوه الطلاب</div>
+
+  <div class="wrap">
+    <div class="grid">
+
+      <!-- LEFT: FORM -->
+      <div class="panel">
+        <h2 class="title" style="margin:0 0 14px">📸 تسجيل بيانات الطالب (بداية الترم)</h2>
+
+        <div class="row">
+          <span class="badge">🎯 المطلوب: <b id="needCount">...</b> صور</span>
+          <span class="badge">🧠 وضع: <b>Auto Capture + Face Box</b></span>
+        </div>
+        <p class="hint">خل الطالب يغيّر زوايا وجهه تدريجيًا (يمين/يسار/فوق/تحت) عشان تزيد الدقة.</p>
+
+        <label>اسم الطالب</label>
+        <input type="text" id="name" placeholder="مثال: أحمد محمد" required>
+
+        <label>الرقم الجامعي</label>
+        <input type="text" id="university_id" placeholder="مثال: 441234567" required>
+
+        <hr style="margin:16px 0">
+
+        <h3 id="instruction" style="margin:0 0 10px;color:#0b3c5d">📸 انظر مباشرة للكاميرا</h3>
+
+        <div class="video-wrap">
+          <video id="video" autoplay playsinline></video>
+          <canvas id="overlay"></canvas>
+        </div>
+
+        <!-- canvas للإرسال للسيرفر بحجم ثابت -->
+        <canvas id="canvas" width="640" height="480"></canvas>
+
+        <div class="row" style="margin-top:12px">
+          <button class="btn2" type="button" id="btnSnap">📸 لقطة</button>
+          <button class="btn2 alt" type="button" id="btnAuto">▶️ تشغيل التلقائي</button>
+          <button class="btn2 danger" type="button" id="btnReset">↩️ إعادة</button>
+          <span class="badge">الصور: <b id="counter">0</b> / <b id="total">0</b></span>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <label style="min-width:120px">الفاصل (ثانية)</label>
+          <input type="number" id="intervalSec" value="1.2" step="0.1" min="0.4" style="width:180px">
+          <span class="hint">كل ما قللت الفاصل أسرع، بس ممكن صور متشابهة.</span>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <button class="btn2" type="button" id="btnSave">✅ حفظ البيانات والوجه</button>
+          <button class="btn2" type="button" id="btnTest" disabled>🧪 اختبار سرعة التعرف</button>
+        </div>
+
+        <div id="saveMsg" class="hint" style="margin-top:10px"></div>
+
+        <div class="kpi" id="perfKpi" style="display:none">
+          <div class="boxx"><div class="t">ms_total</div><div class="v" id="k_ms_total">-</div></div>
+          <div class="boxx"><div class="t">min_dist</div><div class="v" id="k_min_dist">-</div></div>
+          <div class="boxx"><div class="t">recognized</div><div class="v" id="k_rec">-</div></div>
+        </div>
+
+        <pre class="stat" id="perfBox" style="display:none;margin-top:10px"></pre>
+      </div>
+
+      <!-- RIGHT: PREVIEW + TIPS -->
+      <div class="panel">
+        <h3 class="title" style="margin:0 0 12px">🖼️ آخر لقطة</h3>
+        <div class="preview" id="preview">
+          <span class="hint">لم يتم التقاط صور بعد</span>
+        </div>
+
+        <hr style="margin:16px 0">
+
+        <h3 class="title" style="margin:0 0 12px">📌 نصائح لزيادة الدقة</h3>
+        <ul style="margin:0;color:#333;line-height:1.9">
+          <li>إضاءة أمامية قوية (مو من الخلف).</li>
+          <li>غيّر الزوايا: يمين/يسار/فوق/تحت.</li>
+          <li>بدون نظارة شمسية/كمامة أثناء التسجيل.</li>
+          <li>خلك قريب من الكاميرا والوجه واضح.</li>
+          <li>لو الإطار أحمر: قرّب/ثبت الوجه وخفف الحركة.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const overlay = document.getElementById("overlay");
+const octx = overlay.getContext("2d");
+
+const needCountEl = document.getElementById("needCount");
+const counterEl = document.getElementById("counter");
+const totalEl = document.getElementById("total");
+const instructionEl = document.getElementById("instruction");
+const previewEl = document.getElementById("preview");
+const saveMsgEl = document.getElementById("saveMsg");
+
+const btnSnap = document.getElementById("btnSnap");
+const btnAuto = document.getElementById("btnAuto");
+const btnReset = document.getElementById("btnReset");
+const btnSave = document.getElementById("btnSave");
+const btnTest = document.getElementById("btnTest");
+const intervalSecEl = document.getElementById("intervalSec");
+
+const perfBox = document.getElementById("perfBox");
+const perfKpi = document.getElementById("perfKpi");
+const k_ms_total = document.getElementById("k_ms_total");
+const k_min_dist = document.getElementById("k_min_dist");
+const k_rec = document.getElementById("k_rec");
+
+let images = [];
+let targetCount = 5;              // يجي من السيرفر لو متوفر
+let autoTimer = null;
+let busy = false;
+
+let clearTimer = null;
+let lastTestAt = 0;
+
+// منع صور متشابهة (فرق بسيط بالبيكسلات)
+let lastTiny = null;
+const SIMILARITY_THRESHOLD = 6.0; // أصغر = يمنع أكثر
+
+const instructions = [
+  "📸 انظر مباشرة للكاميرا",
+  "➡️ لف رأسك يمين",
+  "⬅️ لف رأسك يسار",
+  "⬆️ ارفع رأسك قليلاً",
+  "⬇️ انزل رأسك قليلاً",
+  "🙂 ابتسامة خفيفة",
+  "🔄 لف بسيط يمين",
+  "🔄 لف بسيط يسار",
+  "⬆️ رفع بسيط",
+  "⬇️ نزول بسيط",
+  "👀 قرب شوي",
+  "👀 ابعد شوي"
+];
+
+function setCounter(){
+  counterEl.textContent = images.length;
+  totalEl.textContent = targetCount;
+  const idx = Math.min(images.length, instructions.length - 1);
+  instructionEl.textContent = (images.length >= targetCount)
+    ? "✅ تم التقاط جميع الصور"
+    : (instructions[idx] || "📸 غيّر زاوية الوجه");
+}
+
+function showPreview(dataUrl){
+  previewEl.innerHTML = "";
+  const img = document.createElement("img");
+  img.src = dataUrl;
+  previewEl.appendChild(img);
+}
+
+function syncOverlaySize(){
+  // نخلي overlay يطابق مقاس الفيديو الحقيقي
+  const w = video.videoWidth || 640;
+  const h = video.videoHeight || 480;
+  overlay.width = w;
+  overlay.height = h;
+}
+video.addEventListener("loadedmetadata", syncOverlaySize);
+video.addEventListener("loadeddata", syncOverlaySize);
+window.addEventListener("resize", syncOverlaySize);
+
+function clearOverlay(){
+  octx.clearRect(0,0,overlay.width,overlay.height);
+}
+
+function roundedRect(ctx, x, y, w, h, r){
+  const radius = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
+}
+
+function drawFaceBox(box, labelText, ok=true){
+  syncOverlaySize();
+  clearOverlay();
+
+  const mainColor = ok ? "#22c55e" : "#ef4444";
+
+  octx.save();
+  octx.shadowColor = "rgba(0,0,0,0.35)";
+  octx.shadowBlur = 10;
+  octx.shadowOffsetY = 3;
+
+  octx.lineWidth = 4;
+  octx.strokeStyle = mainColor;
+  roundedRect(octx, box[0], box[1], box[2], box[3], 14);
+  octx.stroke();
+
+  octx.shadowColor = "transparent";
+  octx.lineWidth = 1;
+  octx.strokeStyle = "rgba(255,255,255,0.65)";
+  roundedRect(octx, box[0] + 1, box[1] + 1, box[2] - 2, box[3] - 2, 13);
+  octx.stroke();
+
+  if (labelText){
+    octx.font = "600 16px Arial";
+
+    const padX = 12;
+    const textW = octx.measureText(labelText).width;
+    const boxW = textW + padX * 2 + 14;
+    const boxH = 34;
+
+    let lx = box[0];
+    let ly = box[1] - boxH - 10;
+    if (ly < 6) ly = box[1] + 8;
+    if (lx + boxW > overlay.width - 6) lx = overlay.width - boxW - 6;
+
+    octx.fillStyle = "rgba(17,24,39,0.82)";
+    octx.strokeStyle = mainColor;
+    octx.lineWidth = 2;
+    roundedRect(octx, lx, ly, boxW, boxH, 10);
+    octx.fill();
+    octx.stroke();
+
+    octx.fillStyle = mainColor;
+    octx.beginPath();
+    octx.arc(lx + 14, ly + boxH/2, 5, 0, Math.PI*2);
+    octx.fill();
+
+    octx.fillStyle = "#fff";
+    octx.textAlign = "center";
+    octx.textBaseline = "middle";
+    const leftPadForDot = 26;
+    const textAreaX = lx + leftPadForDot;
+    const textAreaW = boxW - leftPadForDot;
+    octx.fillText(labelText, textAreaX + textAreaW/2, ly + boxH/2);
+    octx.textAlign = "start";
+    octx.textBaseline = "alphabetic";
+  }
+
+  octx.restore();
+
+  if (clearTimer) clearTimeout(clearTimer);
+  clearTimer = setTimeout(clearOverlay, 2000);
+}
+
+async function init(){
+  // تشغيل الكاميرا
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio:false });
+    video.srcObject = stream;
+  }catch(e){
+    alert("❌ لم يتم تشغيل الكاميرا");
+    console.error(e);
+  }
+
+  // جلب العدد المطلوب
+  try{
+    const res = await fetch("/admin/register_student_face/config");
+    const data = await res.json();
+    if (data && data.ok && data.min_images){
+      targetCount = parseInt(data.min_images);
+    }
+  }catch(e){}
+
+  needCountEl.textContent = targetCount;
+  setCounter();
+}
+
+function tinyFingerprint(){
+  // لقطة صغيرة 32x24 لمقارنة التشابه
+  const tmp = document.createElement("canvas");
+  tmp.width = 32; tmp.height = 24;
+  const tctx = tmp.getContext("2d");
+  tctx.drawImage(video, 0, 0, 32, 24);
+  const imgData = tctx.getImageData(0,0,32,24).data;
+  // نحولها لرمادي بسيط ونخزن كل 4 بايت
+  const arr = new Uint8Array(32*24);
+  let j=0;
+  for (let i=0;i<imgData.length;i+=4){
+    const r=imgData[i], g=imgData[i+1], b=imgData[i+2];
+    arr[j++] = (r*0.299 + g*0.587 + b*0.114) | 0;
+  }
+  return arr;
+}
+
+function diffTiny(a,b){
+  if (!a || !b) return 999;
+  let sum=0;
+  for (let i=0;i<a.length;i++){
+    sum += Math.abs(a[i]-b[i]);
+  }
+  return sum / a.length;
+}
+
+async function runRecognitionTestAndDraw(){
+  // نحدّ من الاختبارات (مرة كل 700ms)
+  const now = Date.now();
+  if (now - lastTestAt < 700) return;
+  lastTestAt = now;
+
+  // نرسل 640x480 للسيرفر عشان box تطابق
+  canvas.width = 640;
+  canvas.height = 480;
+  ctx.drawImage(video, 0, 0, 640, 480);
+  const image = canvas.toDataURL("image/jpeg", 0.75);
+
+  try{
+    const res = await fetch("/admin/recognition_test", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ image })
+    });
+    const data = await res.json();
+
+    // KPIs مصغّرة
+    const perf = data.perf || {};
+    perfKpi.style.display = "grid";
+    k_ms_total.textContent = (perf.ms_total ?? "-");
+    k_min_dist.textContent = (perf.min_dist ?? "-");
+    k_rec.textContent = (data.recognized ? "YES ✅" : "NO ❌");
+
+    // رسم الإطار إذا موجود
+    if (data.box && Array.isArray(data.box)){
+      // box على 640x480 -> overlay على video.videoWidth/Height
+      syncOverlaySize();
+      const sx = overlay.width / 640;
+      const sy = overlay.height / 480;
+      const b = [
+        data.box[0]*sx, data.box[1]*sy,
+        data.box[2]*sx, data.box[3]*sy
+      ];
+      const label = data.recognized ? "Face OK ✅" : "Unknown ❌";
+      drawFaceBox(b, label, data.recognized);
+    }
+
+  }catch(e){
+    // إذا endpoint غير موجود ما نخرب الصفحة
+    // console.error(e);
+  }
+}
+
+function captureOne(){
+  if (busy) return;
+  if (!video.videoWidth) return;
+  if (images.length >= targetCount) return;
+
+  busy = true;
+
+  // منع الصور المتشابهة
+  const fp = tinyFingerprint();
+  const d = diffTiny(fp, lastTiny);
+  if (d < SIMILARITY_THRESHOLD){
+    saveMsgEl.textContent = "⚠️ صورة مشابهة جدًا.. حرّك الوجه شوي";
+    busy = false;
+    return;
+  }
+  lastTiny = fp;
+
+  // لقطة للحفظ
+  canvas.width = 640;
+  canvas.height = 480;
+  ctx.drawImage(video, 0, 0, 640, 480);
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+
+  images.push(dataUrl);
+  showPreview(dataUrl);
+  setCounter();
+
+  // اختبار + إطار بعد اللقطة
+  runRecognitionTestAndDraw();
+
+  busy = false;
+
+  if (images.length >= targetCount) stopAuto();
+}
+
+function startAuto(){
+  if (autoTimer) return;
+  let sec = parseFloat(intervalSecEl.value || "1.2");
+  sec = Math.max(0.4, sec);
+
+  btnAuto.textContent = "⏸️ إيقاف التلقائي";
+  autoTimer = setInterval(() => {
+    if (images.length < targetCount) captureOne();
+  }, sec * 1000);
+}
+
+function stopAuto(){
+  if (autoTimer) clearInterval(autoTimer);
+  autoTimer = null;
+  btnAuto.textContent = "▶️ تشغيل التلقائي";
+}
+
+function resetAll(){
+  stopAuto();
+  images = [];
+  lastTiny = null;
+
+  previewEl.innerHTML = `<span class="hint">لم يتم التقاط صور بعد</span>`;
+  saveMsgEl.textContent = "";
+  perfBox.style.display = "none";
+  perfKpi.style.display = "none";
+  btnTest.disabled = true;
+
+  clearOverlay();
+  setCounter();
+}
+
+async function saveStudent(){
+  const name = document.getElementById("name").value.trim();
+  const uid  = document.getElementById("university_id").value.trim();
+
+  if (!name || !uid){
+    alert("❌ أدخل اسم الطالب والرقم الجامعي");
+    return;
+  }
+  if (images.length < targetCount){
+    alert(`❌ لازم ${targetCount} صور`);
+    return;
+  }
+
+  btnSave.disabled = true;
+  saveMsgEl.textContent = "⏳ جاري الحفظ...";
+  perfBox.style.display = "none";
+
+  try{
+    const res = await fetch("/admin/register_student_face", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, university_id: uid, images })
+    });
+
+    const data = await res.json();
+    saveMsgEl.textContent = data.message || "✅ تم الحفظ";
+
+    // تفعيل اختبار السرعة
+    btnTest.disabled = false;
+
+  }catch(e){
+    console.error(e);
+    saveMsgEl.textContent = "❌ حصل خطأ أثناء الحفظ";
+  }finally{
+    btnSave.disabled = false;
+  }
+}
+
+async function testRecognition(){
+  if (!video.videoWidth) return;
+
+  canvas.width = 640;
+  canvas.height = 480;
+  ctx.drawImage(video, 0, 0, 640, 480);
+  const image = canvas.toDataURL("image/jpeg", 0.8);
+
+  btnTest.disabled = true;
+  saveMsgEl.textContent = "🧪 جاري اختبار التعرف...";
+  perfBox.style.display = "none";
+  perfKpi.style.display = "none";
+
+  try{
+    const res = await fetch("/admin/recognition_test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image })
+    });
+    const data = await res.json();
+
+    const perf = data.perf || {};
+    perfKpi.style.display = "grid";
+    perfBox.style.display = "block";
+
+    k_ms_total.textContent = (perf.ms_total ?? "-");
+    k_min_dist.textContent = (perf.min_dist ?? "-");
+    k_rec.textContent = (data.recognized ? "YES ✅" : "NO ❌");
+
+    perfBox.textContent = JSON.stringify(data, null, 2);
+    saveMsgEl.textContent = "✅ انتهى الاختبار";
+
+    // رسم الإطار إذا رجع
+    if (data.box && Array.isArray(data.box)){
+      syncOverlaySize();
+      const sx = overlay.width / 640;
+      const sy = overlay.height / 480;
+      const b = [
+        data.box[0]*sx, data.box[1]*sy,
+        data.box[2]*sx, data.box[3]*sy
+      ];
+      drawFaceBox(b, data.recognized ? "Face OK ✅" : "Unknown ❌", data.recognized);
+    }
+
+  }catch(e){
+    console.error(e);
+    saveMsgEl.textContent = "❌ فشل الاختبار (تأكد من /admin/recognition_test)";
+  }finally{
+    btnTest.disabled = false;
+  }
+}
+
+// events
+btnSnap.addEventListener("click", captureOne);
+btnAuto.addEventListener("click", () => autoTimer ? stopAuto() : startAuto());
+btnReset.addEventListener("click", resetAll);
+btnSave.addEventListener("click", saveStudent);
+btnTest.addEventListener("click", testRecognition);
+
+init();
+</script>
+</body>
+</html>

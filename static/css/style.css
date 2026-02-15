@@ -1,0 +1,211 @@
+/* ================= ROOT ================= */
+:root {
+    --hail-blue: #0b3c5d;
+    --hail-gold: #c9a24d;
+    --bg-light: #f4f6f9;
+    --danger: #c0392b;
+}
+
+/* ================= BASE ================= */
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: var(--bg-light);
+    direction: rtl;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* ================= HEADER ================= */
+.header {
+    background: var(--hail-blue);
+    color: white;
+    padding: 20px;
+    font-size: 22px;
+    text-align: center;
+}
+
+/* ================= CARD ================= */
+.card {
+    background: white;
+    margin: 50px auto;
+    padding: 35px;
+    width: 420px;
+    max-width: 95%;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+.center {
+    text-align: center;
+}
+
+.title {
+    margin-bottom: 25px;
+    color: var(--hail-blue);
+}
+
+/* ================= FORM ================= */
+input,
+select {
+    width: 85%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    display: block;
+    margin: 10px auto;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--hail-blue);
+}
+
+/* ================= BUTTONS ================= */
+.btn {
+    background: var(--hail-blue);
+    color: white;
+    padding: 10px 35px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    display: block;
+    margin: 15px auto;
+}
+
+.btn:hover {
+    background: #092f49;
+}
+
+.btn.danger {
+    background: var(--danger);
+}
+
+.btn.danger:hover {
+    background: #a93226;
+}
+
+/* ================= ERRORS ================= */
+.error {
+    color: red;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* ================= TABLE ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+}
+
+th,
+td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    font-size: 14px;
+}
+
+th {
+    background: var(--hail-blue);
+    color: white;
+}
+
+tr:hover {
+    background: #f9f9f9;
+}
+
+
+/* ================= DASHBOARD ================= */
+.dashboard {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 18px;
+
+    display: grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+
+/* Responsive grid */
+@media (max-width: 980px){
+    .dashboard { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+}
+@media (max-width: 640px){
+    .dashboard { grid-template-columns: 1fr; }
+}
+
+.box {
+    background: white;
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.06);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.box:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.12);
+}
+
+.box h3 {
+    color: var(--hail-blue);
+    margin: 0;
+    font-size: 20px;
+}
+
+.box p{
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* زر "عرض" بشكل زر احترافي بدل رابط */
+.box a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border-radius: 12px;
+
+    background: var(--hail-gold);
+    color: #fff;
+    font-weight: 800;
+
+    width: fit-content;
+    margin: 6px auto 0;
+}
+
+.box a:hover{
+    filter: brightness(.95);
+}
+
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) {
+    .card {
+        width: 90%;
+        padding: 25px;
+    }
+
+    .header {
+        font-size: 18px;
+    }
+}

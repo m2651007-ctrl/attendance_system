@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة الطالب | جامعة حائل</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="header">
+    جامعة حائل | لوحة الطالب
+</div>
+
+<div class="card center">
+
+    <h2>مرحبًا {{ student_name }}</h2>
+
+    <table>
+        <tr>
+            <th>المقرر</th>
+            <th>الشعبة</th>
+            <th>الدخول</th>
+            <th>الخروج</th>
+            <th>الحالة</th>
+        </tr>
+
+        {% for row in attendance %}
+        <tr>
+            <td>{{ row.course_code }}</td>
+            <td>{{ row.section_name }}</td>
+            <td>{{ row.check_in }}</td>
+            <td>{{ row.check_out }}</td>
+            <td>{{ row.status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+</body>
+</html>

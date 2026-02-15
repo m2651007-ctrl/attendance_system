@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login - University of Hail</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+</head>
+<body>
+
+<div class="header">
+    جامعة حائل | لوحة الإدارة
+</div>
+
+<div class="card center">
+
+    <h2 class="title">تسجيل دخول الإدارة</h2>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        <input type="text" name="username" placeholder="اسم المستخدم" required>
+        <br><br>
+        <input type="password" name="password" placeholder="كلمة المرور" required>
+        <br><br>
+        <button class="btn">دخول</button>
+    </form>
+
+</div>
+
+</body>
+</html>
