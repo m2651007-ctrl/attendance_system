@@ -473,10 +473,17 @@ async function saveStudent(){
     });
 
     const data = await res.json();
-    saveMsgEl.textContent = data.message || "✅ تم الحفظ";
-
-    // تفعيل اختبار السرعة
-    btnTest.disabled = false;
+    
+    if (res.status === 400 && data.message && data.message.includes("مسجل")) {
+      saveMsgEl.textContent = "الطالب مسجل بالفعل";
+      saveMsgEl.style.color = "red";
+    } else {
+      saveMsgEl.textContent = data.message || "✅ تم الحفظ";
+      saveMsgEl.style.color = "green";
+      
+      // تفعيل اختبار السرعة
+      btnTest.disabled = false;
+    }
 
   }catch(e){
     console.error(e);

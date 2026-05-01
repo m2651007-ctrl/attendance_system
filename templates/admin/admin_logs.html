@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>سجلات الإدارة</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: #0b3c5d;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #0b3c5d;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logs-table th,
+        .logs-table td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .logs-table th {
+            background: #0b3c5d;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .logs-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .logs-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .action-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .action-attendance-marked {
+            background: #28a745;
+            color: white;
+        }
+        
+        .action-duplicate-attendance {
+            background: #ffc107;
+            color: black;
+        }
+        
+        .action-duplicate-registration {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .timestamp {
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .details {
+            max-width: 300px;
+            word-wrap: break-word;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>سجلات الإدارة</h1>
+        <p>سجل أنشطة النظام للطلاب</p>
+    </div>
+    
+    <a href="/admin/dashboard" class="back-link">← العودة للوحة التحكم</a>
+    
+    <div class="controls">
+        <input type="text" id="search-input" placeholder="Search by Student ID..." style="padding: 8px; margin-bottom: 20px; width: 300px; border: 1px solid #ddd; border-radius: 4px;">
+        <button id="export-btn" style="padding: 8px 16px; margin-bottom: 20px; margin-left: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Export to CSV</button>
+        <button id="delete-selected-btn" style="padding: 8px 16px; margin-bottom: 20px; margin-left: 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; display: none;">Delete Selected</button>
+    </div>
+    
+    <div id="logs-container">
+        <div class="loading">جاري تحميل السجلات...</div>
+    </div>
+</div>
+
+<script>
+function getActionClass(action) {
+    switch(action) {
+        case 'ATTENDANCE_MARKED':
+            return 'action-attendance-marked';
+        case 'DUPLICATE_ATTENDANCE_ATTEMPT':
+            return 'action-duplicate-attendance';
+        case 'DUPLICATE_REGISTRATION_ATTEMPT':
+            return 'action-duplicate-registration';
+        default:
+            return '';
+    }
+}
+
+function formatAction(action) {
+    switch(action) {
+        case 'ATTENDANCE_MARKED':
+            return 'تسجيل الحضور';
+        case 'DUPLICATE_ATTENDANCE_ATTEMPT':
+            return 'محاولة حضور مكررة';
+        case 'DUPLICATE_REGISTRATION_ATTEMPT':
+            return 'محاولة تسجيل مكررة';
+        default:
+            return action.replace(/_/g, ' ').toLowerCase();
+    }
+}
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    });
+}
+
+async function loadLogs() {
+    try {
+        const searchValue = document.getElementById('search-input').value;
+        const url = searchValue ? `/admin/logs/data?search_student_id=${encodeURIComponent(searchValue)}` : '/admin/logs/data';
+        
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        const container = document.getElementById('logs-container');
+        
+        if (!result.ok) {
+            container.innerHTML = '<div class="no-logs">خطأ في تحميل السجلات: ' + result.message + '</div>';
+            return;
+        }
+        
+        if (!result.logs || result.logs.length === 0) {
+            container.innerHTML = '<div class="no-logs">لا توجد سجلات</div>';
+            return;
+        }
+        
+        let tableHTML = `
+            <table class="logs-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all-checkbox" style="margin-right: 5px;"></th>
+                        <th>التوقيت</th>
+                        <th>رقم الطالب</th>
+                        <th>اسم الطالب</th>
+                        <th>الإجراء</th>
+                        <th>الجلسة</th>
+                        <th>التفاصيل</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        result.logs.forEach((log, index) => {
+            const sessionDisplay = log.course_name && log.session_id ? 
+                `${log.course_name} - Session ${log.session_id}` : 
+                log.session_id || '-';
+            
+            tableHTML += `
+                <tr data-log-id="${log.id}">
+                    <td><input type="checkbox" class="log-checkbox" data-log-id="${log.id}" style="margin-right: 5px;"></td>
+                    <td class="timestamp">${formatTimestamp(log.timestamp)}</td>
+                    <td>${log.student_id}</td>
+                    <td>${log.student_name}</td>
+                    <td><span class="action-badge ${getActionClass(log.action)}">${formatAction(log.action)}</span></td>
+                    <td>${sessionDisplay}</td>
+                    <td class="details">${log.details || '-'}</td>
+                </tr>
+            `;
+        });
+        
+        tableHTML += `
+                </tbody>
+            </table>
+        `;
+        
+        container.innerHTML = tableHTML;
+        
+        // Setup event listeners
+        setupEventListeners();
+        
+    } catch (error) {
+        console.error('Error loading logs:', error);
+        document.getElementById('logs-container').innerHTML = '<div class="no-logs">خطأ في تحميل السجلات</div>';
+    }
+}
+
+function setupEventListeners() {
+    const selectAllCheckbox = document.getElementById('select-all-checkbox');
+    const logCheckboxes = document.querySelectorAll('.log-checkbox');
+    const deleteBtn = document.getElementById('delete-selected-btn');
+    
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            logCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateDeleteButton();
+        });
+    }
+    
+    logCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateDeleteButton);
+    });
+}
+
+function updateDeleteButton() {
+    const checkedBoxes = document.querySelectorAll('.log-checkbox:checked');
+    const deleteBtn = document.getElementById('delete-selected-btn');
+    deleteBtn.style.display = checkedBoxes.length > 0 ? 'inline-block' : 'none';
+}
+
+function getSelectedLogIds() {
+    const checkedBoxes = document.querySelectorAll('.log-checkbox:checked');
+    return Array.from(checkedBoxes).map(cb => parseInt(cb.dataset.logId)).filter(id => id);
+}
+
+// Load logs when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadLogs();
+    
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadLogs, 300); // Debounce search
+    });
+    
+    // Export functionality
+    document.getElementById('export-btn').addEventListener('click', function() {
+        const searchValue = searchInput.value;
+        const url = searchValue ? `/admin/logs/export?search_student_id=${encodeURIComponent(searchValue)}` : '/admin/logs/export';
+        window.open(url, '_blank');
+    });
+    
+    // Delete functionality
+    document.getElementById('delete-selected-btn').addEventListener('click', async function() {
+        const selectedIds = getSelectedLogIds();
+        if (selectedIds.length === 0) {
+            alert('Please select at least one log entry to delete.');
+            return;
+        }
+        
+        if (confirm(`Are you sure you want to delete ${selectedIds.length} log entry(ies)?`)) {
+            try {
+                const response = await fetch('/admin/logs/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ log_ids: selectedIds })
+                });
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    alert(`Successfully deleted ${result.deleted_count} log entry(ies).`);
+                    loadLogs(); // Reload logs
+                } else {
+                    alert('Error deleting logs: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error deleting logs:', error);
+                alert('Error deleting logs. Please try again.');
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>

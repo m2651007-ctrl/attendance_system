@@ -1,40 +1,483 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سجل الحضور</title>
-   <link rel="stylesheet" href="/static/css/style.css">
+    <title>سجل الحضور والانصراف</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: #0b3c5d;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #0b3c5d;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+            text-align: right;
+        }
+        
+        .export-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .export-btn:hover {
+            background: #218838;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .export-selected-btn {
+            background: #17a2b8;
+        }
+        
+        .export-selected-btn:hover {
+            background: #138496;
+        }
+        
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .attendance-table th,
+        .attendance-table td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .attendance-table th {
+            background: #0b3c5d;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .attendance-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .attendance-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-present {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-late {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-absent {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .status-not-checked-out {
+            background: #ffc107;
+            color: black;
+        }
+        
+        .checkout-not-checked-out {
+            color: #ff8c00;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .no-records {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .timestamp {
+            font-family: monospace;
+            font-size: 14px;
+            direction: ltr;
+            text-align: center;
+        }
+        
+        .checkbox {
+            margin-left: 5px;
+        }
+    </style>
 </head>
 <body>
 
-<div class="header">
-    جامعة حائل | سجل الحضور والانصراف
+<div class="container">
+    <div class="header">
+        <h1>سجل الحضور والانصراف</h1>
+        <p>سجلات حضور الطلاب للجلسات</p>
+    </div>
+    
+    <a href="/admin/dashboard" class="back-link">العودة للوحة التحكم ←</a>
+    
+    <div class="controls">
+        <input type="text" id="course-search" class="search-input" placeholder="البحث باسم المقرر...">
+        <input type="text" id="student-search" class="search-input" placeholder="البحث برقم الطالب...">
+        <button id="delete-selected-btn" class="export-btn delete-btn" style="display: none;">حذف المحدد</button>
+        <button id="export-selected-btn" class="export-btn export-selected-btn" style="display: none;">تصدير المحدد</button>
+        <button id="export-btn" class="export-btn">تصدير الكل</button>
+    </div>
+    
+    <div id="attendance-container">
+        <div class="loading">جاري تحميل السجلات...</div>
+    </div>
 </div>
 
-<div class="card center">
+<script>
+function getStatusClass(status) {
+    switch(status) {
+        case 'Present':
+            return 'status-present';
+        case 'Late':
+            return 'status-late';
+        case 'Absent':
+            return 'status-absent';
+        case 'Not Checked Out':
+            return 'status-not-checked-out';
+        default:
+            return '';
+    }
+}
 
-    <h2>🕒 الحضور</h2>
+function formatTimestamp(timestamp) {
+    if (!timestamp) return '-';
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+}
 
-    <p class="hint">
-        سيتم تعبئة هذا الجدول تلقائيًا من نظام التعرّف على الوجه
-    </p>
+function isLateCheckIn(checkInTime, sessionStartTime) {
+    if (!checkInTime || !sessionStartTime) return false;
+    
+    const checkIn = new Date(checkInTime);
+    const [hours, minutes] = sessionStartTime.split(':').map(Number);
+    const sessionStart = new Date(checkIn);
+    sessionStart.setHours(hours, minutes, 0, 0);
+    
+    const diffMinutes = (checkIn - sessionStart) / (1000 * 60);
+    return diffMinutes > 15;
+}
 
-    <table>
-        <tr>
-            <th>الطالب</th>
-            <th>المقرر</th>
-            <th>الشعبة</th>
-            <th>وقت الحضور</th>
-            <th>وقت الانصراف</th>
-            <th>الحالة</th>
-        </tr>
+function getSelectedRecordIds() {
+    const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
+    return Array.from(checkedBoxes).map(cb => parseInt(cb.dataset.recordId)).filter(id => id);
+}
 
-        <tr>
-            <td colspan="6">لا توجد سجلات حالياً</td>
-        </tr>
-    </table>
+function updateSelectedButtons() {
+    const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
+    const deleteBtn = document.getElementById('delete-selected-btn');
+    const exportSelectedBtn = document.getElementById('export-selected-btn');
+    
+    const hasSelection = checkedBoxes.length > 0;
+    deleteBtn.style.display = hasSelection ? 'inline-block' : 'none';
+    exportSelectedBtn.style.display = hasSelection ? 'inline-block' : 'none';
+}
 
-</div>
+function setupEventListeners() {
+    const selectAllCheckbox = document.getElementById('select-all-checkbox');
+    const recordCheckboxes = document.querySelectorAll('.record-checkbox');
+    
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            recordCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateSelectedButtons();
+        });
+    }
+    
+    recordCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedButtons);
+    });
+}
+
+async function loadAttendance() {
+    try {
+        const courseSearch = document.getElementById('course-search').value;
+        const studentSearch = document.getElementById('student-search').value;
+        
+        let url = '/admin/attendance/data?';
+        const params = [];
+        
+        if (courseSearch) {
+            params.push(`course_search=${encodeURIComponent(courseSearch)}`);
+        }
+        
+        if (studentSearch) {
+            params.push(`student_search=${encodeURIComponent(studentSearch)}`);
+        }
+        
+        if (params.length > 0) {
+            url += params.join('&');
+        } else {
+            url = '/admin/attendance/data';
+        }
+        
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        const container = document.getElementById('attendance-container');
+        
+        if (!result.ok) {
+            container.innerHTML = '<div class="no-records">خطأ في تحميل السجلات: ' + result.message + '</div>';
+            return;
+        }
+        
+        if (!result.records || result.records.length === 0) {
+            container.innerHTML = '<div class="no-records">لا توجد سجلات حضور</div>';
+            return;
+        }
+        
+        let tableHTML = `
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all-checkbox" class="checkbox"></th>
+                        <th>اسم الطالب</th>
+                        <th>رقم الطالب</th>
+                        <th>اسم المقرر</th>
+                        <th>رقم الشعبه</th>
+                        <th>اسم الدكتور</th>
+                        <th>وقت الدخول</th>
+                        <th>وقت الخروج</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        result.records.forEach(record => {
+            const statusClass = getStatusClass(record.status);
+            
+            // Determine checkout display
+            let checkoutDisplay = formatTimestamp(record.check_out);
+            let checkoutClass = '';
+            
+            if (record.check_in && !record.check_out) {
+                checkoutDisplay = 'لم يخرج';
+                checkoutClass = 'checkout-not-checked-out';
+            }
+            
+            // Translate status for display
+            let statusDisplay = record.status;
+            switch(record.status) {
+                case 'Present':
+                    statusDisplay = 'حاضر';
+                    break;
+                case 'Late':
+                    statusDisplay = 'متأخر';
+                    break;
+                case 'Absent':
+                    statusDisplay = 'غائب';
+                    break;
+            }
+            
+            tableHTML += `
+                <tr data-record-id="${record.id}">
+                    <td><input type="checkbox" class="record-checkbox" data-record-id="${record.id}" class="checkbox"></td>
+                    <td>${record.student_name}</td>
+                    <td>${record.university_id}</td>
+                    <td>${record.course_name}</td>
+                    <td>${record.session_id}</td>
+                    <td>${record.instructor_name}</td>
+                    <td class="timestamp">${formatTimestamp(record.check_in)}</td>
+                    <td class="timestamp ${checkoutClass}">${checkoutDisplay}</td>
+                    <td><span class="status-badge ${statusClass}">${statusDisplay}</span></td>
+                </tr>
+            `;
+        });
+        
+        tableHTML += `
+                </tbody>
+            </table>
+        `;
+        
+        container.innerHTML = tableHTML;
+        
+        // Setup event listeners for checkboxes
+        setupEventListeners();
+        
+    } catch (error) {
+        console.error('Error loading attendance:', error);
+        document.getElementById('attendance-container').innerHTML = '<div class="no-records">خطأ في تحميل السجلات</div>';
+    }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    loadAttendance();
+    
+    // Search functionality with debounce
+    let searchTimeout;
+    const searchInputs = ['course-search', 'student-search'];
+    
+    searchInputs.forEach(inputId => {
+        document.getElementById(inputId).addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(loadAttendance, 300);
+        });
+    });
+    
+    // Export all functionality
+    document.getElementById('export-btn').addEventListener('click', function() {
+        const courseSearch = document.getElementById('course-search').value;
+        const studentSearch = document.getElementById('student-search').value;
+        
+        let url = '/admin/attendance/export?';
+        const params = [];
+        
+        if (courseSearch) {
+            params.push(`course_search=${encodeURIComponent(courseSearch)}`);
+        }
+        
+        if (studentSearch) {
+            params.push(`student_search=${encodeURIComponent(studentSearch)}`);
+        }
+        
+        if (params.length > 0) {
+            url += params.join('&');
+        } else {
+            url = '/admin/attendance/export';
+        }
+        
+        window.open(url, '_blank');
+    });
+    
+    // Delete selected functionality
+    document.getElementById('delete-selected-btn').addEventListener('click', async function() {
+        const selectedIds = getSelectedRecordIds();
+        if (selectedIds.length === 0) {
+            alert('الرجاء تحديد سجل واحد على الأقل للحذف.');
+            return;
+        }
+        
+        if (confirm(`هل أنت متأكد من حذف ${selectedIds.length} سجل/سجلات الحضور؟`)) {
+            try {
+                const response = await fetch('/admin/attendance/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ record_ids: selectedIds })
+                });
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    alert(`تم حذف ${result.deleted_count} سجل/سجلات بنجاح.`);
+                    loadAttendance(); // Reload data
+                } else {
+                    alert('خطأ في حذف السجلات: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error deleting records:', error);
+                alert('خطأ في حذف السجلات. الرجاء المحاولة مرة أخرى.');
+            }
+        }
+    });
+    
+    // Export selected functionality
+    document.getElementById('export-selected-btn').addEventListener('click', function() {
+        const selectedIds = getSelectedRecordIds();
+        if (selectedIds.length === 0) {
+            alert('الرجاء تحديد سجل واحد على الأقل للتصدير.');
+            return;
+        }
+        
+        const courseSearch = document.getElementById('course-search').value;
+        const studentSearch = document.getElementById('student-search').value;
+        
+        let url = '/admin/attendance/export?';
+        const params = [];
+        
+        if (courseSearch) {
+            params.push(`course_search=${encodeURIComponent(courseSearch)}`);
+        }
+        
+        if (studentSearch) {
+            params.push(`student_search=${encodeURIComponent(studentSearch)}`);
+        }
+        
+        // Add selected IDs
+        params.push(`selected_ids=${selectedIds.join(',')}`);
+        
+        url += params.join('&');
+        window.open(url, '_blank');
+    });
+});
+</script>
 
 </body>
 </html>
