@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اعتراضات الغياب</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 22px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .back { color: #0b3c5d; font-weight: 700; text-decoration: none; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filters a { background: #e2e8f0; color: #0f172a; padding: 8px 12px; border-radius: 9px; text-decoration: none; font-weight: 700; }
+        .filters a.active { background: #0b3c5d; color: #fff; }
+        .table-wrap { background: #fff; border-radius: 12px; overflow: auto; box-shadow: 0 6px 20px rgba(0,0,0,.1); }
+        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+        th, td { padding: 11px; border-bottom: 1px solid #e5e7eb; text-align: right; vertical-align: top; }
+        th { background: #0b3c5d; color: #fff; }
+        .reason { max-width: 280px; white-space: pre-wrap; }
+        .badge { display: inline-block; border-radius: 999px; padding: 5px 9px; font-size: 12px; font-weight: 700; }
+        .pending { background: #fef3c7; color: #92400e; }
+        .approved { background: #dcfce7; color: #166534; }
+        .rejected { background: #fee2e2; color: #991b1b; }
+        .review-form { display: flex; gap: 6px; align-items: center; min-width: 280px; }
+        .review-form input { margin: 0; width: 100%; max-width: 210px; }
+        .btn-ok, .btn-no { border: none; border-radius: 7px; color: #fff; padding: 8px 9px; cursor: pointer; font-weight: 700; }
+        .btn-ok { background: #166534; }
+        .btn-no { background: #b91c1c; }
+        .empty { padding: 20px; text-align: center; color: #475569; }
+    </style>
+</head>
+<body>
+
+<div class="header">جامعة حائل | اعتراضات الغياب</div>
+
+<div class="wrap">
+    <div class="topbar">
+        <a class="back" href="/admin/dashboard">العودة للوحة الأدمن</a>
+        <div class="filters">
+            <a href="/admin/appeals?status=all" class="{{ 'active' if status_filter == 'all' else '' }}">الكل</a>
+            <a href="/admin/appeals?status=pending" class="{{ 'active' if status_filter == 'pending' else '' }}">قيد المراجعة</a>
+            <a href="/admin/appeals?status=approved" class="{{ 'active' if status_filter == 'approved' else '' }}">مقبول</a>
+            <a href="/admin/appeals?status=rejected" class="{{ 'active' if status_filter == 'rejected' else '' }}">مرفوض</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <tr>
+                <th>الطالب</th>
+                <th>المقرر</th>
+                <th>وقت المحاضرة</th>
+                <th>حالة السجل</th>
+                <th>سبب الاعتراض</th>
+                <th>الحالة</th>
+                <th>إجراء الأدمن</th>
+            </tr>
+            {% for ap in appeals %}
+            <tr>
+                <td>{{ ap.student_name }}<br><small>{{ ap.university_id }}</small></td>
+                <td>{{ ap.course_name }}</td>
+                <td>{{ ap.check_in or '-' }}</td>
+                <td>{{ ap.attendance_status or '-' }}</td>
+                <td class="reason">{{ ap.reason }}</td>
+                <td>
+                    <span class="badge {{ ap.status }}">{{ ap.status }}</span>
+                    {% if ap.admin_note %}
+                    <div><small>ملاحظة: {{ ap.admin_note }}</small></div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if ap.status == 'pending' %}
+                    <form class="review-form" method="post" action="/admin/appeals/{{ ap.id }}/review">
+                        <input type="text" name="admin_note" placeholder="ملاحظة الأدمن (اختياري)">
+                        <button class="btn-ok" type="submit" name="decision" value="approved">قبول</button>
+                        <button class="btn-no" type="submit" name="decision" value="rejected">رفض</button>
+                    </form>
+                    {% else %}
+                    <small>تمت المراجعة {{ ap.reviewed_at or '' }}</small>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% if not appeals %}
+        <div class="empty">لا توجد اعتراضات حسب الفلتر الحالي.</div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

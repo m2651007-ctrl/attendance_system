@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>جهاز القاعة</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    body { background:#0b1a24; color:#e2e8f0; margin:0; }
+    .frame { max-width: 820px; margin: 20px auto; padding: 0 12px; }
+    .topbar {
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      background:#0f2433; border:1px solid #1f3b50; border-radius:12px; padding:10px 12px;
+      font-size:14px;
+    }
+    .topbar .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .status { margin-top:10px; background:#0f2433; border:1px solid #1f3b50; border-radius:10px; padding:8px 10px; }
+    .video-wrap{
+      position: relative; width: 100%; max-width: 780px; height: 520px; margin: 12px auto;
+      border-radius: 18px; overflow: hidden; border: 1px solid #1f3b50;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35); background: #000;
+    }
+    #video{ width:100%; height:100%; display:block; object-fit: cover; }
+    #overlay{
+      position:absolute; top:0; left:0; width: 100%; height: 100%;
+      z-index: 5; pointer-events:none;
+    }
+    .footer {
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      margin-top:10px; font-size:13px; color:#94a3b8;
+    }
+    .btn {
+      background:#334155; color:#e2e8f0; border:0; border-radius:8px; padding:8px 10px; cursor:pointer;
+    }
+    .ok { color:#22c55e; }
+    .warn { color:#f59e0b; }
+    .err { color:#ef4444; }
+  </style>
+</head>
+<body>
+<div class="frame">
+  <div class="topbar">
+    <div>القاعة: <strong id="roomName">-</strong></div>
+    <div>المقرر: <strong id="courseName">-</strong></div>
+    <div>الوضع: <strong id="modeLabel">وضع الحضور</strong></div>
+    <div class="mono" id="clock">--:--:--</div>
+  </div>
+
+  <div class="status" id="statusBox">جاري التحضير...</div>
+
+  <div class="video-wrap">
+    <video id="video" autoplay playsinline></video>
+    <canvas id="overlay"></canvas>
+  </div>
+
+  <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+  <div class="footer">
+    <div id="sessionInfo">لا توجد محاضرة نشطة</div>
+    <div>
+      <button class="btn" id="modeBtn">تبديل إلى انصراف</button>
+      <button class="btn" id="resetBtn">تغيير القاعة</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const room = sessionStorage.getItem("kiosk_room");
+const code = sessionStorage.getItem("kiosk_code");
+if (!room || !code) {
+  window.location.href = "/kiosk/setup";
+}
+
+const roomNameEl = document.getElementById("roomName");
+const courseNameEl = document.getElementById("courseName");
+const clockEl = document.getElementById("clock");
+const statusBox = document.getElementById("statusBox");
+const sessionInfo = document.getElementById("sessionInfo");
+const resetBtn = document.getElementById("resetBtn");
+const modeBtn = document.getElementById("modeBtn");
+const modeLabel = document.getElementById("modeLabel");
+
+roomNameEl.textContent = room || "-";
+
+// Simple audio feedback
+let audioCtx = null;
+function beep(freq, durationMs, type){
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.value = freq;
+    gain.gain.value = 0.08;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    setTimeout(() => { osc.stop(); }, durationMs);
+  } catch (e) {}
+}
+function soundSuccess(){ beep(880, 120, "sine"); setTimeout(() => beep(1200, 120, "sine"), 140); }
+function soundCheckout(){ beep(700, 140, "triangle"); setTimeout(() => beep(900, 120, "triangle"), 160); }
+
+let kioskMode = sessionStorage.getItem("kiosk_mode") || "checkin";
+function updateModeUI(){
+  if (kioskMode === "checkout") {
+    modeLabel.textContent = "وضع الانصراف";
+    modeBtn.textContent = "تبديل إلى حضور";
+  } else {
+    modeLabel.textContent = "وضع الحضور";
+    modeBtn.textContent = "تبديل إلى انصراف";
+  }
+}
+updateModeUI();
+
+modeBtn.addEventListener("click", () => {
+  kioskMode = (kioskMode === "checkout") ? "checkin" : "checkout";
+  sessionStorage.setItem("kiosk_mode", kioskMode);
+  updateModeUI();
+  statusBox.textContent = "";
+});
+
+resetBtn.addEventListener("click", () => {
+  sessionStorage.removeItem("kiosk_room");
+  sessionStorage.removeItem("kiosk_code");
+  sessionStorage.removeItem("kiosk_mode");
+  window.location.href = "/kiosk/setup";
+});
+
+function updateClock(){
+  const now = new Date();
+  const t = now.toLocaleTimeString("en-GB");
+  clockEl.textContent = t;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Camera
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const overlay = document.getElementById("overlay");
+const octx = overlay.getContext("2d");
+
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => { video.srcObject = stream; })
+  .catch(err => {
+    statusBox.innerHTML = "<span class='err'>تعذر تشغيل الكاميرا</span>";
+    console.error(err);
+  });
+
+function resizeOverlayToVideo(){
+  const rect = video.getBoundingClientRect();
+  overlay.width = Math.round(rect.width);
+  overlay.height = Math.round(rect.height);
+}
+window.addEventListener("resize", resizeOverlayToVideo);
+video.addEventListener("loadedmetadata", () => resizeOverlayToVideo());
+
+function clearOverlay() { octx.clearRect(0, 0, overlay.width, overlay.height); }
+function roundedRect(ctx, x, y, w, h, r){
+  const radius = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
+}
+function drawFaceBox(box, labelText) {
+  resizeOverlayToVideo();
+  clearOverlay();
+  const rect = video.getBoundingClientRect();
+  const sx = rect.width / 640;
+  const sy = rect.height / 480;
+  let x = box[0] * sx, y = box[1] * sy, w = box[2] * sx, h = box[3] * sy;
+  x = Math.max(0, x); y = Math.max(0, y);
+  w = Math.min(overlay.width - x, w); h = Math.min(overlay.height - y, h);
+
+  octx.save();
+  octx.lineWidth = 4;
+  octx.strokeStyle = "#22c55e";
+  roundedRect(octx, x, y, w, h, 14);
+  octx.stroke();
+
+  if (labelText) {
+    octx.font = "600 16px Arial";
+    octx.textAlign = "center";
+    const padX = 12, padY = 8;
+    const textW = octx.measureText(labelText).width;
+    const labelW = textW + (padX * 2) + 18;
+    const labelH = 34;
+    const centerX = x + (w / 2);
+    let lx = centerX - (labelW / 2);
+    let ly = y - labelH - 10;
+    lx = Math.max(6, Math.min(lx, overlay.width - labelW - 6));
+    if (ly < 6) ly = y + 10;
+    octx.fillStyle = "rgba(17,24,39,0.82)";
+    octx.strokeStyle = "rgba(34,197,94,0.95)";
+    octx.lineWidth = 2;
+    roundedRect(octx, lx, ly, labelW, labelH, 10);
+    octx.fill();
+    octx.stroke();
+    octx.fillStyle = "#ffffff";
+    octx.fillText(labelText, lx + (labelW / 2) + 6, ly + (labelH / 2));
+  }
+  octx.restore();
+}
+
+let activeSessionId = null;
+
+async function fetchActiveSession(){
+  try {
+    const res = await fetch(`/kiosk/active?room_name=${encodeURIComponent(room)}&room_code=${encodeURIComponent(code)}`);
+    const data = await res.json();
+    if (!data.ok) {
+      courseNameEl.textContent = "-";
+      sessionInfo.textContent = "لا توجد محاضرة نشطة";
+      activeSessionId = null;
+      return;
+    }
+    activeSessionId = data.session.session_id;
+    courseNameEl.textContent = data.session.course_name || "-";
+    sessionInfo.textContent = `من ${data.session.start_time} إلى ${data.session.end_time}`;
+  } catch (e) {
+    sessionInfo.textContent = "تعذر جلب معلومات الجلسة";
+  }
+}
+setInterval(fetchActiveSession, 15000);
+fetchActiveSession();
+
+let busy = false;
+function startLive(){ setInterval(captureAndSend, 900); }
+startLive();
+
+async function captureAndSend() {
+  if (busy || !activeSessionId) return;
+  busy = true;
+  try {
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, 640, 480);
+    const image = canvas.toDataURL("image/jpeg", 0.75);
+    const res = await fetch("/kiosk/capture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image, room_name: room, room_code: code, mode: kioskMode })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      statusBox.innerHTML = "<span class='warn'>لا توجد محاضرة نشطة الآن</span>";
+      return;
+    }
+    if (data.box && Array.isArray(data.box)) {
+      if (data.recognized && data.student) {
+        const label = `${data.student.name} | ${data.student.academic_number}`;
+        drawFaceBox(data.box, label);
+        if (kioskMode === "checkout") {
+          if (data.checked_out) {
+            statusBox.innerHTML = "<span class='ok'>تم تسجيل الانصراف</span>";
+            soundCheckout();
+          } else {
+            const msg = data.message || "لا يمكن الانصراف الآن";
+            statusBox.innerHTML = `<span class='warn'>${msg}</span>`;
+          }
+        } else {
+          if (data.new_record) {
+            if ((data.student.status || "") === "Late") {
+              statusBox.innerHTML = "<span class='warn'>تم تسجيل متأخر</span>";
+            } else {
+              statusBox.innerHTML = "<span class='ok'>تم تسجيل الحضور</span>";
+            }
+            soundSuccess();
+          } else {
+            statusBox.innerHTML = "<span class='warn'>تم تسجيله مسبقًا</span>";
+          }
+        }
+      } else {
+        drawFaceBox(data.box, "Unknown");
+        statusBox.innerHTML = "<span class='err'>غير معروف</span>";
+      }
+    }
+  } catch (e) {
+    statusBox.innerHTML = "<span class='err'>خطأ في الاتصال</span>";
+  } finally {
+    busy = false;
+  }
+}
+</script>
+</body>
+</html>

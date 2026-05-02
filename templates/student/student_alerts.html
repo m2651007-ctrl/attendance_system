@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>التنبيهات والبريد</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- STUDENT SECTION ONLY - هذا الكود مخصص لقسم الطالب -->
+    <style>
+        .student-wrap { max-width: 980px; margin: 20px auto; padding: 0 14px; }
+        .student-top { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+        .student-meta { color:#64748b; font-size:14px; }
+        .student-actions a { display:inline-flex; background:#c9a24d; color:#fff; border-radius:10px; padding:9px 14px; font-weight:700; }
+        .student-nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+        .student-nav a { background:#e2e8f0; color:#0f172a; border-radius:9px; padding:8px 12px; font-weight:700; }
+        .student-nav a.active { background:#0b3c5d; color:#fff; }
+        .notice { border-radius:10px; padding:10px 12px; margin-bottom:8px; font-size:14px; font-weight:600; }
+        .notice-info { background:#e0f2fe; color:#075985; }
+        .notice-warning { background:#ffedd5; color:#9a3412; }
+        .notice-danger { background:#fee2e2; color:#991b1b; }
+        .notice-success { background:#dcfce7; color:#166534; }
+        .panel { background:#fff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,.06); padding:14px; }
+        .email-form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:8px; }
+        .email-form input { width:320px; max-width:100%; margin:0; }
+        .email-form button { border:none; border-radius:8px; background:#0b3c5d; color:#fff; font-weight:700; padding:10px 12px; cursor:pointer; }
+        .kpi { display:grid; grid-template-columns:repeat(3,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+        .kpi .card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; }
+        .kpi .t { color:#64748b; font-size:12px; }
+        .kpi .v { color:#0b3c5d; font-weight:800; font-size:22px; }
+        .table-wrap { margin-top: 14px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; overflow:auto; }
+        .table-wrap table { width:100%; border-collapse:collapse; }
+        .table-wrap th, .table-wrap td { padding:10px; border-bottom:1px solid #e5e7eb; text-align:right; }
+        .table-wrap th { background:#0b3c5d; color:#fff; }
+        @media (max-width:700px) { .kpi { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+<div class="header">جامعة حائل | التنبيهات والبريد</div>
+<div class="student-wrap">
+    <div class="student-top">
+        <div>
+            <h2 style="margin:0 0 6px;color:#0b3c5d;">{{ student_name }}</h2>
+            <div class="student-meta">الرقم الجامعي: {{ student_id }}</div>
+        </div>
+        <div class="student-actions"><a href="/student/logout">تسجيل خروج</a></div>
+    </div>
+
+    <div class="student-nav">
+        <a class="{{ 'active' if nav_page == 'dashboard' else '' }}" href="/student/dashboard">الرئيسية</a>
+        <a class="{{ 'active' if nav_page == 'attendance' else '' }}" href="/student/attendance">الحضور والغياب</a>
+        <a class="{{ 'active' if nav_page == 'appeals' else '' }}" href="/student/appeals">اعتراضاتي</a>
+        <a class="{{ 'active' if nav_page == 'alerts' else '' }}" href="/student/alerts">التنبيهات والبريد</a>
+    </div>
+
+    {% if msg %}
+    <div class="notice notice-{{ msg_type if msg_type in ['info', 'warning', 'danger', 'success'] else 'info' }}">{{ msg }}</div>
+    {% endif %}
+
+    {% for alert in alerts %}
+    <div class="notice notice-{{ alert.type if alert.type in ['info', 'warning', 'danger', 'success'] else 'info' }}">{{ alert.text }}</div>
+    {% endfor %}
+
+    <div class="panel">
+        <h3 style="margin:0 0 10px;color:#0b3c5d;">تنبيهات الغياب</h3>
+        <div class="kpi">
+            <div class="card"><div class="t">الحضور</div><div class="v">{{ present_count }}</div></div>
+            <div class="card"><div class="t">الغياب</div><div class="v">{{ absent_count }}</div></div>
+            <div class="card"><div class="t">أعلى نسبة مقرر ({{ top_risk_course_name }})</div><div class="v">{{ absence_rate_percent }}%</div></div>
+        </div>
+
+        <!-- STUDENT SECTION ONLY - هذا الكود مخصص لقسم الطالب -->
+        <form class="email-form" action="/student/profile/email" method="post">
+            <input type="email" name="email" value="{{ student_email or '' }}" placeholder="example@univ.edu">
+            <button type="submit">حفظ البريد</button>
+            <small style="color:#64748b;">هذا البريد يستقبل تنبيهات قرب الحرمان والحرمان.</small>
+        </form>
+
+        <!-- STUDENT SECTION ONLY - هذا الكود مخصص لقسم الطالب -->
+        <div class="table-wrap">
+            <table>
+                <tr>
+                    <th>المقرر</th>
+                    <th>عدد الغياب</th>
+                    <th>نسبة الغياب</th>
+                </tr>
+                {% for c in course_stats %}
+                <tr>
+                    <td>{{ c.course_name }}</td>
+                    <td>{{ c.absent_count }}</td>
+                    <td>{{ c.absence_rate_percent }}%</td>
+                </tr>
+                {% endfor %}
+                {% if not course_stats %}
+                <tr>
+                    <td colspan="3">لا توجد بيانات مقررات حتى الآن.</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

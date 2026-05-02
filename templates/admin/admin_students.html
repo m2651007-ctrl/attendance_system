@@ -4,125 +4,663 @@
   <meta charset="UTF-8">
   <title>تسجيل وجوه الطلاب</title>
   <link rel="stylesheet" href="/static/css/style.css">
+
   <style>
-    .wrap{max-width:980px;margin:30px auto;padding:0 14px;}
-    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start;}
-    @media(max-width:980px){.grid{grid-template-columns:1fr;}}
-    .panel{background:#fff;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.08);padding:18px;}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .hint{color:#666;font-size:14px;margin:8px 0 0}
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#f4f6f9;color:#0b3c5d;font-size:13px}
-    .badge b{font-weight:700}
-    .video-wrap{position:relative;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 12px 30px rgba(0,0,0,.18)}
-    video{width:100%;height:auto;display:block;object-fit:cover}
+    :root{
+      --navy:#06142f;
+      --navy2:#071f46;
+      --blue:#4f5bff;
+      --gold:#c9a24d;
+      --green:#22c55e;
+      --red:#ef233c;
+      --muted:#64748b;
+      --line:#e5eaf3;
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --shadow:0 18px 45px rgba(15,23,42,.08);
+      --soft:0 10px 30px rgba(15,23,42,.06);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      direction:rtl;
+      font-family:"Segoe UI",Tahoma,sans-serif;
+      background:linear-gradient(135deg,#f8fafc,#eef3f8);
+      color:#0f172a;
+    }
+
+    .topbar{
+      min-height:92px;
+      background:linear-gradient(135deg,#040b20,#071a3d,#082453);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:16px 44px;
+      box-shadow:0 14px 36px rgba(2,6,23,.25);
+      position:sticky;
+      top:0;
+      z-index:20;
+    }
+
+    .brand{display:flex;align-items:center;gap:16px}
+    .logo{
+      width:58px;height:58px;border-radius:18px;
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.18);
+      font-size:34px;
+    }
+    .brand h1{margin:0;font-size:28px;font-weight:900}
+    .brand p{margin:4px 0 0;color:rgba(255,255,255,.75);font-size:14px}
+
+    .nav{display:flex;align-items:center;gap:18px}
+    .nav a{
+      color:#fff;
+      font-weight:800;
+      padding:14px 24px;
+      border-radius:14px;
+      opacity:.86;
+      text-decoration:none;
+    }
+    .nav a.active{
+      background:rgba(79,91,255,.48);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+      opacity:1;
+    }
+
+    .admin-mini{display:flex;align-items:center;gap:10px;color:#fff;min-width:170px}
+    .avatar{
+      width:46px;height:46px;border-radius:50%;
+      background:linear-gradient(135deg,#eef2ff,#dbeafe);
+      display:grid;place-items:center;color:#1e3a8a;font-weight:900;
+      border:3px solid rgba(255,255,255,.18);
+    }
+    .admin-mini b{display:block;font-size:14px}
+    .admin-mini span{font-size:12px;color:rgba(255,255,255,.7)}
+
+    .page{
+      width:min(1420px,95%);
+      margin:30px auto 46px;
+    }
+
+    .hero{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:24px;
+    }
+    .hero h2{margin:0;font-size:32px;font-weight:900;color:#0f172a}
+    .hero p{margin:8px 0 0;color:#64748b;font-weight:600}
+    .hero-icon{
+      width:62px;height:62px;border-radius:18px;
+      display:grid;place-items:center;
+      background:#fff;border:1px solid #dbe5ff;
+      box-shadow:var(--soft);font-size:30px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:340px 1fr;
+      gap:24px;
+      align-items:start;
+    }
+
+    .side{display:flex;flex-direction:column;gap:20px}
+
+    .card{
+      background:rgba(255,255,255,.96);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+
+    .last-card{
+      background:linear-gradient(180deg,#2538d8,#061a43);
+      color:#fff;
+      border:0;
+      overflow:hidden;
+    }
+
+    .card-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:0 0 14px;
+      font-size:18px;
+      font-weight:900;
+      color:#0f172a;
+    }
+    .last-card .card-title{color:#fff}
+
+    .preview{
+      width:100%;
+      height:185px;
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(255,255,255,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:rgba(255,255,255,.75);
+    }
+    .preview img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .capture-ok{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top:16px;
+      color:#fff;
+      font-weight:800;
+    }
+    .capture-ok small{color:rgba(255,255,255,.68)}
+    .ok-dot{
+      width:22px;height:22px;border-radius:6px;
+      display:grid;place-items:center;
+      background:#22c55e;color:#fff;font-size:14px;
+    }
+
+    .tips-list{
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .tips-list li{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      color:#0f172a;
+      font-weight:800;
+      font-size:14px;
+    }
+    .tips-list li span{
+      width:30px;height:30px;border-radius:10px;
+      display:grid;place-items:center;
+      background:#eef2ff;
+      flex:0 0 auto;
+    }
+
+    .security-card{
+      background:linear-gradient(135deg,#061a43,#082453);
+      color:#fff;
+      min-height:118px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      overflow:hidden;
+    }
+    .security-card h3{margin:0 0 8px;font-size:17px}
+    .security-card p{margin:0;color:rgba(255,255,255,.72);line-height:1.7;font-size:13px}
+    .lock{
+      width:58px;height:58px;border-radius:50%;
+      background:rgba(255,255,255,.08);
+      display:grid;place-items:center;
+      font-size:30px;
+    }
+
+    .main{
+      display:grid;
+      grid-template-columns:1fr 1.12fr;
+      gap:18px;
+    }
+
+    .form-card,.camera-card{min-height:450px}
+
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:20px;
+    }
+    .section-head h3{
+      margin:0;
+      color:#0f172a;
+      font-size:20px;
+      font-weight:900;
+    }
+    .section-head span{font-size:24px;color:#4f5bff}
+
+    label{
+      display:block;
+      margin:14px 0 8px;
+      color:#0f172a;
+      font-weight:900;
+    }
+
+    input{
+      width:100%;
+      height:52px;
+      border:1px solid #dbe3ef;
+      border-radius:12px;
+      padding:0 16px;
+      font-size:15px;
+      background:#fff;
+      outline:none;
+      transition:.2s;
+    }
+    input:focus{
+      border-color:#4f5bff;
+      box-shadow:0 0 0 4px rgba(79,91,255,.12);
+    }
+
+    .mini-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:20px;
+    }
+
+    .info-tile{
+      border-radius:14px;
+      padding:14px;
+      background:linear-gradient(135deg,#f8f7ff,#eef2ff);
+      border:1px solid #e5e7ff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      min-height:76px;
+      font-weight:900;
+      color:#4f46e5;
+    }
+    .info-tile.green{
+      background:linear-gradient(135deg,#f0fdf4,#f8fafc);
+      color:#16a34a;
+      border-color:#dcfce7;
+    }
+    .info-tile small{
+      display:block;
+      margin-top:4px;
+      color:#475569;
+      font-weight:700;
+    }
+    .info-tile span{font-size:30px}
+
+    .notice{
+      margin-top:18px;
+      border-radius:12px;
+      background:#eef5ff;
+      color:#475569;
+      padding:13px 14px;
+      font-weight:700;
+      text-align:center;
+    }
+
+    .video-wrap{
+      position:relative;
+      border-radius:14px;
+      background:#020617;
+      overflow:hidden;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+      height:260px;
+    }
+    video{
+      width:100%;
+      height:260px;
+      object-fit:cover;
+      display:block;
+    }
+
     #overlay{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      z-index:5; pointer-events:none;
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:5;
+      pointer-events:none;
     }
+
+    .face-guide{
+      position:absolute;
+      inset:34px 110px;
+      border-radius:24px;
+      pointer-events:none;
+      z-index:4;
+      opacity:.9;
+    }
+    .face-guide:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(#5865ff,#5865ff) top left/44px 4px no-repeat,
+        linear-gradient(#5865ff,#5865ff) top left/4px 44px no-repeat,
+        linear-gradient(#5865ff,#5865ff) top right/44px 4px no-repeat,
+        linear-gradient(#5865ff,#5865ff) top right/4px 44px no-repeat,
+        linear-gradient(#5865ff,#5865ff) bottom left/44px 4px no-repeat,
+        linear-gradient(#5865ff,#5865ff) bottom left/4px 44px no-repeat,
+        linear-gradient(#5865ff,#5865ff) bottom right/44px 4px no-repeat,
+        linear-gradient(#5865ff,#5865ff) bottom right/4px 44px no-repeat;
+      border-radius:24px;
+      filter:drop-shadow(0 0 12px rgba(88,101,255,.6));
+    }
+
     canvas{display:none}
-    .preview{width:100%;border-radius:12px;border:1px solid #eee;background:#fafafa;min-height:140px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .preview img{width:100%;height:auto;display:block}
-    .btn2{
-      background:#0b3c5d;color:#fff;border:none;border-radius:10px;
-      padding:10px 14px;cursor:pointer;font-size:15px
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1.1fr 1fr;
+      gap:14px;
+      margin:16px 0;
     }
-    .btn2:disabled{opacity:.55;cursor:not-allowed}
-    .btn2.alt{background:#c9a24d}
-    .btn2.danger{background:#c0392b}
-    .stat{font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12.5px; background:#0b3c5d0d; padding:10px; border-radius:10px; overflow:auto}
-    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-    @media(max-width:600px){.kpi{grid-template-columns:1fr}}
-    .kpi .boxx{background:#f7f9fc;border:1px solid #eef2f7;border-radius:12px;padding:10px}
-    .kpi .boxx .t{font-size:12px;color:#555}
-    .kpi .boxx .v{font-size:18px;font-weight:800;color:#0b3c5d;margin-top:4px}
+    .btn2{
+      border:0;
+      border-radius:10px;
+      height:44px;
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+      transition:.2s;
+      font-size:15px;
+    }
+    .btn2:hover{transform:translateY(-2px)}
+    .btn2{background:#061a43}
+    .btn2.alt{background:linear-gradient(135deg,#625bff,#4047d9)}
+    .btn2.danger{background:linear-gradient(135deg,#f43f5e,#dc062b)}
+    .btn2:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .counter-pill{
+      width:180px;
+      margin:0 auto;
+      height:40px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      background:#f8fafc;
+      color:#0f172a;
+      font-weight:900;
+      box-shadow:inset 0 0 0 1px #eef2f7;
+    }
+    .green-dot{
+      width:18px;height:18px;border-radius:50%;
+      background:#22c55e;
+      display:inline-block;
+    }
+
+    .interval{margin-top:18px}
+    .interval p{
+      text-align:center;
+      color:#64748b;
+      font-weight:700;
+      font-size:13px;
+    }
+
+    .bottom-stats{
+      grid-column:1 / -1;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-top:6px;
+    }
+    .stat-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      box-shadow:var(--soft);
+      padding:18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      min-height:96px;
+    }
+    .stat-card small{color:#64748b;font-weight:700}
+    .stat-card b{display:block;margin-top:6px;font-size:25px;color:#0f172a}
+    .stat-icon{
+      width:58px;height:58px;border-radius:50%;
+      display:grid;place-items:center;
+      background:#eef2ff;
+      font-size:28px;
+    }
+
+    .wide-actions{
+      grid-column:1 / -1;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-top:4px;
+    }
+    .wide-btn{
+      border:0;
+      border-radius:14px;
+      min-height:72px;
+      font-weight:900;
+      font-size:17px;
+      cursor:pointer;
+      background:linear-gradient(135deg,#ecfdf5,#f8fafc);
+      color:#16a34a;
+      border:1px solid #d9f99d;
+      box-shadow:var(--soft);
+    }
+    .wide-btn.blue{
+      background:linear-gradient(135deg,#eef5ff,#f8fafc);
+      color:#2563eb;
+      border-color:#bfdbfe;
+    }
+    .wide-btn small{
+      font-size:13px;
+      color:#64748b;
+      font-weight:700;
+    }
+
+    #saveMsg{
+      margin-top:12px;
+      text-align:center;
+      color:#64748b;
+      font-weight:800;
+    }
+
+    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+    .kpi .boxx{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px}
+    .kpi .t{font-size:12px;color:#64748b}
+    .kpi .v{font-size:18px;font-weight:900;color:#0b3c5d}
+    .stat{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#f8fafc;padding:12px;border-radius:12px;overflow:auto}
+
+    @media(max-width:1150px){
+      .layout{grid-template-columns:1fr}
+      .side{display:grid;grid-template-columns:1fr 1fr}
+      .security-card{grid-column:1/-1}
+    }
+
+    @media(max-width:900px){
+      .topbar{height:auto;padding:18px;flex-wrap:wrap;gap:14px}
+      .nav{order:3;width:100%;justify-content:center;flex-wrap:wrap}
+      .main{grid-template-columns:1fr}
+      .bottom-stats{grid-template-columns:1fr 1fr}
+      .wide-actions{grid-template-columns:1fr}
+    }
+
+    @media(max-width:640px){
+      .side{display:flex}
+      .bottom-stats{grid-template-columns:1fr}
+      .mini-grid{grid-template-columns:1fr}
+      .actions{grid-template-columns:1fr}
+      .hero{align-items:flex-start;gap:14px}
+      .hero h2{font-size:24px}
+    }
   </style>
 </head>
 
-<body dir="rtl">
-  <div class="header">جامعة حائل | تسجيل وجوه الطلاب</div>
-
-  <div class="wrap">
-    <div class="grid">
-
-      <!-- LEFT: FORM -->
-      <div class="panel">
-        <h2 class="title" style="margin:0 0 14px">📸 تسجيل بيانات الطالب (بداية الترم)</h2>
-
-        <div class="row">
-          <span class="badge">🎯 المطلوب: <b id="needCount">...</b> صور</span>
-          <span class="badge">🧠 وضع: <b>Auto Capture + Face Box</b></span>
-        </div>
-        <p class="hint">خل الطالب يغيّر زوايا وجهه تدريجيًا (يمين/يسار/فوق/تحت) عشان تزيد الدقة.</p>
-
-        <label>اسم الطالب</label>
-        <input type="text" id="name" placeholder="مثال: أحمد محمد" required>
-
-        <label>الرقم الجامعي</label>
-        <input type="text" id="university_id" placeholder="مثال: 441234567" required>
-
-        <hr style="margin:16px 0">
-
-        <h3 id="instruction" style="margin:0 0 10px;color:#0b3c5d">📸 انظر مباشرة للكاميرا</h3>
-
-        <div class="video-wrap">
-          <video id="video" autoplay playsinline></video>
-          <canvas id="overlay"></canvas>
-        </div>
-
-        <!-- canvas للإرسال للسيرفر بحجم ثابت -->
-        <canvas id="canvas" width="640" height="480"></canvas>
-
-        <div class="row" style="margin-top:12px">
-          <button class="btn2" type="button" id="btnSnap">📸 لقطة</button>
-          <button class="btn2 alt" type="button" id="btnAuto">▶️ تشغيل التلقائي</button>
-          <button class="btn2 danger" type="button" id="btnReset">↩️ إعادة</button>
-          <span class="badge">الصور: <b id="counter">0</b> / <b id="total">0</b></span>
-        </div>
-
-        <div class="row" style="margin-top:12px">
-          <label style="min-width:120px">الفاصل (ثانية)</label>
-          <input type="number" id="intervalSec" value="1.2" step="0.1" min="0.4" style="width:180px">
-          <span class="hint">كل ما قللت الفاصل أسرع، بس ممكن صور متشابهة.</span>
-        </div>
-
-        <div class="row" style="margin-top:12px">
-          <button class="btn2" type="button" id="btnSave">✅ حفظ البيانات والوجه</button>
-          <button class="btn2" type="button" id="btnTest" disabled>🧪 اختبار سرعة التعرف</button>
-        </div>
-
-        <div id="saveMsg" class="hint" style="margin-top:10px"></div>
-
-        <div class="kpi" id="perfKpi" style="display:none">
-          <div class="boxx"><div class="t">ms_total</div><div class="v" id="k_ms_total">-</div></div>
-          <div class="boxx"><div class="t">min_dist</div><div class="v" id="k_min_dist">-</div></div>
-          <div class="boxx"><div class="t">recognized</div><div class="v" id="k_rec">-</div></div>
-        </div>
-
-        <pre class="stat" id="perfBox" style="display:none;margin-top:10px"></pre>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🛡️</div>
+      <div>
+        <h1>جامعة حائل</h1>
+        <p>نظام تسجيل وجوه الطلاب</p>
       </div>
-
-      <!-- RIGHT: PREVIEW + TIPS -->
-      <div class="panel">
-        <h3 class="title" style="margin:0 0 12px">🖼️ آخر لقطة</h3>
-        <div class="preview" id="preview">
-          <span class="hint">لم يتم التقاط صور بعد</span>
-        </div>
-
-        <hr style="margin:16px 0">
-
-        <h3 class="title" style="margin:0 0 12px">📌 نصائح لزيادة الدقة</h3>
-        <ul style="margin:0;color:#333;line-height:1.9">
-          <li>إضاءة أمامية قوية (مو من الخلف).</li>
-          <li>غيّر الزوايا: يمين/يسار/فوق/تحت.</li>
-          <li>بدون نظارة شمسية/كمامة أثناء التسجيل.</li>
-          <li>خلك قريب من الكاميرا والوجه واضح.</li>
-          <li>لو الإطار أحمر: قرّب/ثبت الوجه وخفف الحركة.</li>
-        </ul>
-      </div>
-
     </div>
-  </div>
+
+    <nav class="nav">
+      <a href="/admin/dashboard">الرئيسية 🏠</a>
+      <a href="/admin/students" class="active">الطلاب 👥</a>
+      <a href="/admin/attendance">التقارير 📊</a>
+      <a href="/admin/courses">الإعدادات ⚙️</a>
+    </nav>
+
+    <div class="admin-mini">
+      <div class="avatar">م</div>
+      <div>
+        <b>مرحباً، المدير</b>
+        <span>لوحة التحكم</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <div>
+        <h2>تسجيل بيانات الطالب (بداية الترم)</h2>
+        <p>قم بتسجيل وجه الطالب وبياناته لإنشاء ملف تعريفي دقيق وآمن باستخدام تقنية التعرف على الوجه</p>
+      </div>
+      <div class="hero-icon">🧿</div>
+    </section>
+
+    <section class="layout">
+      <aside class="side">
+        <div class="card last-card">
+          <div class="card-title">آخر لقطة <span>🖼️</span></div>
+          <div class="preview" id="preview">
+            <span>لم يتم التقاط صور بعد</span>
+          </div>
+          <div class="capture-ok">
+            <span class="ok-dot">✓</span>
+            <div>
+              <div>بانتظار التقاط الصورة</div>
+              <small>سيتم عرض آخر لقطة هنا</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">نصائح للحصول على أفضل نتيجة <span>💡</span></div>
+          <ul class="tips-list">
+            <li>إضاءة أمامية جيدة وتجنب الإضاءة من الخلف <span>☀️</span></li>
+            <li>غيّر الزوايا قليلاً يمين/يسار/فوق/تحت <span>🔄</span></li>
+            <li>بدون نظارة شمسية أو قبعة أثناء التسجيل <span>👓</span></li>
+            <li>حافظ على وجهك واضحاً داخل الإطار <span>🎯</span></li>
+            <li>لا تحرك رأسك كثيراً أثناء الالتقاط <span>🚫</span></li>
+          </ul>
+        </div>
+
+        <div class="card security-card">
+          <div>
+            <h3>الأمان والخصوصية</h3>
+            <p>نحافظ على بياناتك بأعلى معايير الأمان</p>
+          </div>
+          <div class="lock">🔒</div>
+        </div>
+      </aside>
+
+      <section class="main">
+        <div class="card form-card">
+          <div class="section-head">
+            <h3>بيانات الطالب</h3>
+            <span>👤</span>
+          </div>
+
+          <label>اسم الطالب</label>
+          <input type="text" id="name" placeholder="مثال: أحمد محمد" required>
+
+          <label>الرقم الجامعي</label>
+          <input type="text" id="university_id" placeholder="مثال: 441234567" required>
+
+          <div class="mini-grid">
+            <div class="info-tile">
+              <div>المطلوب <small><b id="needCount">...</b> صورة</small></div>
+              <span>📷</span>
+            </div>
+            <div class="info-tile green">
+              <div>الوضع <small>Auto Capture + Face Box</small></div>
+              <span>🧿</span>
+            </div>
+          </div>
+
+          <div class="notice">سيتم تدريب النموذج على عدة زوايا لزيادة دقة التعرف.</div>
+
+          <div id="saveMsg"></div>
+
+          <div class="kpi" id="perfKpi" style="display:none">
+            <div class="boxx"><div class="t">ms_total</div><div class="v" id="k_ms_total">-</div></div>
+            <div class="boxx"><div class="t">min_dist</div><div class="v" id="k_min_dist">-</div></div>
+            <div class="boxx"><div class="t">recognized</div><div class="v" id="k_rec">-</div></div>
+          </div>
+
+          <pre class="stat" id="perfBox" style="display:none;margin-top:10px"></pre>
+        </div>
+
+        <div class="card camera-card">
+          <div class="section-head">
+            <h3 id="instruction">معاينة الكاميرا المباشرة</h3>
+            <span>📷</span>
+          </div>
+
+          <div class="video-wrap">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="overlay"></canvas>
+            <div class="face-guide"></div>
+          </div>
+
+          <canvas id="canvas" width="640" height="480"></canvas>
+
+          <div class="actions">
+            <button class="btn2 danger" type="button" id="btnReset">إعادة 🔄</button>
+            <button class="btn2 alt" type="button" id="btnAuto">تشغيل تلقائي ▶️</button>
+            <button class="btn2" type="button" id="btnSnap">لقطة 📸</button>
+          </div>
+
+          <div class="counter-pill">
+            <span>الصور:</span>
+            <b><span id="counter">0</span> / <span id="total">0</span></b>
+            <span class="green-dot"></span>
+          </div>
+
+          <div class="interval">
+            <label>الفاصل (ثانية)</label>
+            <input type="number" id="intervalSec" value="1.2" step="0.1" min="0.4">
+            <p>كل ما قللت الفاصل أسرع، بس ممكن صور متشابهة.</p>
+          </div>
+        </div>
+
+        <div class="bottom-stats">
+          <div class="stat-card">
+            <div><small>إجمالي الطلاب المسجلين</small><b>1,248</b><small>هذا الفصل الدراسي</small></div>
+            <div class="stat-icon">👥</div>
+          </div>
+          <div class="stat-card">
+            <div><small>تسجيلات اليوم</small><b>86</b><small>تم تسجيلها بنجاح</small></div>
+            <div class="stat-icon">✅</div>
+          </div>
+          <div class="stat-card">
+            <div><small>دقة التعرف</small><b>98.7%</b><small>متوسط دقة النموذج</small></div>
+            <div class="stat-icon">🎯</div>
+          </div>
+          <div class="stat-card">
+            <div><small>آخر تحديث للنموذج</small><b>2025 مايو 25</b><small>منذ ساعتين</small></div>
+            <div class="stat-icon">🔁</div>
+          </div>
+        </div>
+
+        <div class="wide-actions">
+          <button class="wide-btn" type="button" id="btnSave">حفظ البيانات والوجه ✅<br><small>حفظ البيانات وبدء التدريب</small></button>
+          <button class="wide-btn blue" type="button" id="btnTest" disabled>اختبار سرعة التعرف 🧪<br><small>اختبار دقة وسرعة النموذج</small></button>
+        </div>
+      </section>
+    </section>
+  </main>
 
 <script>
 const video = document.getElementById("video");
@@ -153,16 +691,15 @@ const k_min_dist = document.getElementById("k_min_dist");
 const k_rec = document.getElementById("k_rec");
 
 let images = [];
-let targetCount = 5;              // يجي من السيرفر لو متوفر
+let targetCount = 5;
 let autoTimer = null;
 let busy = false;
 
 let clearTimer = null;
 let lastTestAt = 0;
 
-// منع صور متشابهة (فرق بسيط بالبيكسلات)
 let lastTiny = null;
-const SIMILARITY_THRESHOLD = 6.0; // أصغر = يمنع أكثر
+const SIMILARITY_THRESHOLD = 6.0;
 
 const instructions = [
   "📸 انظر مباشرة للكاميرا",
@@ -196,12 +733,12 @@ function showPreview(dataUrl){
 }
 
 function syncOverlaySize(){
-  // نخلي overlay يطابق مقاس الفيديو الحقيقي
   const w = video.videoWidth || 640;
   const h = video.videoHeight || 480;
   overlay.width = w;
   overlay.height = h;
 }
+
 video.addEventListener("loadedmetadata", syncOverlaySize);
 video.addEventListener("loadeddata", syncOverlaySize);
 window.addEventListener("resize", syncOverlaySize);
@@ -286,7 +823,6 @@ function drawFaceBox(box, labelText, ok=true){
 }
 
 async function init(){
-  // تشغيل الكاميرا
   try{
     const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio:false });
     video.srcObject = stream;
@@ -295,7 +831,6 @@ async function init(){
     console.error(e);
   }
 
-  // جلب العدد المطلوب
   try{
     const res = await fetch("/admin/register_student_face/config");
     const data = await res.json();
@@ -309,13 +844,12 @@ async function init(){
 }
 
 function tinyFingerprint(){
-  // لقطة صغيرة 32x24 لمقارنة التشابه
   const tmp = document.createElement("canvas");
-  tmp.width = 32; tmp.height = 24;
+  tmp.width = 32;
+  tmp.height = 24;
   const tctx = tmp.getContext("2d");
   tctx.drawImage(video, 0, 0, 32, 24);
   const imgData = tctx.getImageData(0,0,32,24).data;
-  // نحولها لرمادي بسيط ونخزن كل 4 بايت
   const arr = new Uint8Array(32*24);
   let j=0;
   for (let i=0;i<imgData.length;i+=4){
@@ -335,12 +869,10 @@ function diffTiny(a,b){
 }
 
 async function runRecognitionTestAndDraw(){
-  // نحدّ من الاختبارات (مرة كل 700ms)
   const now = Date.now();
   if (now - lastTestAt < 700) return;
   lastTestAt = now;
 
-  // نرسل 640x480 للسيرفر عشان box تطابق
   canvas.width = 640;
   canvas.height = 480;
   ctx.drawImage(video, 0, 0, 640, 480);
@@ -354,16 +886,13 @@ async function runRecognitionTestAndDraw(){
     });
     const data = await res.json();
 
-    // KPIs مصغّرة
     const perf = data.perf || {};
     perfKpi.style.display = "grid";
     k_ms_total.textContent = (perf.ms_total ?? "-");
     k_min_dist.textContent = (perf.min_dist ?? "-");
     k_rec.textContent = (data.recognized ? "YES ✅" : "NO ❌");
 
-    // رسم الإطار إذا موجود
     if (data.box && Array.isArray(data.box)){
-      // box على 640x480 -> overlay على video.videoWidth/Height
       syncOverlaySize();
       const sx = overlay.width / 640;
       const sy = overlay.height / 480;
@@ -374,11 +903,7 @@ async function runRecognitionTestAndDraw(){
       const label = data.recognized ? "Face OK ✅" : "Unknown ❌";
       drawFaceBox(b, label, data.recognized);
     }
-
-  }catch(e){
-    // إذا endpoint غير موجود ما نخرب الصفحة
-    // console.error(e);
-  }
+  }catch(e){}
 }
 
 function captureOne(){
@@ -388,7 +913,6 @@ function captureOne(){
 
   busy = true;
 
-  // منع الصور المتشابهة
   const fp = tinyFingerprint();
   const d = diffTiny(fp, lastTiny);
   if (d < SIMILARITY_THRESHOLD){
@@ -398,7 +922,6 @@ function captureOne(){
   }
   lastTiny = fp;
 
-  // لقطة للحفظ
   canvas.width = 640;
   canvas.height = 480;
   ctx.drawImage(video, 0, 0, 640, 480);
@@ -408,7 +931,6 @@ function captureOne(){
   showPreview(dataUrl);
   setCounter();
 
-  // اختبار + إطار بعد اللقطة
   runRecognitionTestAndDraw();
 
   busy = false;
@@ -421,7 +943,7 @@ function startAuto(){
   let sec = parseFloat(intervalSecEl.value || "1.2");
   sec = Math.max(0.4, sec);
 
-  btnAuto.textContent = "⏸️ إيقاف التلقائي";
+  btnAuto.textContent = "إيقاف التلقائي ⏸️";
   autoTimer = setInterval(() => {
     if (images.length < targetCount) captureOne();
   }, sec * 1000);
@@ -430,7 +952,7 @@ function startAuto(){
 function stopAuto(){
   if (autoTimer) clearInterval(autoTimer);
   autoTimer = null;
-  btnAuto.textContent = "▶️ تشغيل التلقائي";
+  btnAuto.textContent = "تشغيل تلقائي ▶️";
 }
 
 function resetAll(){
@@ -438,7 +960,7 @@ function resetAll(){
   images = [];
   lastTiny = null;
 
-  previewEl.innerHTML = `<span class="hint">لم يتم التقاط صور بعد</span>`;
+  previewEl.innerHTML = `<span>لم يتم التقاط صور بعد</span>`;
   saveMsgEl.textContent = "";
   perfBox.style.display = "none";
   perfKpi.style.display = "none";
@@ -473,15 +995,13 @@ async function saveStudent(){
     });
 
     const data = await res.json();
-    
+
     if (res.status === 400 && data.message && data.message.includes("مسجل")) {
       saveMsgEl.textContent = "الطالب مسجل بالفعل";
       saveMsgEl.style.color = "red";
     } else {
       saveMsgEl.textContent = data.message || "✅ تم الحفظ";
       saveMsgEl.style.color = "green";
-      
-      // تفعيل اختبار السرعة
       btnTest.disabled = false;
     }
 
@@ -525,7 +1045,6 @@ async function testRecognition(){
     perfBox.textContent = JSON.stringify(data, null, 2);
     saveMsgEl.textContent = "✅ انتهى الاختبار";
 
-    // رسم الإطار إذا رجع
     if (data.box && Array.isArray(data.box)){
       syncOverlaySize();
       const sx = overlay.width / 640;
@@ -545,7 +1064,6 @@ async function testRecognition(){
   }
 }
 
-// events
 btnSnap.addEventListener("click", captureOne);
 btnAuto.addEventListener("click", () => autoTimer ? stopAuto() : startAuto());
 btnReset.addEventListener("click", resetAll);
