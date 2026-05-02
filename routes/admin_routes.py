@@ -45,6 +45,12 @@ def ensure_session_extra_columns():
         if "room_code" not in cols:
             cur.execute("ALTER TABLE sessions ADD COLUMN room_code TEXT")
 
+        if "days" not in cols:
+            cur.execute("ALTER TABLE sessions ADD COLUMN days TEXT")
+
+        if "capacity" not in cols:
+            cur.execute("ALTER TABLE sessions ADD COLUMN capacity INTEGER")
+
         conn.commit()
     finally:
         if conn:
@@ -468,7 +474,9 @@ def register_admin_routes(app):
                        COALESCE(s.start_time, '') AS start_time,
                        COALESCE(s.end_time, '') AS end_time,
                        COALESCE(s.room_name, '') AS room_name,
-                       COALESCE(s.room_code, '') AS room_code
+                       COALESCE(s.room_code, '') AS room_code,
+                       COALESCE(s.days, '') AS days,
+                       s.capacity
                 FROM sessions s
                 JOIN doctors d ON s.doctor_id = d.doctor_id
                 ORDER BY s.session_id DESC
@@ -493,6 +501,9 @@ def register_admin_routes(app):
         end_time = (request.form.get("end_time") or "").strip()
         room_name = (request.form.get("room_name") or "").strip()
         room_code = (request.form.get("room_code") or "").strip()
+        days = (request.form.get("days") or "").strip()
+        capacity_raw = (request.form.get("capacity") or "").strip()
+        capacity = int(capacity_raw) if capacity_raw.isdigit() else None
 
         if not course_name or not doctor_id or not session_number:
             return "Missing course_name/doctor_id/session_number", 400
@@ -506,9 +517,9 @@ def register_admin_routes(app):
             cur = conn.cursor()
             cur.execute("""
                 INSERT INTO sessions
-                    (course_name, session_number, doctor_id, start_time, end_time, active, room_name, room_code)
+                    (course_name, session_number, doctor_id, start_time, end_time, active, room_name, room_code, days, capacity)
                 VALUES
-                    (?, ?, ?, ?, ?, 1, ?, ?)
+                    (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
             """, (
                 course_name,
                 session_number,
@@ -516,7 +527,9 @@ def register_admin_routes(app):
                 start_time,
                 end_time,
                 room_name,
-                room_code
+                room_code,
+                days,
+                capacity
             ))
             conn.commit()
         finally:
