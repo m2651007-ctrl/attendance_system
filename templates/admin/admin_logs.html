@@ -2,328 +2,355 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سجلات الإدارة</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    
+    <title>سجلات النظام — جامعة حائل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        :root {
+            --navy:#0b3c5d; --navy-mid:#0d4f7a; --navy-lt:#1a6494;
+            --bg:#f0f4f8; --white:#ffffff; --text:#1a2332; --muted:#64748b;
+            --danger:#dc2626; --danger-lt:#fee2e2;
+            --success:#16a34a; --success-lt:#dcfce7;
+            --warning:#d97706; --warning-lt:#fef3c7;
+            --border:#dde4ed; --shadow:0 4px 24px rgba(11,60,93,.10);
         }
-        
-        .header {
-            background: #0b3c5d;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            border-radius: 8px;
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Tajawal',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+        /* HEADER */
+        .top-header {
+            background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--navy-lt) 100%);
+            padding:0 40px; display:flex; align-items:center;
+            justify-content:space-between; height:70px;
+            box-shadow:0 2px 20px rgba(0,0,0,.2);
+            position:sticky; top:0; z-index:100;
         }
-        
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #0b3c5d;
-            text-decoration: none;
-            font-weight: bold;
+        .logo { display:flex; align-items:center; gap:12px; color:#fff; }
+        .logo-icon {
+            width:42px; height:42px; background:rgba(255,255,255,.12);
+            border-radius:10px; display:flex; align-items:center;
+            justify-content:center; font-size:22px;
+            border:1px solid rgba(255,255,255,.2);
         }
-        
-        .back-link:hover {
-            text-decoration: underline;
+        .logo-text { font-size:18px; font-weight:700; }
+        .logo-sub  { font-size:12px; opacity:.7; }
+        .back-btn {
+            display:flex; align-items:center; gap:8px;
+            color:rgba(255,255,255,.85); text-decoration:none;
+            font-size:14px; font-weight:500;
+            background:rgba(255,255,255,.1);
+            border:1px solid rgba(255,255,255,.2);
+            border-radius:9px; padding:8px 16px; transition:all .2s;
         }
-        
-        .logs-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .back-btn:hover { background:rgba(255,255,255,.2); color:#fff; }
+
+        /* PAGE */
+        .page { max-width:1300px; margin:0 auto; padding:30px 24px; }
+
+        /* STATS */
+        .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+        .stat-card {
+            background:var(--white); border-radius:14px; padding:18px 20px;
+            box-shadow:var(--shadow); display:flex; align-items:center;
+            justify-content:space-between;
         }
-        
-        .logs-table th,
-        .logs-table td {
-            padding: 12px 15px;
-            text-align: right;
-            border-bottom: 1px solid #ddd;
+        .stat-info small { font-size:12px; color:var(--muted); }
+        .stat-info b     { display:block; font-size:24px; font-weight:800; color:var(--navy); margin:4px 0 2px; }
+        .stat-icon {
+            width:48px; height:48px; border-radius:12px;
+            display:flex; align-items:center; justify-content:center; font-size:22px;
         }
-        
-        .logs-table th {
-            background: #0b3c5d;
-            color: white;
-            font-weight: bold;
+        .si-green  { background:var(--success-lt); }
+        .si-yellow { background:var(--warning-lt); }
+        .si-red    { background:var(--danger-lt); }
+
+        /* CARD */
+        .card { background:var(--white); border-radius:18px; box-shadow:var(--shadow); overflow:hidden; }
+        .card-header {
+            background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);
+            padding:20px 28px; display:flex; align-items:center; gap:12px;
         }
-        
-        .logs-table tr:nth-child(even) {
-            background: #f9f9f9;
+        .card-header-icon {
+            width:38px; height:38px; background:rgba(255,255,255,.15);
+            border-radius:9px; display:flex; align-items:center;
+            justify-content:center; font-size:16px;
         }
-        
-        .logs-table tr:hover {
-            background: #f5f5f5;
+        .card-header h2 { color:#fff; font-size:16px; font-weight:700; }
+        .card-header p  { color:rgba(255,255,255,.65); font-size:12px; margin-top:2px; }
+
+        /* TOOLBAR */
+        .toolbar {
+            display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+            padding:16px 24px; border-bottom:1px solid var(--border);
+            background:#f8fafc;
         }
-        
-        .action-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
+        .search-wrap { position:relative; flex:1; min-width:220px; }
+        .search-wrap input {
+            width:100%; padding:9px 38px 9px 14px;
+            border:1.5px solid var(--border); border-radius:10px;
+            font-size:13px; font-family:'Tajawal',sans-serif;
+            outline:none; background:#fff; transition:all .2s;
         }
-        
-        .action-attendance-marked {
-            background: #28a745;
-            color: white;
+        .search-wrap input:focus { border-color:var(--navy); box-shadow:0 0 0 3px rgba(11,60,93,.08); }
+        .search-icon { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:14px; opacity:.4; }
+
+        .toolbar-btn {
+            display:flex; align-items:center; gap:6px;
+            padding:9px 16px; border-radius:10px; border:none;
+            font-size:13px; font-weight:700; font-family:'Tajawal',sans-serif;
+            cursor:pointer; transition:all .2s;
         }
-        
-        .action-duplicate-attendance {
-            background: #ffc107;
-            color: black;
+        .btn-export { background:var(--success-lt); color:var(--success); border:1px solid #bbf7d0; }
+        .btn-export:hover { background:var(--success); color:#fff; }
+        .btn-delete { background:var(--danger-lt); color:var(--danger); border:1px solid #fecaca; display:none; }
+        .btn-delete:hover { background:var(--danger); color:#fff; }
+
+        /* TABLE */
+        .table-wrap { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; min-width:900px; }
+        thead th {
+            background:#f1f5f9; color:var(--navy); font-size:12px; font-weight:700;
+            padding:13px 16px; text-align:right; letter-spacing:.4px;
+            border-bottom:2px solid var(--border);
         }
-        
-        .action-duplicate-registration {
-            background: #dc3545;
-            color: white;
+        tbody tr { transition:background .15s; }
+        tbody tr:hover { background:#f8fafc; }
+        tbody tr:not(:last-child) td { border-bottom:1px solid #eef2f7; }
+        td { padding:12px 16px; font-size:13px; color:var(--text); vertical-align:middle; }
+
+        .student-cell { display:flex; align-items:center; gap:10px; }
+        .avatar {
+            width:34px; height:34px; border-radius:9px;
+            background:linear-gradient(135deg,var(--navy),var(--navy-lt));
+            display:flex; align-items:center; justify-content:center;
+            color:#fff; font-size:13px; font-weight:700; flex-shrink:0;
         }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        .student-name { font-weight:600; color:var(--navy); font-size:13px; }
+        .student-id   { font-size:11px; color:var(--muted); margin-top:1px; }
+
+        .badge {
+            display:inline-block; border-radius:7px;
+            padding:3px 10px; font-size:11px; font-weight:700;
         }
-        
-        .no-logs {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        .timestamp {
-            font-family: monospace;
-            font-size: 14px;
-        }
-        
-        .details {
-            max-width: 300px;
-            word-wrap: break-word;
-            text-align: right;
-        }
+        .badge-present { background:var(--success-lt); color:var(--success); }
+        .badge-dup-att { background:var(--warning-lt); color:var(--warning); }
+        .badge-dup-reg { background:var(--danger-lt); color:var(--danger); }
+        .badge-other   { background:#f1f5f9; color:var(--muted); }
+
+        .ts { font-family:monospace; font-size:11px; color:var(--muted); }
+        .session-cell { font-size:12px; color:var(--navy); font-weight:600; }
+
+        .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+        .empty-icon { font-size:48px; margin-bottom:12px; }
+
+        .loading { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+        tbody tr { animation:fadeIn .2s ease both; }
+
+        @media(max-width:700px){ .stats-row{grid-template-columns:1fr;} }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>سجلات الإدارة</h1>
-        <p>سجل أنشطة النظام للطلاب</p>
+<header class="top-header">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <div>
+            <div class="logo-text">جامعة حائل</div>
+            <div class="logo-sub">نظام الحضور والغياب</div>
+        </div>
     </div>
-    
-    <a href="/admin/dashboard" class="back-link">← العودة للوحة التحكم</a>
-    
-    <div class="controls">
-        <input type="text" id="search-input" placeholder="Search by Student ID..." style="padding: 8px; margin-bottom: 20px; width: 300px; border: 1px solid #ddd; border-radius: 4px;">
-        <button id="export-btn" style="padding: 8px 16px; margin-bottom: 20px; margin-left: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Export to CSV</button>
-        <button id="delete-selected-btn" style="padding: 8px 16px; margin-bottom: 20px; margin-left: 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; display: none;">Delete Selected</button>
+    <a class="back-btn" href="/admin/dashboard">← العودة للوحة الأدمن</a>
+</header>
+
+<div class="page">
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-info">
+                <small>تسجيلات حضور</small>
+                <b id="cnt-present">—</b>
+                <small>إجمالي ناجح</small>
+            </div>
+            <div class="stat-icon si-green">✅</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <small>محاولات مكررة</small>
+                <b id="cnt-dup">—</b>
+                <small>حضور مكرر</small>
+            </div>
+            <div class="stat-icon si-yellow">⚠️</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <small>تسجيل مكرر</small>
+                <b id="cnt-reg">—</b>
+                <small>محاولة تسجيل مكرر</small>
+            </div>
+            <div class="stat-icon si-red">🚫</div>
+        </div>
     </div>
-    
-    <div id="logs-container">
-        <div class="loading">جاري تحميل السجلات...</div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">📋</div>
+            <div>
+                <h2>سجلات أنشطة النظام</h2>
+                <p>جميع العمليات المسجلة للطلاب</p>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="ابحث برقم الطالب...">
+            </div>
+            <button class="toolbar-btn btn-export" id="export-btn">📥 تصدير CSV</button>
+            <button class="toolbar-btn btn-delete" id="delete-selected-btn">🗑 حذف المحدد</button>
+        </div>
+
+        <div class="table-wrap">
+            <div id="logs-container">
+                <div class="loading">⏳ جاري تحميل السجلات...</div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
 function getActionClass(action) {
     switch(action) {
-        case 'ATTENDANCE_MARKED':
-            return 'action-attendance-marked';
-        case 'DUPLICATE_ATTENDANCE_ATTEMPT':
-            return 'action-duplicate-attendance';
-        case 'DUPLICATE_REGISTRATION_ATTEMPT':
-            return 'action-duplicate-registration';
-        default:
-            return '';
+        case 'ATTENDANCE_MARKED':           return 'badge-present';
+        case 'DUPLICATE_ATTENDANCE_ATTEMPT': return 'badge-dup-att';
+        case 'DUPLICATE_REGISTRATION_ATTEMPT': return 'badge-dup-reg';
+        default: return 'badge-other';
     }
 }
-
 function formatAction(action) {
     switch(action) {
-        case 'ATTENDANCE_MARKED':
-            return 'تسجيل الحضور';
-        case 'DUPLICATE_ATTENDANCE_ATTEMPT':
-            return 'محاولة حضور مكررة';
-        case 'DUPLICATE_REGISTRATION_ATTEMPT':
-            return 'محاولة تسجيل مكررة';
-        default:
-            return action.replace(/_/g, ' ').toLowerCase();
+        case 'ATTENDANCE_MARKED':            return '✅ تسجيل حضور';
+        case 'DUPLICATE_ATTENDANCE_ATTEMPT':  return '⚠️ حضور مكرر';
+        case 'DUPLICATE_REGISTRATION_ATTEMPT': return '🚫 تسجيل مكرر';
+        default: return action.replace(/_/g,' ').toLowerCase();
     }
 }
-
-function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-    });
+function formatTimestamp(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString('ar-SA', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false });
+}
+function initial(name) {
+    return (name || '?').trim()[0].toUpperCase();
 }
 
 async function loadLogs() {
+    const search = document.getElementById('search-input').value.trim();
+    const url = search ? `/admin/logs/data?search_student_id=${encodeURIComponent(search)}` : '/admin/logs/data';
+    const container = document.getElementById('logs-container');
+    container.innerHTML = '<div class="loading">⏳ جاري التحميل...</div>';
+
     try {
-        const searchValue = document.getElementById('search-input').value;
-        const url = searchValue ? `/admin/logs/data?search_student_id=${encodeURIComponent(searchValue)}` : '/admin/logs/data';
-        
-        const response = await fetch(url);
-        const result = await response.json();
-        
-        const container = document.getElementById('logs-container');
-        
-        if (!result.ok) {
-            container.innerHTML = '<div class="no-logs">خطأ في تحميل السجلات: ' + result.message + '</div>';
-            return;
-        }
-        
-        if (!result.logs || result.logs.length === 0) {
-            container.innerHTML = '<div class="no-logs">لا توجد سجلات</div>';
-            return;
-        }
-        
-        let tableHTML = `
-            <table class="logs-table">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="select-all-checkbox" style="margin-right: 5px;"></th>
-                        <th>التوقيت</th>
-                        <th>رقم الطالب</th>
-                        <th>اسم الطالب</th>
-                        <th>الإجراء</th>
-                        <th>الجلسة</th>
-                        <th>التفاصيل</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
-        result.logs.forEach((log, index) => {
-            const sessionDisplay = log.course_name && log.session_id ? 
-                `${log.course_name} - Session ${log.session_id}` : 
-                log.session_id || '-';
-            
-            tableHTML += `
-                <tr data-log-id="${log.id}">
-                    <td><input type="checkbox" class="log-checkbox" data-log-id="${log.id}" style="margin-right: 5px;"></td>
-                    <td class="timestamp">${formatTimestamp(log.timestamp)}</td>
-                    <td>${log.student_id}</td>
-                    <td>${log.student_name}</td>
-                    <td><span class="action-badge ${getActionClass(log.action)}">${formatAction(log.action)}</span></td>
-                    <td>${sessionDisplay}</td>
-                    <td class="details">${log.details || '-'}</td>
-                </tr>
-            `;
+        const res    = await fetch(url);
+        const result = await res.json();
+
+        if (!result.ok) { container.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><p>خطأ في تحميل السجلات</p></div>'; return; }
+        if (!result.logs || result.logs.length === 0) { container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>لا توجد سجلات</p></div>'; return; }
+
+        // stats
+        let cP=0, cD=0, cR=0;
+        result.logs.forEach(l => {
+            if (l.action === 'ATTENDANCE_MARKED') cP++;
+            else if (l.action === 'DUPLICATE_ATTENDANCE_ATTEMPT') cD++;
+            else if (l.action === 'DUPLICATE_REGISTRATION_ATTEMPT') cR++;
         });
-        
-        tableHTML += `
-                </tbody>
-            </table>
-        `;
-        
-        container.innerHTML = tableHTML;
-        
-        // Setup event listeners
-        setupEventListeners();
-        
-    } catch (error) {
-        console.error('Error loading logs:', error);
-        document.getElementById('logs-container').innerHTML = '<div class="no-logs">خطأ في تحميل السجلات</div>';
+        document.getElementById('cnt-present').textContent = cP;
+        document.getElementById('cnt-dup').textContent     = cD;
+        document.getElementById('cnt-reg').textContent     = cR;
+
+        let html = `<table>
+            <thead><tr>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>الطالب</th>
+                <th>الإجراء</th>
+                <th>المقرر / الجلسة</th>
+                <th>التوقيت</th>
+                <th>التفاصيل</th>
+            </tr></thead><tbody>`;
+
+        result.logs.forEach((log, i) => {
+            const session = log.course_name ? `${log.course_name}${log.session_number ? ' — ' + log.session_number : ''}` : (log.session_id || '—');
+            html += `<tr data-log-id="${log.id}" style="animation-delay:${i*0.03}s">
+                <td><input type="checkbox" class="log-checkbox" data-log-id="${log.id}"></td>
+                <td>
+                    <div class="student-cell">
+                        <div class="avatar">${initial(log.student_name)}</div>
+                        <div>
+                            <div class="student-name">${log.student_name}</div>
+                            <div class="student-id">${log.student_id}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="badge ${getActionClass(log.action)}">${formatAction(log.action)}</span></td>
+                <td><span class="session-cell">${session}</span></td>
+                <td><span class="ts">${formatTimestamp(log.timestamp)}</span></td>
+                <td style="max-width:220px;font-size:12px;color:var(--muted)">${log.details || '—'}</td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+        setupListeners();
+    } catch(e) {
+        container.innerHTML = '<div class="empty"><div class="empty-icon">❌</div><p>خطأ في الاتصال</p></div>';
     }
 }
 
-function setupEventListeners() {
-    const selectAllCheckbox = document.getElementById('select-all-checkbox');
-    const logCheckboxes = document.querySelectorAll('.log-checkbox');
-    const deleteBtn = document.getElementById('delete-selected-btn');
-    
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-            logCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-            updateDeleteButton();
-        });
-    }
-    
-    logCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateDeleteButton);
+function setupListeners() {
+    const selectAll = document.getElementById('select-all');
+    if (selectAll) selectAll.addEventListener('change', function() {
+        document.querySelectorAll('.log-checkbox').forEach(cb => cb.checked = this.checked);
+        updateDeleteBtn();
     });
+    document.querySelectorAll('.log-checkbox').forEach(cb => cb.addEventListener('change', updateDeleteBtn));
 }
 
-function updateDeleteButton() {
-    const checkedBoxes = document.querySelectorAll('.log-checkbox:checked');
-    const deleteBtn = document.getElementById('delete-selected-btn');
-    deleteBtn.style.display = checkedBoxes.length > 0 ? 'inline-block' : 'none';
+function updateDeleteBtn() {
+    const count = document.querySelectorAll('.log-checkbox:checked').length;
+    document.getElementById('delete-selected-btn').style.display = count > 0 ? 'flex' : 'none';
 }
 
-function getSelectedLogIds() {
-    const checkedBoxes = document.querySelectorAll('.log-checkbox:checked');
-    return Array.from(checkedBoxes).map(cb => parseInt(cb.dataset.logId)).filter(id => id);
+function getSelectedIds() {
+    return Array.from(document.querySelectorAll('.log-checkbox:checked')).map(cb => parseInt(cb.dataset.logId)).filter(Boolean);
 }
 
-// Load logs when page loads
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     loadLogs();
-    
-    // Search functionality
-    const searchInput = document.getElementById('search-input');
+
     let searchTimeout;
-    searchInput.addEventListener('input', function() {
+    document.getElementById('search-input').addEventListener('input', () => {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(loadLogs, 300); // Debounce search
+        searchTimeout = setTimeout(loadLogs, 300);
     });
-    
-    // Export functionality
-    document.getElementById('export-btn').addEventListener('click', function() {
-        const searchValue = searchInput.value;
-        const url = searchValue ? `/admin/logs/export?search_student_id=${encodeURIComponent(searchValue)}` : '/admin/logs/export';
+
+    document.getElementById('export-btn').addEventListener('click', () => {
+        const search = document.getElementById('search-input').value.trim();
+        const url = search ? `/admin/logs/export?search_student_id=${encodeURIComponent(search)}` : '/admin/logs/export';
         window.open(url, '_blank');
     });
-    
-    // Delete functionality
-    document.getElementById('delete-selected-btn').addEventListener('click', async function() {
-        const selectedIds = getSelectedLogIds();
-        if (selectedIds.length === 0) {
-            alert('Please select at least one log entry to delete.');
-            return;
-        }
-        
-        if (confirm(`Are you sure you want to delete ${selectedIds.length} log entry(ies)?`)) {
-            try {
-                const response = await fetch('/admin/logs/delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ log_ids: selectedIds })
-                });
-                
-                const result = await response.json();
-                
-                if (result.ok) {
-                    alert(`Successfully deleted ${result.deleted_count} log entry(ies).`);
-                    loadLogs(); // Reload logs
-                } else {
-                    alert('Error deleting logs: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Error deleting logs:', error);
-                alert('Error deleting logs. Please try again.');
-            }
-        }
+
+    document.getElementById('delete-selected-btn').addEventListener('click', async () => {
+        const ids = getSelectedIds();
+        if (!ids.length) return;
+        if (!confirm(`هل أنت متأكد من حذف ${ids.length} سجل؟`)) return;
+        try {
+            const res    = await fetch('/admin/logs/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({log_ids:ids}) });
+            const result = await res.json();
+            if (result.ok) { loadLogs(); }
+            else alert('خطأ: ' + result.message);
+        } catch(e) { alert('حدث خطأ أثناء الحذف'); }
     });
 });
 </script>
-
 </body>
 </html>
