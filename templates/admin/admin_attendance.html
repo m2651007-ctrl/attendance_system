@@ -2,482 +2,279 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سجل الحضور والانصراف</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    
+    <title>سجل الحضور — جامعة حائل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+        :root {
+            --navy:#0b3c5d; --navy-mid:#0d4f7a; --navy-lt:#1a6494;
+            --bg:#f0f4f8; --white:#ffffff; --text:#1a2332; --muted:#64748b;
+            --danger:#dc2626; --danger-lt:#fee2e2;
+            --success:#16a34a; --success-lt:#dcfce7;
+            --warning:#d97706; --warning-lt:#fef3c7;
+            --border:#dde4ed; --shadow:0 4px 24px rgba(11,60,93,.10);
         }
-        
-        .header {
-            background: #0b3c5d;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 30px;
-            border-radius: 8px;
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Tajawal',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+        .top-header {
+            background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--navy-lt) 100%);
+            padding:0 40px; display:flex; align-items:center;
+            justify-content:space-between; height:70px;
+            box-shadow:0 2px 20px rgba(0,0,0,.2); position:sticky; top:0; z-index:100;
         }
-        
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #0b3c5d;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        
-        .controls {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .search-input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
-            text-align: right;
-        }
-        
-        .export-btn {
-            padding: 8px 16px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .export-btn:hover {
-            background: #218838;
-        }
-        
-        .delete-btn {
-            background: #dc3545;
-        }
-        
-        .delete-btn:hover {
-            background: #c82333;
-        }
-        
-        .export-selected-btn {
-            background: #17a2b8;
-        }
-        
-        .export-selected-btn:hover {
-            background: #138496;
-        }
-        
-        .attendance-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .attendance-table th,
-        .attendance-table td {
-            padding: 12px 15px;
-            text-align: right;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .attendance-table th {
-            background: #0b3c5d;
-            color: white;
-            font-weight: bold;
-        }
-        
-        .attendance-table tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-        
-        .attendance-table tr:hover {
-            background: #f5f5f5;
-        }
-        
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-present {
-            background: #28a745;
-            color: white;
-        }
-        
-        .status-late {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .status-absent {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .status-not-checked-out {
-            background: #ffc107;
-            color: black;
-        }
-        
-        .checkout-not-checked-out {
-            color: #ff8c00;
-            font-weight: bold;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        .no-records {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        .timestamp {
-            font-family: monospace;
-            font-size: 14px;
-            direction: ltr;
-            text-align: center;
-        }
-        
-        .checkbox {
-            margin-left: 5px;
-        }
+        .logo { display:flex; align-items:center; gap:12px; color:#fff; }
+        .logo-icon { width:42px; height:42px; background:rgba(255,255,255,.12); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid rgba(255,255,255,.2); }
+        .logo-text { font-size:18px; font-weight:700; }
+        .logo-sub  { font-size:12px; opacity:.7; }
+        .back-btn { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,.85); text-decoration:none; font-size:14px; font-weight:500; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:9px; padding:8px 16px; transition:all .2s; }
+        .back-btn:hover { background:rgba(255,255,255,.2); color:#fff; }
+
+        .page { max-width:1400px; margin:0 auto; padding:30px 24px; }
+
+        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+        .stat-card { background:var(--white); border-radius:14px; padding:16px 20px; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:space-between; }
+        .stat-info small { font-size:12px; color:var(--muted); }
+        .stat-info b { display:block; font-size:22px; font-weight:800; color:var(--navy); margin:4px 0 2px; }
+        .stat-icon { width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+        .si-green{background:var(--success-lt);} .si-yellow{background:var(--warning-lt);} .si-red{background:var(--danger-lt);} .si-blue{background:#dbeafe;}
+
+        .card { background:var(--white); border-radius:18px; box-shadow:var(--shadow); overflow:hidden; }
+        .card-header { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%); padding:20px 28px; display:flex; align-items:center; gap:12px; }
+        .card-header-icon { width:38px; height:38px; background:rgba(255,255,255,.15); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+        .card-header h2 { color:#fff; font-size:16px; font-weight:700; }
+        .card-header p  { color:rgba(255,255,255,.65); font-size:12px; margin-top:2px; }
+
+        .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:16px 24px; border-bottom:1px solid var(--border); background:#f8fafc; }
+        .search-wrap { position:relative; flex:1; min-width:180px; }
+        .search-wrap input { width:100%; padding:9px 36px 9px 12px; border:1.5px solid var(--border); border-radius:10px; font-size:13px; font-family:'Tajawal',sans-serif; outline:none; background:#fff; transition:all .2s; }
+        .search-wrap input:focus { border-color:var(--navy); box-shadow:0 0 0 3px rgba(11,60,93,.08); }
+        .search-wrap input::placeholder { color:#a0aec0; }
+        .search-icon { position:absolute; right:10px; top:50%; transform:translateY(-50%); opacity:.4; font-size:13px; }
+
+        .toolbar-btn { display:flex; align-items:center; gap:5px; padding:9px 14px; border-radius:10px; border:none; font-size:13px; font-weight:700; font-family:'Tajawal',sans-serif; cursor:pointer; transition:all .2s; white-space:nowrap; }
+        .btn-export { background:var(--success-lt); color:var(--success); border:1px solid #bbf7d0; }
+        .btn-export:hover { background:var(--success); color:#fff; }
+        .btn-delete { background:var(--danger-lt); color:var(--danger); border:1px solid #fecaca; display:none; }
+        .btn-delete:hover { background:var(--danger); color:#fff; }
+
+        .table-wrap { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; min-width:1000px; }
+        thead th { background:#f1f5f9; color:var(--navy); font-size:12px; font-weight:700; padding:12px 14px; text-align:right; border-bottom:2px solid var(--border); }
+        tbody tr { transition:background .15s; animation:fadeIn .2s ease both; }
+        tbody tr:hover { background:#f8fafc; }
+        tbody tr:not(:last-child) td { border-bottom:1px solid #eef2f7; }
+        td { padding:12px 14px; font-size:13px; color:var(--text); vertical-align:middle; }
+
+        .student-cell { display:flex; align-items:center; gap:9px; }
+        .avatar { width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--navy),var(--navy-lt)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:700; flex-shrink:0; }
+        .s-name { font-weight:600; color:var(--navy); }
+        .s-id   { font-size:11px; color:var(--muted); }
+
+        .badge { display:inline-block; border-radius:7px; padding:3px 9px; font-size:11px; font-weight:700; }
+        .badge-present { background:var(--success-lt); color:var(--success); }
+        .badge-late    { background:var(--warning-lt); color:var(--warning); }
+        .badge-absent  { background:var(--danger-lt);  color:var(--danger); }
+        .badge-other   { background:#f1f5f9; color:var(--muted); }
+
+        .ts { font-family:monospace; font-size:11px; color:var(--muted); }
+        .course-cell { font-weight:600; color:var(--navy); font-size:12px; }
+
+        .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+        .empty-icon { font-size:48px; margin-bottom:12px; }
+        .loading { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+        @media(max-width:700px){ .stats-row{grid-template-columns:1fr 1fr;} }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>سجل الحضور والانصراف</h1>
-        <p>سجلات حضور الطلاب للجلسات</p>
+<header class="top-header">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <div><div class="logo-text">جامعة حائل</div><div class="logo-sub">نظام الحضور والغياب</div></div>
     </div>
-    
-    <a href="/admin/dashboard" class="back-link">العودة للوحة التحكم ←</a>
-    
-    <div class="controls">
-        <input type="text" id="course-search" class="search-input" placeholder="البحث باسم المقرر...">
-        <input type="text" id="student-search" class="search-input" placeholder="البحث برقم الطالب...">
-        <button id="delete-selected-btn" class="export-btn delete-btn" style="display: none;">حذف المحدد</button>
-        <button id="export-selected-btn" class="export-btn export-selected-btn" style="display: none;">تصدير المحدد</button>
-        <button id="export-btn" class="export-btn">تصدير الكل</button>
+    <a class="back-btn" href="/admin/dashboard">← العودة للوحة الأدمن</a>
+</header>
+
+<div class="page">
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-info"><small>إجمالي الحضور</small><b id="cnt-total">—</b><small>جميع السجلات</small></div>
+            <div class="stat-icon si-blue">📊</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>حاضر</small><b id="cnt-present">—</b><small>في الوقت</small></div>
+            <div class="stat-icon si-green">✅</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>متأخر</small><b id="cnt-late">—</b><small>بعد 15 دقيقة</small></div>
+            <div class="stat-icon si-yellow">⏰</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>غائب</small><b id="cnt-absent">—</b><small>لم يسجل</small></div>
+            <div class="stat-icon si-red">❌</div>
+        </div>
     </div>
-    
-    <div id="attendance-container">
-        <div class="loading">جاري تحميل السجلات...</div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">📋</div>
+            <div><h2>سجل الحضور والغياب</h2><p>جميع سجلات الطلاب في النظام</p></div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="course-search" placeholder="ابحث بالمقرر أو الشعبة...">
+            </div>
+            <div class="search-wrap">
+                <span class="search-icon">👤</span>
+                <input type="text" id="student-search" placeholder="ابحث برقم الطالب...">
+            </div>
+            <button class="toolbar-btn btn-export" id="export-btn">📥 تصدير CSV</button>
+            <button class="toolbar-btn btn-delete" id="delete-selected-btn">🗑 حذف المحدد</button>
+        </div>
+
+        <div class="table-wrap">
+            <div id="attendance-container">
+                <div class="loading">⏳ جاري تحميل سجلات الحضور...</div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-function getStatusClass(status) {
-    switch(status) {
-        case 'Present':
-            return 'status-present';
-        case 'Late':
-            return 'status-late';
-        case 'Absent':
-            return 'status-absent';
-        case 'Not Checked Out':
-            return 'status-not-checked-out';
-        default:
-            return '';
+function getBadge(status) {
+    switch((status||'').toLowerCase()) {
+        case 'present': return ['badge-present','✓ حاضر'];
+        case 'late':    return ['badge-late','⏰ متأخر'];
+        case 'absent':  return ['badge-absent','✗ غائب'];
+        default:        return ['badge-other', status || '—'];
     }
 }
-
-function formatTimestamp(timestamp) {
-    if (!timestamp) return '-';
-    const date = new Date(timestamp);
-    return date.toLocaleString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
-}
-
-function isLateCheckIn(checkInTime, sessionStartTime) {
-    if (!checkInTime || !sessionStartTime) return false;
-    
-    const checkIn = new Date(checkInTime);
-    const [hours, minutes] = sessionStartTime.split(':').map(Number);
-    const sessionStart = new Date(checkIn);
-    sessionStart.setHours(hours, minutes, 0, 0);
-    
-    const diffMinutes = (checkIn - sessionStart) / (1000 * 60);
-    return diffMinutes > 15;
-}
-
-function getSelectedRecordIds() {
-    const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
-    return Array.from(checkedBoxes).map(cb => parseInt(cb.dataset.recordId)).filter(id => id);
-}
-
-function updateSelectedButtons() {
-    const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
-    const deleteBtn = document.getElementById('delete-selected-btn');
-    const exportSelectedBtn = document.getElementById('export-selected-btn');
-    
-    const hasSelection = checkedBoxes.length > 0;
-    deleteBtn.style.display = hasSelection ? 'inline-block' : 'none';
-    exportSelectedBtn.style.display = hasSelection ? 'inline-block' : 'none';
-}
-
-function setupEventListeners() {
-    const selectAllCheckbox = document.getElementById('select-all-checkbox');
-    const recordCheckboxes = document.querySelectorAll('.record-checkbox');
-    
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-            recordCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-            updateSelectedButtons();
-        });
-    }
-    
-    recordCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateSelectedButtons);
-    });
+function initial(n){ return (n||'?').trim()[0]; }
+function fmtTs(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    return d.toLocaleString('ar-SA',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
 }
 
 async function loadAttendance() {
+    const cs = document.getElementById('course-search').value.trim();
+    const ss = document.getElementById('student-search').value.trim();
+    let url = '/admin/attendance/data';
+    const params = [];
+    if (cs) params.push('course_search=' + encodeURIComponent(cs));
+    if (ss) params.push('student_search=' + encodeURIComponent(ss));
+    if (params.length) url += '?' + params.join('&');
+
+    const container = document.getElementById('attendance-container');
+    container.innerHTML = '<div class="loading">⏳ جاري التحميل...</div>';
+
     try {
-        const courseSearch = document.getElementById('course-search').value;
-        const studentSearch = document.getElementById('student-search').value;
-        
-        let url = '/admin/attendance/data?';
-        const params = [];
-        
-        if (courseSearch) {
-            params.push(`course_search=${encodeURIComponent(courseSearch)}`);
-        }
-        
-        if (studentSearch) {
-            params.push(`student_search=${encodeURIComponent(studentSearch)}`);
-        }
-        
-        if (params.length > 0) {
-            url += params.join('&');
-        } else {
-            url = '/admin/attendance/data';
-        }
-        
-        const response = await fetch(url);
-        const result = await response.json();
-        
-        const container = document.getElementById('attendance-container');
-        
-        if (!result.ok) {
-            container.innerHTML = '<div class="no-records">خطأ في تحميل السجلات: ' + result.message + '</div>';
+        const res    = await fetch(url);
+        const result = await res.json();
+        if (!result.ok || !result.records || result.records.length === 0) {
+            container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>لا توجد سجلات</p></div>';
             return;
         }
-        
-        if (!result.records || result.records.length === 0) {
-            container.innerHTML = '<div class="no-records">لا توجد سجلات حضور</div>';
-            return;
-        }
-        
-        let tableHTML = `
-            <table class="attendance-table">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="select-all-checkbox" class="checkbox"></th>
-                        <th>اسم الطالب</th>
-                        <th>رقم الطالب</th>
-                        <th>اسم المقرر</th>
-                        <th>رقم الشعبه</th>
-                        <th>اسم الدكتور</th>
-                        <th>وقت الدخول</th>
-                        <th>وقت الخروج</th>
-                        <th>الحالة</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
-        result.records.forEach(record => {
-            const statusClass = getStatusClass(record.status);
-            
-            // Determine checkout display
-            let checkoutDisplay = formatTimestamp(record.check_out);
-            let checkoutClass = '';
-            
-            if (record.check_in && !record.check_out) {
-                checkoutDisplay = 'لم يخرج';
-                checkoutClass = 'checkout-not-checked-out';
-            }
-            
-            // Translate status for display
-            let statusDisplay = record.status;
-            switch(record.status) {
-                case 'Present':
-                    statusDisplay = 'حاضر';
-                    break;
-                case 'Late':
-                    statusDisplay = 'متأخر';
-                    break;
-                case 'Absent':
-                    statusDisplay = 'غائب';
-                    break;
-            }
-            
-            tableHTML += `
-                <tr data-record-id="${record.id}">
-                    <td><input type="checkbox" class="record-checkbox" data-record-id="${record.id}" class="checkbox"></td>
-                    <td>${record.student_name}</td>
-                    <td>${record.university_id}</td>
-                    <td>${record.course_name}</td>
-                    <td>${record.session_id}</td>
-                    <td>${record.instructor_name}</td>
-                    <td class="timestamp">${formatTimestamp(record.check_in)}</td>
-                    <td class="timestamp ${checkoutClass}">${checkoutDisplay}</td>
-                    <td><span class="status-badge ${statusClass}">${statusDisplay}</span></td>
-                </tr>
-            `;
+
+        let cT=0, cP=0, cL=0, cA=0;
+        result.records.forEach(r => {
+            cT++;
+            const s = (r.status||'').toLowerCase();
+            if (s==='present') cP++;
+            else if (s==='late') cL++;
+            else if (s==='absent') cA++;
         });
-        
-        tableHTML += `
-                </tbody>
-            </table>
-        `;
-        
-        container.innerHTML = tableHTML;
-        
-        // Setup event listeners for checkboxes
-        setupEventListeners();
-        
-    } catch (error) {
-        console.error('Error loading attendance:', error);
-        document.getElementById('attendance-container').innerHTML = '<div class="no-records">خطأ في تحميل السجلات</div>';
+        document.getElementById('cnt-total').textContent   = cT;
+        document.getElementById('cnt-present').textContent = cP;
+        document.getElementById('cnt-late').textContent    = cL;
+        document.getElementById('cnt-absent').textContent  = cA;
+
+        let html = `<table><thead><tr>
+            <th><input type="checkbox" id="select-all"></th>
+            <th>الطالب</th><th>المقرر</th><th>الشعبة</th>
+            <th>الدكتور</th><th>تسجيل الدخول</th><th>تسجيل الخروج</th><th>الحالة</th>
+        </tr></thead><tbody>`;
+
+        result.records.forEach((r,i) => {
+            const [bcls, blbl] = getBadge(r.status);
+            html += `<tr style="animation-delay:${i*0.02}s">
+                <td><input type="checkbox" class="att-checkbox" data-id="${r.id}"></td>
+                <td><div class="student-cell">
+                    <div class="avatar">${initial(r.student_name)}</div>
+                    <div><div class="s-name">${r.student_name}</div><div class="s-id">${r.university_id}</div></div>
+                </div></td>
+                <td><span class="course-cell">${r.course_name || '—'}</span></td>
+                <td><span style="font-size:12px;background:#e0f2fe;color:#0369a1;border-radius:6px;padding:2px 8px;font-weight:600;">${r.session_number || '—'}</span></td>
+                <td style="font-size:12px;color:var(--muted)">${r.instructor_name || '—'}</td>
+                <td><span class="ts">${fmtTs(r.check_in)}</span></td>
+                <td><span class="ts">${r.check_out ? fmtTs(r.check_out) : '<span style="color:#9ca3af">—</span>'}</span></td>
+                <td><span class="badge ${bcls}">${blbl}</span></td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+        setupListeners();
+    } catch(e) {
+        container.innerHTML = '<div class="empty"><div class="empty-icon">❌</div><p>خطأ في الاتصال</p></div>';
     }
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
+function setupListeners() {
+    const sa = document.getElementById('select-all');
+    if (sa) sa.addEventListener('change', function() {
+        document.querySelectorAll('.att-checkbox').forEach(cb => cb.checked = this.checked);
+        updateDeleteBtn();
+    });
+    document.querySelectorAll('.att-checkbox').forEach(cb => cb.addEventListener('change', updateDeleteBtn));
+}
+
+function updateDeleteBtn() {
+    const n = document.querySelectorAll('.att-checkbox:checked').length;
+    document.getElementById('delete-selected-btn').style.display = n > 0 ? 'flex' : 'none';
+}
+
+function getSelectedIds() {
+    return Array.from(document.querySelectorAll('.att-checkbox:checked')).map(cb => parseInt(cb.dataset.id)).filter(Boolean);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     loadAttendance();
-    
-    // Search functionality with debounce
-    let searchTimeout;
-    const searchInputs = ['course-search', 'student-search'];
-    
-    searchInputs.forEach(inputId => {
-        document.getElementById(inputId).addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(loadAttendance, 300);
-        });
-    });
-    
-    // Export all functionality
-    document.getElementById('export-btn').addEventListener('click', function() {
-        const courseSearch = document.getElementById('course-search').value;
-        const studentSearch = document.getElementById('student-search').value;
-        
-        let url = '/admin/attendance/export?';
-        const params = [];
-        
-        if (courseSearch) {
-            params.push(`course_search=${encodeURIComponent(courseSearch)}`);
-        }
-        
-        if (studentSearch) {
-            params.push(`student_search=${encodeURIComponent(studentSearch)}`);
-        }
-        
-        if (params.length > 0) {
-            url += params.join('&');
-        } else {
-            url = '/admin/attendance/export';
-        }
-        
+
+    let t1, t2;
+    document.getElementById('course-search').addEventListener('input', () => { clearTimeout(t1); t1 = setTimeout(loadAttendance, 300); });
+    document.getElementById('student-search').addEventListener('input', () => { clearTimeout(t2); t2 = setTimeout(loadAttendance, 300); });
+
+    document.getElementById('export-btn').addEventListener('click', () => {
+        const cs = document.getElementById('course-search').value.trim();
+        const ss = document.getElementById('student-search').value.trim();
+        const ids = getSelectedIds();
+        let url = '/admin/attendance/export';
+        const p = [];
+        if (cs)  p.push('course_search='  + encodeURIComponent(cs));
+        if (ss)  p.push('student_search=' + encodeURIComponent(ss));
+        if (ids.length) p.push('selected_ids=' + ids.join(','));
+        if (p.length) url += '?' + p.join('&');
         window.open(url, '_blank');
     });
-    
-    // Delete selected functionality
-    document.getElementById('delete-selected-btn').addEventListener('click', async function() {
-        const selectedIds = getSelectedRecordIds();
-        if (selectedIds.length === 0) {
-            alert('الرجاء تحديد سجل واحد على الأقل للحذف.');
-            return;
-        }
-        
-        if (confirm(`هل أنت متأكد من حذف ${selectedIds.length} سجل/سجلات الحضور؟`)) {
-            try {
-                const response = await fetch('/admin/attendance/delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ record_ids: selectedIds })
-                });
-                
-                const result = await response.json();
-                
-                if (result.ok) {
-                    alert(`تم حذف ${result.deleted_count} سجل/سجلات بنجاح.`);
-                    loadAttendance(); // Reload data
-                } else {
-                    alert('خطأ في حذف السجلات: ' + result.message);
-                }
-            } catch (error) {
-                console.error('Error deleting records:', error);
-                alert('خطأ في حذف السجلات. الرجاء المحاولة مرة أخرى.');
-            }
-        }
-    });
-    
-    // Export selected functionality
-    document.getElementById('export-selected-btn').addEventListener('click', function() {
-        const selectedIds = getSelectedRecordIds();
-        if (selectedIds.length === 0) {
-            alert('الرجاء تحديد سجل واحد على الأقل للتصدير.');
-            return;
-        }
-        
-        const courseSearch = document.getElementById('course-search').value;
-        const studentSearch = document.getElementById('student-search').value;
-        
-        let url = '/admin/attendance/export?';
-        const params = [];
-        
-        if (courseSearch) {
-            params.push(`course_search=${encodeURIComponent(courseSearch)}`);
-        }
-        
-        if (studentSearch) {
-            params.push(`student_search=${encodeURIComponent(studentSearch)}`);
-        }
-        
-        // Add selected IDs
-        params.push(`selected_ids=${selectedIds.join(',')}`);
-        
-        url += params.join('&');
-        window.open(url, '_blank');
+
+    document.getElementById('delete-selected-btn').addEventListener('click', async () => {
+        const ids = getSelectedIds();
+        if (!ids.length) return;
+        if (!confirm(`هل أنت متأكد من حذف ${ids.length} سجل؟`)) return;
+        try {
+            const res = await fetch('/admin/attendance/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({record_ids:ids}) });
+            const r   = await res.json();
+            if (r.ok) loadAttendance();
+            else alert('خطأ: ' + r.message);
+        } catch(e) { alert('حدث خطأ'); }
     });
 });
 </script>
-
 </body>
 </html>
