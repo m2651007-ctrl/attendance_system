@@ -1,703 +1,713 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>تسجيل وجوه الطلاب</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-
+  <title>تسجيل وجوه الطلاب — جامعة حائل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --navy:#06142f;
-      --navy2:#071f46;
-      --blue:#4f5bff;
-      --gold:#c9a24d;
-      --green:#22c55e;
-      --red:#ef233c;
-      --muted:#64748b;
-      --line:#e5eaf3;
-      --bg:#f6f8fc;
-      --card:#ffffff;
-      --shadow:0 18px 45px rgba(15,23,42,.08);
-      --soft:0 10px 30px rgba(15,23,42,.06);
+    :root {
+      --navy:     #0b3c5d;
+      --navy-mid: #0d4f7a;
+      --navy-lt:  #1a6494;
+      --bg:       #f0f4f8;
+      --white:    #ffffff;
+      --text:     #1a2332;
+      --muted:    #64748b;
+      --danger:   #dc2626;
+      --danger-lt:#fee2e2;
+      --success:  #16a34a;
+      --success-lt:#dcfce7;
+      --warning:  #d97706;
+      --warning-lt:#fef3c7;
+      --blue:     #2563eb;
+      --blue-lt:  #dbeafe;
+      --border:   #dde4ed;
+      --shadow:   0 4px 24px rgba(11,60,93,.10);
+      --shadow-lg:0 8px 40px rgba(11,60,93,.16);
     }
 
-    *{box-sizing:border-box}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body{
-      margin:0;
-      direction:rtl;
-      font-family:"Segoe UI",Tahoma,sans-serif;
-      background:linear-gradient(135deg,#f8fafc,#eef3f8);
-      color:#0f172a;
-    }
-
-    .topbar{
-      min-height:92px;
-      background:linear-gradient(135deg,#040b20,#071a3d,#082453);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:16px 44px;
-      box-shadow:0 14px 36px rgba(2,6,23,.25);
-      position:sticky;
-      top:0;
-      z-index:20;
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
     }
 
-    .brand{display:flex;align-items:center;gap:16px}
-    .logo{
-      width:58px;height:58px;border-radius:18px;
-      display:grid;place-items:center;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.18);
-      font-size:34px;
-    }
-    .brand h1{margin:0;font-size:28px;font-weight:900}
-    .brand p{margin:4px 0 0;color:rgba(255,255,255,.75);font-size:14px}
-
-    .nav{display:flex;align-items:center;gap:18px}
-    .nav a{
-      color:#fff;
-      font-weight:800;
-      padding:14px 24px;
-      border-radius:14px;
-      opacity:.86;
-      text-decoration:none;
-    }
-    .nav a.active{
-      background:rgba(79,91,255,.48);
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
-      opacity:1;
+    /* ===== HEADER ===== */
+    .top-header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-lt) 100%);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      box-shadow: 0 2px 20px rgba(0,0,0,.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    .admin-mini{display:flex;align-items:center;gap:10px;color:#fff;min-width:170px}
-    .avatar{
-      width:46px;height:46px;border-radius:50%;
-      background:linear-gradient(135deg,#eef2ff,#dbeafe);
-      display:grid;place-items:center;color:#1e3a8a;font-weight:900;
-      border:3px solid rgba(255,255,255,.18);
+    .logo { display: flex; align-items: center; gap: 12px; color: var(--white); }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      border: 1px solid rgba(255,255,255,.2);
     }
-    .admin-mini b{display:block;font-size:14px}
-    .admin-mini span{font-size:12px;color:rgba(255,255,255,.7)}
+    .logo-text { font-size: 18px; font-weight: 700; }
+    .logo-sub  { font-size: 12px; opacity: .7; font-weight: 400; }
 
-    .page{
-      width:min(1420px,95%);
-      margin:30px auto 46px;
+    .back-btn {
+      display: flex; align-items: center; gap: 8px;
+      color: rgba(255,255,255,.85); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 9px; padding: 8px 16px; transition: all .2s;
     }
+    .back-btn:hover { background: rgba(255,255,255,.2); color: var(--white); }
 
-    .hero{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:24px;
-    }
-    .hero h2{margin:0;font-size:32px;font-weight:900;color:#0f172a}
-    .hero p{margin:8px 0 0;color:#64748b;font-weight:600}
-    .hero-icon{
-      width:62px;height:62px;border-radius:18px;
-      display:grid;place-items:center;
-      background:#fff;border:1px solid #dbe5ff;
-      box-shadow:var(--soft);font-size:30px;
-    }
-
-    .layout{
-      display:grid;
-      grid-template-columns:340px 1fr;
-      gap:24px;
-      align-items:start;
+    /* ===== PAGE ===== */
+    .page {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 30px 24px;
     }
 
-    .side{display:flex;flex-direction:column;gap:20px}
-
-    .card{
-      background:rgba(255,255,255,.96);
-      border:1px solid var(--line);
-      border-radius:18px;
-      box-shadow:var(--shadow);
-      padding:18px;
+    /* ===== STATS ROW ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
-    .last-card{
-      background:linear-gradient(180deg,#2538d8,#061a43);
-      color:#fff;
-      border:0;
-      overflow:hidden;
+    .stat-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .card-title{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin:0 0 14px;
-      font-size:18px;
-      font-weight:900;
-      color:#0f172a;
-    }
-    .last-card .card-title{color:#fff}
+    .stat-card .stat-info small { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .stat-card .stat-info b    { display: block; font-size: 26px; font-weight: 800; color: var(--navy); margin: 4px 0 2px; }
+    .stat-card .stat-info span { font-size: 12px; color: var(--muted); }
 
-    .preview{
-      width:100%;
-      height:185px;
-      border-radius:14px;
-      overflow:hidden;
-      background:rgba(255,255,255,.12);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:rgba(255,255,255,.75);
-    }
-    .preview img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
+    .stat-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
     }
 
-    .capture-ok{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      margin-top:16px;
-      color:#fff;
-      font-weight:800;
-    }
-    .capture-ok small{color:rgba(255,255,255,.68)}
-    .ok-dot{
-      width:22px;height:22px;border-radius:6px;
-      display:grid;place-items:center;
-      background:#22c55e;color:#fff;font-size:14px;
+    .stat-icon.blue    { background: var(--blue-lt); }
+    .stat-icon.green   { background: var(--success-lt); }
+    .stat-icon.gold    { background: var(--warning-lt); }
+    .stat-icon.navy    { background: #e0f2fe; }
+
+    /* ===== MAIN GRID ===== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
     }
 
-    .tips-list{
-      list-style:none;
-      padding:0;
-      margin:0;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .tips-list li{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      color:#0f172a;
-      font-weight:800;
-      font-size:14px;
-    }
-    .tips-list li span{
-      width:30px;height:30px;border-radius:10px;
-      display:grid;place-items:center;
-      background:#eef2ff;
-      flex:0 0 auto;
+    /* ===== CARD ===== */
+    .card {
+      background: var(--white);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 20px;
     }
 
-    .security-card{
-      background:linear-gradient(135deg,#061a43,#082453);
-      color:#fff;
-      min-height:118px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      overflow:hidden;
-    }
-    .security-card h3{margin:0 0 8px;font-size:17px}
-    .security-card p{margin:0;color:rgba(255,255,255,.72);line-height:1.7;font-size:13px}
-    .lock{
-      width:58px;height:58px;border-radius:50%;
-      background:rgba(255,255,255,.08);
-      display:grid;place-items:center;
-      font-size:30px;
+    .card:last-child { margin-bottom: 0; }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .main{
-      display:grid;
-      grid-template-columns:1fr 1.12fr;
-      gap:18px;
+    .card-header-icon {
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,.15);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
     }
 
-    .form-card,.camera-card{min-height:450px}
+    .card-header h3 { color: var(--white); font-size: 15px; font-weight: 700; }
+    .card-header p  { color: rgba(255,255,255,.65); font-size: 12px; margin-top: 1px; }
 
-    .section-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:20px;
-    }
-    .section-head h3{
-      margin:0;
-      color:#0f172a;
-      font-size:20px;
-      font-weight:900;
-    }
-    .section-head span{font-size:24px;color:#4f5bff}
+    .card-body { padding: 22px; }
 
-    label{
-      display:block;
-      margin:14px 0 8px;
-      color:#0f172a;
-      font-weight:900;
+    /* ===== FORM ===== */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+    .form-group label span { color: var(--danger); margin-right: 2px; }
+
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%); font-size: 15px;
+      opacity: .45; pointer-events: none;
     }
 
-    input{
-      width:100%;
-      height:52px;
-      border:1px solid #dbe3ef;
-      border-radius:12px;
-      padding:0 16px;
-      font-size:15px;
-      background:#fff;
-      outline:none;
-      transition:.2s;
-    }
-    input:focus{
-      border-color:#4f5bff;
-      box-shadow:0 0 0 4px rgba(79,91,255,.12);
+    .form-group input {
+      width: 100%; padding: 10px 40px 10px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 14px; font-family: 'Tajawal', sans-serif;
+      color: var(--text); background: #f8fafc;
+      transition: all .2s; outline: none;
     }
 
-    .mini-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin-top:20px;
+    .form-group input:focus {
+      border-color: var(--navy); background: var(--white);
+      box-shadow: 0 0 0 3px rgba(11,60,93,.08);
     }
 
-    .info-tile{
-      border-radius:14px;
-      padding:14px;
-      background:linear-gradient(135deg,#f8f7ff,#eef2ff);
-      border:1px solid #e5e7ff;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      min-height:76px;
-      font-weight:900;
-      color:#4f46e5;
-    }
-    .info-tile.green{
-      background:linear-gradient(135deg,#f0fdf4,#f8fafc);
-      color:#16a34a;
-      border-color:#dcfce7;
-    }
-    .info-tile small{
-      display:block;
-      margin-top:4px;
-      color:#475569;
-      font-weight:700;
-    }
-    .info-tile span{font-size:30px}
+    .form-group input::placeholder { color: #a0aec0; }
 
-    .notice{
-      margin-top:18px;
-      border-radius:12px;
-      background:#eef5ff;
-      color:#475569;
-      padding:13px 14px;
-      font-weight:700;
-      text-align:center;
+    /* ===== INFO TILES ===== */
+    .info-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+
+    .info-tile {
+      border-radius: 12px; padding: 12px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid;
     }
 
-    .video-wrap{
-      position:relative;
-      border-radius:14px;
-      background:#020617;
-      overflow:hidden;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
-      height:260px;
-    }
-    video{
-      width:100%;
-      height:260px;
-      object-fit:cover;
-      display:block;
+    .info-tile.blue  { background: #eff6ff; border-color: #bfdbfe; }
+    .info-tile.green { background: var(--success-lt); border-color: #bbf7d0; }
+
+    .info-tile .tile-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+    .info-tile .tile-value { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 2px; }
+    .info-tile .tile-icon  { font-size: 22px; }
+
+    /* ===== NOTICE ===== */
+    .notice {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #0369a1;
+      font-weight: 500;
+      margin-bottom: 16px;
     }
 
-    #overlay{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      z-index:5;
-      pointer-events:none;
+    /* ===== SAVE BTN ===== */
+    .save-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+      color: var(--white); border: none; border-radius: 12px;
+      padding: 13px; font-size: 15px; font-weight: 700;
+      font-family: 'Tajawal', sans-serif; cursor: pointer;
+      transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 14px rgba(11,60,93,.3);
+      margin-top: 6px;
+    }
+    .save-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(11,60,93,.4); }
+    .save-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .test-btn {
+      width: 100%;
+      background: var(--blue-lt);
+      color: var(--blue); border: 1px solid #bfdbfe; border-radius: 12px;
+      padding: 11px; font-size: 14px; font-weight: 700;
+      font-family: 'Tajawal', sans-serif; cursor: pointer;
+      transition: all .2s; margin-top: 8px;
+    }
+    .test-btn:hover { background: var(--blue); color: var(--white); }
+    .test-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* ===== SAVE MSG ===== */
+    .save-msg {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 10px;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .face-guide{
-      position:absolute;
-      inset:34px 110px;
-      border-radius:24px;
-      pointer-events:none;
-      z-index:4;
-      opacity:.9;
+    /* ===== TIPS ===== */
+    .tips-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .tip-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 500; color: var(--text);
+      padding: 8px 10px;
+      background: #f8fafc;
+      border-radius: 9px;
+      border: 1px solid var(--border);
     }
-    .face-guide:before{
-      content:"";
-      position:absolute;
-      inset:0;
+    .tip-icon { font-size: 18px; flex-shrink: 0; }
+
+    /* ===== PREVIEW ===== */
+    .preview-wrap {
+      width: 100%; height: 160px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0b3c5d, #1a6494);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.6);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .preview-wrap img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+
+    .capture-status {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 600;
+    }
+
+    .status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--muted); flex-shrink: 0;
+    }
+    .status-dot.active { background: var(--success); }
+
+    /* ===== CAMERA CARD ===== */
+    .video-wrap {
+      position: relative;
+      border-radius: 14px;
+      background: #020617;
+      overflow: hidden;
+      height: 280px;
+    }
+
+    video {
+      width: 100%; height: 280px;
+      object-fit: cover; display: block;
+    }
+
+    #overlay {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 5; pointer-events: none;
+    }
+
+    .face-guide {
+      position: absolute;
+      inset: 30px 100px;
+      border-radius: 20px;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .face-guide::before {
+      content: "";
+      position: absolute; inset: 0;
       background:
-        linear-gradient(#5865ff,#5865ff) top left/44px 4px no-repeat,
-        linear-gradient(#5865ff,#5865ff) top left/4px 44px no-repeat,
-        linear-gradient(#5865ff,#5865ff) top right/44px 4px no-repeat,
-        linear-gradient(#5865ff,#5865ff) top right/4px 44px no-repeat,
-        linear-gradient(#5865ff,#5865ff) bottom left/44px 4px no-repeat,
-        linear-gradient(#5865ff,#5865ff) bottom left/4px 44px no-repeat,
-        linear-gradient(#5865ff,#5865ff) bottom right/44px 4px no-repeat,
-        linear-gradient(#5865ff,#5865ff) bottom right/4px 44px no-repeat;
-      border-radius:24px;
-      filter:drop-shadow(0 0 12px rgba(88,101,255,.6));
+        linear-gradient(var(--navy-lt), var(--navy-lt)) top left/40px 3px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) top left/3px 40px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) top right/40px 3px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) top right/3px 40px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) bottom left/40px 3px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) bottom left/3px 40px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) bottom right/40px 3px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) bottom right/3px 40px no-repeat;
+      border-radius: 20px;
+      filter: drop-shadow(0 0 10px rgba(26,100,148,.7));
     }
 
-    canvas{display:none}
+    canvas { display: none; }
 
-    .actions{
-      display:grid;
-      grid-template-columns:1fr 1.1fr 1fr;
-      gap:14px;
-      margin:16px 0;
-    }
-    .btn2{
-      border:0;
-      border-radius:10px;
-      height:44px;
-      color:#fff;
-      font-weight:900;
-      cursor:pointer;
-      transition:.2s;
-      font-size:15px;
-    }
-    .btn2:hover{transform:translateY(-2px)}
-    .btn2{background:#061a43}
-    .btn2.alt{background:linear-gradient(135deg,#625bff,#4047d9)}
-    .btn2.danger{background:linear-gradient(135deg,#f43f5e,#dc062b)}
-    .btn2:disabled{opacity:.55;cursor:not-allowed;transform:none}
-
-    .counter-pill{
-      width:180px;
-      margin:0 auto;
-      height:40px;
-      border-radius:999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      background:#f8fafc;
-      color:#0f172a;
-      font-weight:900;
-      box-shadow:inset 0 0 0 1px #eef2f7;
-    }
-    .green-dot{
-      width:18px;height:18px;border-radius:50%;
-      background:#22c55e;
-      display:inline-block;
+    /* ===== CAMERA CONTROLS ===== */
+    .cam-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin: 14px 0;
     }
 
-    .interval{margin-top:18px}
-    .interval p{
-      text-align:center;
-      color:#64748b;
-      font-weight:700;
-      font-size:13px;
+    .cam-btn {
+      border: none; border-radius: 10px;
+      height: 42px; font-weight: 700;
+      cursor: pointer; font-size: 13px;
+      font-family: 'Tajawal', sans-serif;
+      transition: all .2s; color: var(--white);
+    }
+    .cam-btn:hover { transform: translateY(-1px); }
+    .cam-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .cam-btn.navy   { background: var(--navy); }
+    .cam-btn.blue   { background: linear-gradient(135deg, var(--blue), #1d4ed8); }
+    .cam-btn.danger { background: linear-gradient(135deg, #f43f5e, #dc2626); }
+
+    /* ===== COUNTER ===== */
+    .counter-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 16px; margin-bottom: 14px;
     }
 
-    .bottom-stats{
-      grid-column:1 / -1;
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:14px;
-      margin-top:6px;
-    }
-    .stat-card{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:14px;
-      box-shadow:var(--soft);
-      padding:18px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      min-height:96px;
-    }
-    .stat-card small{color:#64748b;font-weight:700}
-    .stat-card b{display:block;margin-top:6px;font-size:25px;color:#0f172a}
-    .stat-icon{
-      width:58px;height:58px;border-radius:50%;
-      display:grid;place-items:center;
-      background:#eef2ff;
-      font-size:28px;
+    .counter-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .counter-value { font-size: 18px; font-weight: 800; color: var(--navy); }
+
+    .progress-bar-wrap {
+      background: #e2e8f0; border-radius: 999px; height: 6px; overflow: hidden;
     }
 
-    .wide-actions{
-      grid-column:1 / -1;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:18px;
-      margin-top:4px;
-    }
-    .wide-btn{
-      border:0;
-      border-radius:14px;
-      min-height:72px;
-      font-weight:900;
-      font-size:17px;
-      cursor:pointer;
-      background:linear-gradient(135deg,#ecfdf5,#f8fafc);
-      color:#16a34a;
-      border:1px solid #d9f99d;
-      box-shadow:var(--soft);
-    }
-    .wide-btn.blue{
-      background:linear-gradient(135deg,#eef5ff,#f8fafc);
-      color:#2563eb;
-      border-color:#bfdbfe;
-    }
-    .wide-btn small{
-      font-size:13px;
-      color:#64748b;
-      font-weight:700;
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--navy), var(--navy-lt));
+      border-radius: 999px;
+      transition: width .4s ease;
+      width: 0%;
     }
 
-    #saveMsg{
-      margin-top:12px;
-      text-align:center;
-      color:#64748b;
-      font-weight:800;
+    /* ===== INSTRUCTION BADGE ===== */
+    #instruction {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 14px;
     }
 
-    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-    .kpi .boxx{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px}
-    .kpi .t{font-size:12px;color:#64748b}
-    .kpi .v{font-size:18px;font-weight:900;color:#0b3c5d}
-    .stat{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#f8fafc;padding:12px;border-radius:12px;overflow:auto}
-
-    @media(max-width:1150px){
-      .layout{grid-template-columns:1fr}
-      .side{display:grid;grid-template-columns:1fr 1fr}
-      .security-card{grid-column:1/-1}
+    /* ===== INTERVAL ===== */
+    .interval-row {
+      display: flex; align-items: center; gap: 12px;
     }
 
-    @media(max-width:900px){
-      .topbar{height:auto;padding:18px;flex-wrap:wrap;gap:14px}
-      .nav{order:3;width:100%;justify-content:center;flex-wrap:wrap}
-      .main{grid-template-columns:1fr}
-      .bottom-stats{grid-template-columns:1fr 1fr}
-      .wide-actions{grid-template-columns:1fr}
+    .interval-row label { font-size: 13px; font-weight: 600; color: var(--navy); white-space: nowrap; }
+
+    .interval-row input {
+      width: 80px; padding: 8px 10px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: 'Tajawal', sans-serif;
+      text-align: center; outline: none;
     }
 
-    @media(max-width:640px){
-      .side{display:flex}
-      .bottom-stats{grid-template-columns:1fr}
-      .mini-grid{grid-template-columns:1fr}
-      .actions{grid-template-columns:1fr}
-      .hero{align-items:flex-start;gap:14px}
-      .hero h2{font-size:24px}
+    .interval-row input:focus { border-color: var(--navy); }
+    .interval-row small { font-size: 12px; color: var(--muted); }
+
+    /* ===== PERF ===== */
+    .perf-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+      margin-top: 10px;
+    }
+
+    .perf-box {
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px;
+    }
+
+    .perf-box .perf-label { font-size: 11px; color: var(--muted); }
+    .perf-box .perf-val   { font-size: 17px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+
+    pre.perf-raw {
+      font-family: monospace; font-size: 11px;
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px;
+      overflow: auto; max-height: 120px;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1000px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .cam-controls { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">🛡️</div>
-      <div>
-        <h1>جامعة حائل</h1>
-        <p>نظام تسجيل وجوه الطلاب</p>
-      </div>
+
+<!-- Header -->
+<header class="top-header">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <div>
+      <div class="logo-text">جامعة حائل</div>
+      <div class="logo-sub">نظام الحضور والغياب</div>
     </div>
+  </div>
+  <a class="back-btn" href="/admin/dashboard">← العودة للوحة الأدمن</a>
+</header>
 
-    <nav class="nav">
-      <a href="/admin/dashboard">الرئيسية 🏠</a>
-      <a href="/admin/students" class="active">الطلاب 👥</a>
-      <a href="/admin/attendance">التقارير 📊</a>
-      <a href="/admin/courses">الإعدادات ⚙️</a>
-    </nav>
+<div class="page">
 
-    <div class="admin-mini">
-      <div class="avatar">م</div>
-      <div>
-        <b>مرحباً، المدير</b>
-        <span>لوحة التحكم</span>
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-info">
+        <small>إجمالي الطلاب المسجلين</small>
+        <b>1,248</b>
+        <span>هذا الفصل الدراسي</span>
       </div>
+      <div class="stat-icon blue">👥</div>
     </div>
-  </header>
-
-  <main class="page">
-    <section class="hero">
-      <div>
-        <h2>تسجيل بيانات الطالب (بداية الترم)</h2>
-        <p>قم بتسجيل وجه الطالب وبياناته لإنشاء ملف تعريفي دقيق وآمن باستخدام تقنية التعرف على الوجه</p>
+    <div class="stat-card">
+      <div class="stat-info">
+        <small>تسجيلات اليوم</small>
+        <b>86</b>
+        <span>تم تسجيلها بنجاح</span>
       </div>
-      <div class="hero-icon">🧿</div>
-    </section>
+      <div class="stat-icon green">✅</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-info">
+        <small>دقة التعرف</small>
+        <b>98.7%</b>
+        <span>متوسط دقة النموذج</span>
+      </div>
+      <div class="stat-icon gold">🎯</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-info">
+        <small>آخر تحديث للنموذج</small>
+        <b>مايو 25</b>
+        <span>منذ ساعتين</span>
+      </div>
+      <div class="stat-icon navy">🔁</div>
+    </div>
+  </div>
 
-    <section class="layout">
-      <aside class="side">
-        <div class="card last-card">
-          <div class="card-title">آخر لقطة <span>🖼️</span></div>
-          <div class="preview" id="preview">
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Sidebar -->
+    <div>
+
+      <!-- Preview -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">🖼️</div>
+          <div>
+            <h3>آخر لقطة</h3>
+            <p>معاينة الصورة الملتقطة</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="preview-wrap" id="preview">
             <span>لم يتم التقاط صور بعد</span>
           </div>
-          <div class="capture-ok">
-            <span class="ok-dot">✓</span>
-            <div>
-              <div>بانتظار التقاط الصورة</div>
-              <small>سيتم عرض آخر لقطة هنا</small>
-            </div>
+          <div class="capture-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="captureStatusText">بانتظار الالتقاط</span>
           </div>
         </div>
+      </div>
 
-        <div class="card">
-          <div class="card-title">نصائح للحصول على أفضل نتيجة <span>💡</span></div>
+      <!-- Tips -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">💡</div>
+          <div>
+            <h3>نصائح للحصول على أفضل نتيجة</h3>
+            <p>اتبع هذه الإرشادات لدقة أعلى</p>
+          </div>
+        </div>
+        <div class="card-body">
           <ul class="tips-list">
-            <li>إضاءة أمامية جيدة وتجنب الإضاءة من الخلف <span>☀️</span></li>
-            <li>غيّر الزوايا قليلاً يمين/يسار/فوق/تحت <span>🔄</span></li>
-            <li>بدون نظارة شمسية أو قبعة أثناء التسجيل <span>👓</span></li>
-            <li>حافظ على وجهك واضحاً داخل الإطار <span>🎯</span></li>
-            <li>لا تحرك رأسك كثيراً أثناء الالتقاط <span>🚫</span></li>
+            <li class="tip-item"><span class="tip-icon">☀️</span> إضاءة أمامية جيدة، تجنب الضوء من الخلف</li>
+            <li class="tip-item"><span class="tip-icon">🔄</span> غيّر الزوايا يمين / يسار / فوق / تحت</li>
+            <li class="tip-item"><span class="tip-icon">👓</span> بدون نظارة شمسية أو قبعة</li>
+            <li class="tip-item"><span class="tip-icon">🎯</span> حافظ على وجهك داخل الإطار</li>
+            <li class="tip-item"><span class="tip-icon">🚫</span> لا تحرك رأسك كثيراً أثناء الالتقاط</li>
           </ul>
         </div>
+      </div>
 
-        <div class="card security-card">
-          <div>
-            <h3>الأمان والخصوصية</h3>
-            <p>نحافظ على بياناتك بأعلى معايير الأمان</p>
-          </div>
-          <div class="lock">🔒</div>
-        </div>
-      </aside>
+    </div>
 
-      <section class="main">
-        <div class="card form-card">
-          <div class="section-head">
-            <h3>بيانات الطالب</h3>
-            <span>👤</span>
-          </div>
+    <!-- Main Content -->
+    <div>
 
-          <label>اسم الطالب</label>
-          <input type="text" id="name" placeholder="مثال: أحمد محمد" required>
+      <!-- Form + Camera row -->
+      <div style="display:grid; grid-template-columns: 1fr 1.1fr; gap: 20px; align-items: start;">
 
-          <label>الرقم الجامعي</label>
-          <input type="text" id="university_id" placeholder="مثال: 441234567" required>
-
-          <div class="mini-grid">
-            <div class="info-tile">
-              <div>المطلوب <small><b id="needCount">...</b> صورة</small></div>
-              <span>📷</span>
-            </div>
-            <div class="info-tile green">
-              <div>الوضع <small>Auto Capture + Face Box</small></div>
-              <span>🧿</span>
+        <!-- Student Form -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon">👤</div>
+            <div>
+              <h3>بيانات الطالب</h3>
+              <p>أدخل معلومات الطالب أدناه</p>
             </div>
           </div>
+          <div class="card-body">
 
-          <div class="notice">سيتم تدريب النموذج على عدة زوايا لزيادة دقة التعرف.</div>
+            <div class="form-group">
+              <label>اسم الطالب <span>*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">👤</span>
+                <input type="text" id="name" placeholder="مثال: أحمد محمد" required>
+              </div>
+            </div>
 
-          <div id="saveMsg"></div>
+            <div class="form-group">
+              <label>الرقم الجامعي <span>*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">🎓</span>
+                <input type="text" id="university_id" placeholder="مثال: 441234567" required>
+              </div>
+            </div>
 
-          <div class="kpi" id="perfKpi" style="display:none">
-            <div class="boxx"><div class="t">ms_total</div><div class="v" id="k_ms_total">-</div></div>
-            <div class="boxx"><div class="t">min_dist</div><div class="v" id="k_min_dist">-</div></div>
-            <div class="boxx"><div class="t">recognized</div><div class="v" id="k_rec">-</div></div>
-          </div>
+            <div class="info-tiles">
+              <div class="info-tile blue">
+                <div>
+                  <div class="tile-label">الصور المطلوبة</div>
+                  <div class="tile-value"><span id="needCount">...</span> صورة</div>
+                </div>
+                <div class="tile-icon">📷</div>
+              </div>
+              <div class="info-tile green">
+                <div>
+                  <div class="tile-label">وضع الالتقاط</div>
+                  <div class="tile-value">تلقائي</div>
+                </div>
+                <div class="tile-icon">🧿</div>
+              </div>
+            </div>
 
-          <pre class="stat" id="perfBox" style="display:none;margin-top:10px"></pre>
-        </div>
+            <div class="notice">
+              سيتم تدريب النموذج على عدة زوايا لزيادة دقة التعرف على الوجه.
+            </div>
 
-        <div class="card camera-card">
-          <div class="section-head">
-            <h3 id="instruction">معاينة الكاميرا المباشرة</h3>
-            <span>📷</span>
-          </div>
+            <button class="save-btn" id="btnSave" type="button">✅ حفظ البيانات والوجه</button>
+            <button class="test-btn" id="btnTest" type="button" disabled>🧪 اختبار سرعة التعرف</button>
 
-          <div class="video-wrap">
-            <video id="video" autoplay playsinline></video>
-            <canvas id="overlay"></canvas>
-            <div class="face-guide"></div>
-          </div>
+            <div class="save-msg" id="saveMsg"></div>
 
-          <canvas id="canvas" width="640" height="480"></canvas>
+            <!-- Perf -->
+            <div class="perf-grid" id="perfKpi" style="display:none">
+              <div class="perf-box">
+                <div class="perf-label">ms_total</div>
+                <div class="perf-val" id="k_ms_total">-</div>
+              </div>
+              <div class="perf-box">
+                <div class="perf-label">min_dist</div>
+                <div class="perf-val" id="k_min_dist">-</div>
+              </div>
+              <div class="perf-box">
+                <div class="perf-label">recognized</div>
+                <div class="perf-val" id="k_rec">-</div>
+              </div>
+            </div>
+            <pre class="perf-raw" id="perfBox" style="display:none"></pre>
 
-          <div class="actions">
-            <button class="btn2 danger" type="button" id="btnReset">إعادة 🔄</button>
-            <button class="btn2 alt" type="button" id="btnAuto">تشغيل تلقائي ▶️</button>
-            <button class="btn2" type="button" id="btnSnap">لقطة 📸</button>
-          </div>
-
-          <div class="counter-pill">
-            <span>الصور:</span>
-            <b><span id="counter">0</span> / <span id="total">0</span></b>
-            <span class="green-dot"></span>
-          </div>
-
-          <div class="interval">
-            <label>الفاصل (ثانية)</label>
-            <input type="number" id="intervalSec" value="1.2" step="0.1" min="0.4">
-            <p>كل ما قللت الفاصل أسرع، بس ممكن صور متشابهة.</p>
-          </div>
-        </div>
-
-        <div class="bottom-stats">
-          <div class="stat-card">
-            <div><small>إجمالي الطلاب المسجلين</small><b>1,248</b><small>هذا الفصل الدراسي</small></div>
-            <div class="stat-icon">👥</div>
-          </div>
-          <div class="stat-card">
-            <div><small>تسجيلات اليوم</small><b>86</b><small>تم تسجيلها بنجاح</small></div>
-            <div class="stat-icon">✅</div>
-          </div>
-          <div class="stat-card">
-            <div><small>دقة التعرف</small><b>98.7%</b><small>متوسط دقة النموذج</small></div>
-            <div class="stat-icon">🎯</div>
-          </div>
-          <div class="stat-card">
-            <div><small>آخر تحديث للنموذج</small><b>2025 مايو 25</b><small>منذ ساعتين</small></div>
-            <div class="stat-icon">🔁</div>
           </div>
         </div>
 
-        <div class="wide-actions">
-          <button class="wide-btn" type="button" id="btnSave">حفظ البيانات والوجه ✅<br><small>حفظ البيانات وبدء التدريب</small></button>
-          <button class="wide-btn blue" type="button" id="btnTest" disabled>اختبار سرعة التعرف 🧪<br><small>اختبار دقة وسرعة النموذج</small></button>
+        <!-- Camera -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon">📷</div>
+            <div>
+              <h3>الكاميرا المباشرة</h3>
+              <p>التقط وجه الطالب من زوايا متعددة</p>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div id="instruction">📸 انظر مباشرة للكاميرا</div>
+
+            <div class="video-wrap">
+              <video id="video" autoplay playsinline></video>
+              <canvas id="overlay"></canvas>
+              <div class="face-guide"></div>
+            </div>
+
+            <canvas id="canvas" width="640" height="480"></canvas>
+
+            <div class="cam-controls">
+              <button class="cam-btn danger" type="button" id="btnReset">🔄 إعادة</button>
+              <button class="cam-btn blue"  type="button" id="btnAuto">▶️ تلقائي</button>
+              <button class="cam-btn navy"  type="button" id="btnSnap">📸 لقطة</button>
+            </div>
+
+            <div class="counter-row">
+              <span class="counter-label">الصور الملتقطة</span>
+              <span class="counter-value"><span id="counter">0</span> / <span id="total">0</span></span>
+            </div>
+
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+
+            <div style="margin-top: 14px;">
+              <div class="interval-row">
+                <label>الفاصل الزمني</label>
+                <input type="number" id="intervalSec" value="1.2" step="0.1" min="0.4">
+                <small>ثانية بين كل لقطة</small>
+              </div>
+            </div>
+
+          </div>
         </div>
-      </section>
-    </section>
-  </main>
+
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const video       = document.getElementById("video");
+const canvas      = document.getElementById("canvas");
+const ctx         = canvas.getContext("2d");
+const overlay     = document.getElementById("overlay");
+const octx        = overlay.getContext("2d");
 
-const overlay = document.getElementById("overlay");
-const octx = overlay.getContext("2d");
+const needCountEl     = document.getElementById("needCount");
+const counterEl       = document.getElementById("counter");
+const totalEl         = document.getElementById("total");
+const instructionEl   = document.getElementById("instruction");
+const previewEl       = document.getElementById("preview");
+const saveMsgEl       = document.getElementById("saveMsg");
+const progressBar     = document.getElementById("progressBar");
+const statusDot       = document.getElementById("statusDot");
+const captureStatusText = document.getElementById("captureStatusText");
 
-const needCountEl = document.getElementById("needCount");
-const counterEl = document.getElementById("counter");
-const totalEl = document.getElementById("total");
-const instructionEl = document.getElementById("instruction");
-const previewEl = document.getElementById("preview");
-const saveMsgEl = document.getElementById("saveMsg");
-
-const btnSnap = document.getElementById("btnSnap");
-const btnAuto = document.getElementById("btnAuto");
+const btnSnap  = document.getElementById("btnSnap");
+const btnAuto  = document.getElementById("btnAuto");
 const btnReset = document.getElementById("btnReset");
-const btnSave = document.getElementById("btnSave");
-const btnTest = document.getElementById("btnTest");
+const btnSave  = document.getElementById("btnSave");
+const btnTest  = document.getElementById("btnTest");
 const intervalSecEl = document.getElementById("intervalSec");
 
-const perfBox = document.getElementById("perfBox");
-const perfKpi = document.getElementById("perfKpi");
+const perfBox  = document.getElementById("perfBox");
+const perfKpi  = document.getElementById("perfKpi");
 const k_ms_total = document.getElementById("k_ms_total");
 const k_min_dist = document.getElementById("k_min_dist");
-const k_rec = document.getElementById("k_rec");
+const k_rec      = document.getElementById("k_rec");
 
 let images = [];
 let targetCount = 5;
 let autoTimer = null;
 let busy = false;
-
 let clearTimer = null;
 let lastTestAt = 0;
-
 let lastTiny = null;
 const SIMILARITY_THRESHOLD = 6.0;
 
@@ -716,24 +726,32 @@ const instructions = [
   "👀 ابعد شوي"
 ];
 
-function setCounter(){
+function setCounter() {
   counterEl.textContent = images.length;
-  totalEl.textContent = targetCount;
+  totalEl.textContent   = targetCount;
+  const pct = targetCount > 0 ? Math.min((images.length / targetCount) * 100, 100) : 0;
+  progressBar.style.width = pct + "%";
+
   const idx = Math.min(images.length, instructions.length - 1);
   instructionEl.textContent = (images.length >= targetCount)
     ? "✅ تم التقاط جميع الصور"
     : (instructions[idx] || "📸 غيّر زاوية الوجه");
+
+  if (images.length > 0) {
+    statusDot.classList.add("active");
+    captureStatusText.textContent = `تم التقاط ${images.length} صورة`;
+  }
 }
 
-function showPreview(dataUrl){
+function showPreview(dataUrl) {
   previewEl.innerHTML = "";
   const img = document.createElement("img");
   img.src = dataUrl;
   previewEl.appendChild(img);
 }
 
-function syncOverlaySize(){
-  const w = video.videoWidth || 640;
+function syncOverlaySize() {
+  const w = video.videoWidth  || 640;
   const h = video.videoHeight || 480;
   overlay.width = w;
   overlay.height = h;
@@ -743,323 +761,226 @@ video.addEventListener("loadedmetadata", syncOverlaySize);
 video.addEventListener("loadeddata", syncOverlaySize);
 window.addEventListener("resize", syncOverlaySize);
 
-function clearOverlay(){
-  octx.clearRect(0,0,overlay.width,overlay.height);
-}
+function clearOverlay() { octx.clearRect(0, 0, overlay.width, overlay.height); }
 
-function roundedRect(ctx, x, y, w, h, r){
+function roundedRect(c, x, y, w, h, r) {
   const radius = Math.min(r, w/2, h/2);
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.arcTo(x + w, y, x + w, y + h, radius);
-  ctx.arcTo(x + w, y + h, x, y + h, radius);
-  ctx.arcTo(x, y + h, x, y, radius);
-  ctx.arcTo(x, y, x + w, y, radius);
-  ctx.closePath();
+  c.beginPath();
+  c.moveTo(x+radius, y);
+  c.arcTo(x+w, y, x+w, y+h, radius);
+  c.arcTo(x+w, y+h, x, y+h, radius);
+  c.arcTo(x, y+h, x, y, radius);
+  c.arcTo(x, y, x+w, y, radius);
+  c.closePath();
 }
 
-function drawFaceBox(box, labelText, ok=true){
+function drawFaceBox(box, labelText, ok=true) {
   syncOverlaySize();
   clearOverlay();
-
-  const mainColor = ok ? "#22c55e" : "#ef4444";
-
+  const color = ok ? "#22c55e" : "#ef4444";
   octx.save();
-  octx.shadowColor = "rgba(0,0,0,0.35)";
-  octx.shadowBlur = 10;
-  octx.shadowOffsetY = 3;
-
-  octx.lineWidth = 4;
-  octx.strokeStyle = mainColor;
-  roundedRect(octx, box[0], box[1], box[2], box[3], 14);
+  octx.lineWidth = 3;
+  octx.strokeStyle = color;
+  roundedRect(octx, box[0], box[1], box[2], box[3], 12);
   octx.stroke();
-
-  octx.shadowColor = "transparent";
-  octx.lineWidth = 1;
-  octx.strokeStyle = "rgba(255,255,255,0.65)";
-  roundedRect(octx, box[0] + 1, box[1] + 1, box[2] - 2, box[3] - 2, 13);
-  octx.stroke();
-
-  if (labelText){
-    octx.font = "600 16px Arial";
-
-    const padX = 12;
-    const textW = octx.measureText(labelText).width;
-    const boxW = textW + padX * 2 + 14;
-    const boxH = 34;
-
-    let lx = box[0];
-    let ly = box[1] - boxH - 10;
-    if (ly < 6) ly = box[1] + 8;
-    if (lx + boxW > overlay.width - 6) lx = overlay.width - boxW - 6;
-
-    octx.fillStyle = "rgba(17,24,39,0.82)";
-    octx.strokeStyle = mainColor;
-    octx.lineWidth = 2;
-    roundedRect(octx, lx, ly, boxW, boxH, 10);
-    octx.fill();
-    octx.stroke();
-
-    octx.fillStyle = mainColor;
-    octx.beginPath();
-    octx.arc(lx + 14, ly + boxH/2, 5, 0, Math.PI*2);
-    octx.fill();
-
+  if (labelText) {
+    octx.font = "600 14px Arial";
+    const tw = octx.measureText(labelText).width;
+    const bw = tw + 24; const bh = 30;
+    let lx = box[0]; let ly = box[1] - bh - 8;
+    if (ly < 4) ly = box[1] + 6;
+    octx.fillStyle = "rgba(11,60,93,0.85)";
+    octx.strokeStyle = color;
+    octx.lineWidth = 1.5;
+    roundedRect(octx, lx, ly, bw, bh, 8);
+    octx.fill(); octx.stroke();
     octx.fillStyle = "#fff";
     octx.textAlign = "center";
     octx.textBaseline = "middle";
-    const leftPadForDot = 26;
-    const textAreaX = lx + leftPadForDot;
-    const textAreaW = boxW - leftPadForDot;
-    octx.fillText(labelText, textAreaX + textAreaW/2, ly + boxH/2);
+    octx.fillText(labelText, lx + bw/2, ly + bh/2);
     octx.textAlign = "start";
     octx.textBaseline = "alphabetic";
   }
-
   octx.restore();
-
   if (clearTimer) clearTimeout(clearTimer);
   clearTimer = setTimeout(clearOverlay, 2000);
 }
 
-async function init(){
-  try{
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio:false });
+async function init() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 }, audio:false });
     video.srcObject = stream;
-  }catch(e){
+  } catch(e) {
     alert("❌ لم يتم تشغيل الكاميرا");
     console.error(e);
   }
-
-  try{
-    const res = await fetch("/admin/register_student_face/config");
+  try {
+    const res  = await fetch("/admin/register_student_face/config");
     const data = await res.json();
-    if (data && data.ok && data.min_images){
-      targetCount = parseInt(data.min_images);
-    }
-  }catch(e){}
-
+    if (data && data.ok && data.min_images) targetCount = parseInt(data.min_images);
+  } catch(e) {}
   needCountEl.textContent = targetCount;
   setCounter();
 }
 
-function tinyFingerprint(){
+function tinyFingerprint() {
   const tmp = document.createElement("canvas");
-  tmp.width = 32;
-  tmp.height = 24;
-  const tctx = tmp.getContext("2d");
-  tctx.drawImage(video, 0, 0, 32, 24);
-  const imgData = tctx.getImageData(0,0,32,24).data;
-  const arr = new Uint8Array(32*24);
-  let j=0;
-  for (let i=0;i<imgData.length;i+=4){
-    const r=imgData[i], g=imgData[i+1], b=imgData[i+2];
-    arr[j++] = (r*0.299 + g*0.587 + b*0.114) | 0;
-  }
+  tmp.width = 32; tmp.height = 24;
+  const tc = tmp.getContext("2d");
+  tc.drawImage(video, 0, 0, 32, 24);
+  const d = tc.getImageData(0,0,32,24).data;
+  const arr = new Uint8Array(32*24); let j=0;
+  for (let i=0; i<d.length; i+=4) arr[j++] = (d[i]*.299 + d[i+1]*.587 + d[i+2]*.114)|0;
   return arr;
 }
 
-function diffTiny(a,b){
+function diffTiny(a, b) {
   if (!a || !b) return 999;
-  let sum=0;
-  for (let i=0;i<a.length;i++){
-    sum += Math.abs(a[i]-b[i]);
-  }
-  return sum / a.length;
+  let s=0;
+  for (let i=0; i<a.length; i++) s += Math.abs(a[i]-b[i]);
+  return s / a.length;
 }
 
-async function runRecognitionTestAndDraw(){
+async function runRecognitionTestAndDraw() {
   const now = Date.now();
   if (now - lastTestAt < 700) return;
   lastTestAt = now;
-
-  canvas.width = 640;
-  canvas.height = 480;
+  canvas.width=640; canvas.height=480;
   ctx.drawImage(video, 0, 0, 640, 480);
   const image = canvas.toDataURL("image/jpeg", 0.75);
-
-  try{
-    const res = await fetch("/admin/recognition_test", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
+  try {
+    const res  = await fetch("/admin/recognition_test", {
+      method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ image })
     });
     const data = await res.json();
-
     const perf = data.perf || {};
     perfKpi.style.display = "grid";
-    k_ms_total.textContent = (perf.ms_total ?? "-");
-    k_min_dist.textContent = (perf.min_dist ?? "-");
-    k_rec.textContent = (data.recognized ? "YES ✅" : "NO ❌");
-
-    if (data.box && Array.isArray(data.box)){
+    k_ms_total.textContent = perf.ms_total ?? "-";
+    k_min_dist.textContent = perf.min_dist ?? "-";
+    k_rec.textContent = data.recognized ? "YES ✅" : "NO ❌";
+    if (data.box && Array.isArray(data.box)) {
       syncOverlaySize();
-      const sx = overlay.width / 640;
-      const sy = overlay.height / 480;
-      const b = [
-        data.box[0]*sx, data.box[1]*sy,
-        data.box[2]*sx, data.box[3]*sy
-      ];
-      const label = data.recognized ? "Face OK ✅" : "Unknown ❌";
-      drawFaceBox(b, label, data.recognized);
+      const sx = overlay.width/640; const sy = overlay.height/480;
+      drawFaceBox([data.box[0]*sx, data.box[1]*sy, data.box[2]*sx, data.box[3]*sy],
+        data.recognized ? "Face OK ✅" : "Unknown ❌", data.recognized);
     }
-  }catch(e){}
+  } catch(e) {}
 }
 
-function captureOne(){
-  if (busy) return;
-  if (!video.videoWidth) return;
-  if (images.length >= targetCount) return;
-
+function captureOne() {
+  if (busy || !video.videoWidth || images.length >= targetCount) return;
   busy = true;
-
   const fp = tinyFingerprint();
-  const d = diffTiny(fp, lastTiny);
-  if (d < SIMILARITY_THRESHOLD){
-    saveMsgEl.textContent = "⚠️ صورة مشابهة جدًا.. حرّك الوجه شوي";
-    busy = false;
-    return;
+  if (diffTiny(fp, lastTiny) < SIMILARITY_THRESHOLD) {
+    saveMsgEl.textContent = "⚠️ صورة مشابهة.. حرّك الوجه شوي";
+    saveMsgEl.style.color = "";
+    busy = false; return;
   }
   lastTiny = fp;
-
-  canvas.width = 640;
-  canvas.height = 480;
+  canvas.width=640; canvas.height=480;
   ctx.drawImage(video, 0, 0, 640, 480);
   const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
-
   images.push(dataUrl);
   showPreview(dataUrl);
   setCounter();
-
   runRecognitionTestAndDraw();
-
   busy = false;
-
   if (images.length >= targetCount) stopAuto();
 }
 
-function startAuto(){
+function startAuto() {
   if (autoTimer) return;
   let sec = parseFloat(intervalSecEl.value || "1.2");
   sec = Math.max(0.4, sec);
-
-  btnAuto.textContent = "إيقاف التلقائي ⏸️";
-  autoTimer = setInterval(() => {
-    if (images.length < targetCount) captureOne();
-  }, sec * 1000);
+  btnAuto.textContent = "⏸️ إيقاف";
+  autoTimer = setInterval(() => { if (images.length < targetCount) captureOne(); }, sec * 1000);
 }
 
-function stopAuto(){
+function stopAuto() {
   if (autoTimer) clearInterval(autoTimer);
   autoTimer = null;
-  btnAuto.textContent = "تشغيل تلقائي ▶️";
+  btnAuto.textContent = "▶️ تلقائي";
 }
 
-function resetAll(){
+function resetAll() {
   stopAuto();
-  images = [];
-  lastTiny = null;
-
-  previewEl.innerHTML = `<span>لم يتم التقاط صور بعد</span>`;
+  images = []; lastTiny = null;
+  previewEl.innerHTML = "<span>لم يتم التقاط صور بعد</span>";
   saveMsgEl.textContent = "";
   perfBox.style.display = "none";
   perfKpi.style.display = "none";
   btnTest.disabled = true;
-
+  statusDot.classList.remove("active");
+  captureStatusText.textContent = "بانتظار الالتقاط";
   clearOverlay();
   setCounter();
 }
 
-async function saveStudent(){
+async function saveStudent() {
   const name = document.getElementById("name").value.trim();
   const uid  = document.getElementById("university_id").value.trim();
-
-  if (!name || !uid){
-    alert("❌ أدخل اسم الطالب والرقم الجامعي");
-    return;
-  }
-  if (images.length < targetCount){
-    alert(`❌ لازم ${targetCount} صور`);
-    return;
-  }
-
+  if (!name || !uid) { alert("❌ أدخل اسم الطالب والرقم الجامعي"); return; }
+  if (images.length < targetCount) { alert(`❌ لازم ${targetCount} صور`); return; }
   btnSave.disabled = true;
   saveMsgEl.textContent = "⏳ جاري الحفظ...";
-  perfBox.style.display = "none";
-
-  try{
-    const res = await fetch("/admin/register_student_face", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  saveMsgEl.style.color = "";
+  try {
+    const res  = await fetch("/admin/register_student_face", {
+      method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ name, university_id: uid, images })
     });
-
     const data = await res.json();
-
     if (res.status === 400 && data.message && data.message.includes("مسجل")) {
-      saveMsgEl.textContent = "الطالب مسجل بالفعل";
-      saveMsgEl.style.color = "red";
+      saveMsgEl.textContent = "⚠️ الطالب مسجل بالفعل";
+      saveMsgEl.style.color = "var(--warning)";
     } else {
-      saveMsgEl.textContent = data.message || "✅ تم الحفظ";
-      saveMsgEl.style.color = "green";
+      saveMsgEl.textContent = data.message || "✅ تم الحفظ بنجاح";
+      saveMsgEl.style.color = "var(--success)";
       btnTest.disabled = false;
     }
-
-  }catch(e){
-    console.error(e);
+  } catch(e) {
     saveMsgEl.textContent = "❌ حصل خطأ أثناء الحفظ";
-  }finally{
+    saveMsgEl.style.color = "var(--danger)";
+  } finally {
     btnSave.disabled = false;
   }
 }
 
-async function testRecognition(){
+async function testRecognition() {
   if (!video.videoWidth) return;
-
-  canvas.width = 640;
-  canvas.height = 480;
+  canvas.width=640; canvas.height=480;
   ctx.drawImage(video, 0, 0, 640, 480);
   const image = canvas.toDataURL("image/jpeg", 0.8);
-
   btnTest.disabled = true;
   saveMsgEl.textContent = "🧪 جاري اختبار التعرف...";
   perfBox.style.display = "none";
   perfKpi.style.display = "none";
-
-  try{
-    const res = await fetch("/admin/recognition_test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+  try {
+    const res  = await fetch("/admin/recognition_test", {
+      method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ image })
     });
     const data = await res.json();
-
     const perf = data.perf || {};
     perfKpi.style.display = "grid";
     perfBox.style.display = "block";
-
-    k_ms_total.textContent = (perf.ms_total ?? "-");
-    k_min_dist.textContent = (perf.min_dist ?? "-");
-    k_rec.textContent = (data.recognized ? "YES ✅" : "NO ❌");
-
-    perfBox.textContent = JSON.stringify(data, null, 2);
-    saveMsgEl.textContent = "✅ انتهى الاختبار";
-
-    if (data.box && Array.isArray(data.box)){
+    k_ms_total.textContent = perf.ms_total ?? "-";
+    k_min_dist.textContent = perf.min_dist ?? "-";
+    k_rec.textContent      = data.recognized ? "YES ✅" : "NO ❌";
+    perfBox.textContent    = JSON.stringify(data, null, 2);
+    saveMsgEl.textContent  = "✅ انتهى الاختبار";
+    saveMsgEl.style.color  = "var(--success)";
+    if (data.box && Array.isArray(data.box)) {
       syncOverlaySize();
-      const sx = overlay.width / 640;
-      const sy = overlay.height / 480;
-      const b = [
-        data.box[0]*sx, data.box[1]*sy,
-        data.box[2]*sx, data.box[3]*sy
-      ];
-      drawFaceBox(b, data.recognized ? "Face OK ✅" : "Unknown ❌", data.recognized);
+      const sx = overlay.width/640; const sy = overlay.height/480;
+      drawFaceBox([data.box[0]*sx, data.box[1]*sy, data.box[2]*sx, data.box[3]*sy],
+        data.recognized ? "Face OK ✅" : "Unknown ❌", data.recognized);
     }
-
-  }catch(e){
-    console.error(e);
-    saveMsgEl.textContent = "❌ فشل الاختبار (تأكد من /admin/recognition_test)";
-  }finally{
+  } catch(e) {
+    saveMsgEl.textContent = "❌ فشل الاختبار";
+    saveMsgEl.style.color = "var(--danger)";
+  } finally {
     btnTest.disabled = false;
   }
 }
