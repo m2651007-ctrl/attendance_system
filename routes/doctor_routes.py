@@ -30,7 +30,7 @@ def register_doctor_routes(app):
             conn.close()
 
             if d and hashlib.sha256(password.encode()).hexdigest() == d["password_hash"]:
-                session["doctor_id"] = d["doctor_id"]
+                session["doctor_id"]   = d["doctor_id"]
                 session["doctor_name"] = d["name"]
                 return redirect("/doctor/dashboard")
 
@@ -46,7 +46,7 @@ def register_doctor_routes(app):
             return redirect("/doctor/login")
 
         conn = get_db()
-        cur = conn.cursor()
+        cur  = conn.cursor()
 
         cur.execute("SELECT COUNT(*) FROM sessions WHERE doctor_id=?", (session["doctor_id"],))
         total_sessions = cur.fetchone()[0]
@@ -82,28 +82,32 @@ def register_doctor_routes(app):
         conn.close()
 
         return render_template("doctor/doctor_dashboard.html",
-            doctor_name=session["doctor_name"],
-            total_sessions=total_sessions,
-            total_attendance=total_attendance,
-            total_deprived=total_deprived,
-            today_present=today_present
+            doctor_name      = session["doctor_name"],
+            total_sessions   = total_sessions,
+            total_attendance = total_attendance,
+            total_deprived   = total_deprived,
+            today_present    = today_present
         )
 
 
-    # ===================== COURSES — عرض فقط، التسجيل من الأدمن =====================
+    # ===================== COURSES =====================
     @app.route("/doctor/courses")
     def doctor_courses():
         if "doctor_id" not in session:
             return redirect("/doctor/login")
 
         conn = get_db()
-        cur = conn.cursor()
+        cur  = conn.cursor()
 
         cur.execute("""
-            SELECT session_id, course_name,
+            SELECT session_id,
+                   course_name,
                    COALESCE(session_number, '')  AS session_number,
-                   COALESCE(schedule_days, '')   AS schedule_days,
-                   COALESCE(schedule_time, '')   AS schedule_time
+                   COALESCE(days, '')             AS schedule_days,
+                   COALESCE(start_time, '') || ' - ' || COALESCE(end_time, '') AS schedule_time,
+                   COALESCE(room_name, '')        AS room_name,
+                   COALESCE(room_code, '')        AS room_code,
+                   COALESCE(capacity, 0)          AS capacity
             FROM sessions
             WHERE doctor_id=?
             ORDER BY course_name
@@ -122,13 +126,15 @@ def register_doctor_routes(app):
             return redirect("/doctor/login")
 
         conn = get_db()
-        cur = conn.cursor()
+        cur  = conn.cursor()
 
         cur.execute("""
-            SELECT session_id, course_name,
-                   COALESCE(session_number, '') AS session_number,
-                   COALESCE(schedule_days, '')  AS schedule_days,
-                   COALESCE(schedule_time, '')  AS schedule_time
+            SELECT session_id,
+                   course_name,
+                   COALESCE(session_number, '')  AS session_number,
+                   COALESCE(days, '')             AS schedule_days,
+                   COALESCE(start_time, '') || ' - ' || COALESCE(end_time, '') AS schedule_time,
+                   COALESCE(room_name, '')        AS room_name
             FROM sessions
             WHERE doctor_id=?
             ORDER BY course_name
@@ -146,7 +152,7 @@ def register_doctor_routes(app):
         if "doctor_id" not in session:
             return jsonify({"ok": False})
 
-        data = request.json
+        data       = request.json
         image_data = data["image"]
         session_id = data["session_id"]
 
@@ -166,10 +172,10 @@ def register_doctor_routes(app):
 
         ids, embs = _get_cached_students()
         dists = np.linalg.norm(embs - emb, axis=1)
-        best  = np.argmin(dists)
+        best  = int(np.argmin(dists))
 
         if dists[best] > RECOG_THRESHOLD:
-            return jsonify({"recognized": False, "box": [x, y, w, h]})
+            return jsonify({"recognized": False, "box": [int(x), int(y), int(w), int(h)]})
 
         uid = ids[best]
 
@@ -187,10 +193,24 @@ def register_doctor_routes(app):
 
         new_record = False
         if not existing:
+            # تحديد حاضر أو متأخر
+            cur.execute("SELECT start_time FROM sessions WHERE session_id=?", (session_id,))
+            s_row = cur.fetchone()
+            status = "Present"
+            if s_row and s_row["start_time"]:
+                try:
+                    now = datetime.datetime.now()
+                    h_, m_ = map(int, s_row["start_time"].split(":"))
+                    start_dt = now.replace(hour=h_, minute=m_, second=0, microsecond=0)
+                    if (now - start_dt).total_seconds() / 60 > 15:
+                        status = "Late"
+                except Exception:
+                    pass
+
             cur.execute("""
                 INSERT INTO attendance (session_id, university_id, check_in, status)
-                VALUES (?, ?, ?, 'Present')
-            """, (session_id, uid, datetime.datetime.now()))
+                VALUES (?, ?, ?, ?)
+            """, (session_id, uid, datetime.datetime.now(), status))
             conn.commit()
             new_record = True
 
@@ -199,10 +219,10 @@ def register_doctor_routes(app):
         return jsonify({
             "recognized": True,
             "new_record":  new_record,
-            "box":         [x, y, w, h],
+            "box":         [int(x), int(y), int(w), int(h)],
             "student": {
                 "university_id":   uid,
-                "name":            student["name"] if student else uid,
+                "name":            student["name"]            if student else uid,
                 "academic_number": student["academic_number"] if student else ""
             }
         })
@@ -234,7 +254,7 @@ def register_doctor_routes(app):
             name            = r["name"] or r["university_id"],
             academic_number = r["academic_number"] or "",
             university_id   = r["university_id"],
-            check_in        = r["check_in"] or "",
+            check_in        = r["check_in"]  or "",
             check_out       = r["check_out"] or "",
             status          = r["status"]
         ) for r in cur.fetchall()]
@@ -280,20 +300,24 @@ def register_doctor_routes(app):
         existing = cur.fetchone()
 
         if existing:
-            cur.execute("UPDATE attendance SET status=? WHERE session_id=? AND university_id=? AND DATE(check_in)=?",
-                        (status, session_id, university_id, today))
+            cur.execute("""
+                UPDATE attendance SET status=?
+                WHERE session_id=? AND university_id=? AND DATE(check_in)=?
+            """, (status, session_id, university_id, today))
         else:
-            cur.execute("INSERT INTO attendance (session_id, university_id, check_in, status) VALUES (?,?,?,?)",
-                        (session_id, university_id, datetime.datetime.now(), status))
+            cur.execute("""
+                INSERT INTO attendance (session_id, university_id, check_in, status)
+                VALUES (?, ?, ?, ?)
+            """, (session_id, university_id, datetime.datetime.now(), status))
 
         conn.commit()
         conn.close()
 
         return jsonify({"ok": True, "student": {
-            "name": student["name"],
+            "name":            student["name"],
             "academic_number": student["academic_number"],
-            "university_id": university_id,
-            "status": status
+            "university_id":   university_id,
+            "status":          status
         }})
 
 
@@ -307,20 +331,22 @@ def register_doctor_routes(app):
         if not session_id:
             return jsonify({"ok": False})
 
-        conn = get_db()
-        cur  = conn.cursor()
+        conn  = get_db()
+        cur   = conn.cursor()
         today = datetime.date.today().isoformat()
 
-        # حضور اليوم
-        cur.execute("SELECT COUNT(*) FROM attendance WHERE session_id=? AND DATE(check_in)=? AND status='Present'",
-                    (session_id, today))
+        cur.execute("""
+            SELECT COUNT(*) FROM attendance
+            WHERE session_id=? AND DATE(check_in)=? AND status='Present'
+        """, (session_id, today))
         present_today = cur.fetchone()[0]
 
-        cur.execute("SELECT COUNT(*) FROM attendance WHERE session_id=? AND DATE(check_in)=? AND status='Absent'",
-                    (session_id, today))
+        cur.execute("""
+            SELECT COUNT(*) FROM attendance
+            WHERE session_id=? AND DATE(check_in)=? AND status='Absent'
+        """, (session_id, today))
         absent_today = cur.fetchone()[0]
 
-        # إجمالي كل المحاضرات
         cur.execute("""
             SELECT COUNT(*) as total,
                    SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) as total_present,
@@ -328,11 +354,10 @@ def register_doctor_routes(app):
             FROM attendance WHERE session_id=?
         """, (session_id,))
         r = cur.fetchone()
-        total_all     = r["total"] or 1
+        total_all     = r["total"]         or 1
         total_present = r["total_present"] or 0
         total_absent  = r["total_absent"]  or 0
 
-        # المحرومون
         cur.execute("""
             SELECT COUNT(*) FROM (
                 SELECT university_id,
@@ -343,7 +368,6 @@ def register_doctor_routes(app):
         """, (session_id,))
         deprived = cur.fetchone()[0]
 
-        # اتجاه آخر 10 محاضرات
         cur.execute("""
             SELECT DATE(check_in) as day,
                    SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) as present,
@@ -354,7 +378,6 @@ def register_doctor_routes(app):
         trend = [{"day": r["day"], "present": r["present"], "absent": r["absent"]}
                  for r in cur.fetchall()]
 
-        # توزيع نسب الحضور لكل طالب (للرسم الدائري)
         cur.execute("""
             SELECT
                 SUM(CASE WHEN pct >= 75 THEN 1 ELSE 0 END) as excellent,
@@ -459,14 +482,23 @@ def register_doctor_routes(app):
         writer = csv.writer(output)
         writer.writerow(["الاسم","الرقم الأكاديمي","الرقم الجامعي","وقت الدخول","وقت الانصراف","الحالة"])
         for r in rows:
-            writer.writerow([r["name"] or r["university_id"], r["academic_number"] or "",
-                             r["university_id"], r["check_in"] or "", r["check_out"] or "", r["status"]])
+            writer.writerow([
+                r["name"] or r["university_id"],
+                r["academic_number"] or "",
+                r["university_id"],
+                r["check_in"]  or "",
+                r["check_out"] or "",
+                r["status"]
+            ])
 
         course_name = course["course_name"] if course else "attendance"
-        filename = f"attendance_{course_name}_{datetime.date.today()}.csv"
+        filename    = f"attendance_{course_name}_{datetime.date.today()}.csv"
 
-        return Response("\ufeff" + output.getvalue(), mimetype="text/csv",
-                        headers={"Content-Disposition": f"attachment; filename={filename}"})
+        return Response(
+            "\ufeff" + output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
 
 
     # ===================== CHECKOUT PAGE =====================
@@ -478,8 +510,13 @@ def register_doctor_routes(app):
         conn = get_db()
         cur  = conn.cursor()
         cur.execute("""
-            SELECT session_id, course_name, COALESCE(session_number,'') AS session_number
-            FROM sessions WHERE doctor_id=? ORDER BY course_name
+            SELECT session_id,
+                   course_name,
+                   COALESCE(session_number, '') AS session_number,
+                   COALESCE(room_name, '')      AS room_name
+            FROM sessions
+            WHERE doctor_id=?
+            ORDER BY course_name
         """, (session["doctor_id"],))
         sessions_list = cur.fetchall()
         conn.close()
@@ -493,7 +530,7 @@ def register_doctor_routes(app):
         if "doctor_id" not in session:
             return jsonify({"ok": False})
 
-        data = request.json
+        data       = request.json
         image_data = data["image"]
         session_id = data["session_id"]
 
@@ -513,10 +550,10 @@ def register_doctor_routes(app):
 
         ids, embs = _get_cached_students()
         dists = np.linalg.norm(embs - emb, axis=1)
-        best  = np.argmin(dists)
+        best  = int(np.argmin(dists))
 
         if dists[best] > RECOG_THRESHOLD:
-            return jsonify({"recognized": False, "box": [x, y, w, h]})
+            return jsonify({"recognized": False, "box": [int(x), int(y), int(w), int(h)]})
 
         uid = ids[best]
         conn = get_db()
@@ -533,19 +570,22 @@ def register_doctor_routes(app):
 
         checked_out = False
         if existing:
-            cur.execute("UPDATE attendance SET check_out=? WHERE id=?",
-                        (datetime.datetime.now(), existing["id"]))
+            cur.execute(
+                "UPDATE attendance SET check_out=? WHERE id=?",
+                (datetime.datetime.now(), existing["id"])
+            )
             conn.commit()
             checked_out = True
 
         conn.close()
+
         return jsonify({
             "recognized":  True,
             "checked_out": checked_out,
-            "box":         [x, y, w, h],
+            "box":         [int(x), int(y), int(w), int(h)],
             "student": {
                 "university_id":   uid,
-                "name":            student["name"] if student else uid,
+                "name":            student["name"]            if student else uid,
                 "academic_number": student["academic_number"] if student else ""
             }
         })
@@ -576,7 +616,7 @@ def register_doctor_routes(app):
             name            = r["name"] or r["university_id"],
             academic_number = r["academic_number"] or "",
             university_id   = r["university_id"],
-            check_in        = r["check_in"] or "",
+            check_in        = r["check_in"]  or "",
             check_out       = r["check_out"] or "—",
             status          = r["status"]
         ) for r in cur.fetchall()]
