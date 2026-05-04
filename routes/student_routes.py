@@ -1,428 +1,525 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>إدارة المقررات — جامعة حائل</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --navy:     #0b3c5d;
-            --navy-mid: #0d4f7a;
-            --navy-lt:  #1a6494;
-            --bg:       #f0f4f8;
-            --white:    #ffffff;
-            --text:     #1a2332;
-            --muted:    #64748b;
-            --danger:   #dc2626;
-            --danger-lt:#fee2e2;
-            --success:  #16a34a;
-            --success-lt:#dcfce7;
-            --border:   #dde4ed;
-            --shadow:   0 4px 24px rgba(11,60,93,.10);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+from flask import render_template, request, redirect, session, jsonify
+import sqlite3, datetime, os, smtplib, re
+from email.mime.text import MIMEText
 
-        /* HEADER */
-        .top-header {
-            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-lt) 100%);
-            padding: 0 40px; display: flex; align-items: center;
-            justify-content: space-between; height: 70px;
-            box-shadow: 0 2px 20px rgba(0,0,0,.2);
-            position: sticky; top: 0; z-index: 100;
-        }
-        .logo { display: flex; align-items: center; gap: 12px; color: var(--white); }
-        .logo-icon {
-            width: 42px; height: 42px; background: rgba(255,255,255,.12);
-            border-radius: 10px; display: flex; align-items: center;
-            justify-content: center; font-size: 22px;
-            border: 1px solid rgba(255,255,255,.2);
-        }
-        .logo-text { font-size: 18px; font-weight: 700; }
-        .logo-sub  { font-size: 12px; opacity: .7; font-weight: 400; }
-        .back-btn {
-            display: flex; align-items: center; gap: 8px;
-            color: rgba(255,255,255,.85); text-decoration: none;
-            font-size: 14px; font-weight: 500;
-            background: rgba(255,255,255,.1);
-            border: 1px solid rgba(255,255,255,.2);
-            border-radius: 9px; padding: 8px 16px; transition: all .2s;
-        }
-        .back-btn:hover { background: rgba(255,255,255,.2); color: var(--white); }
+from helpers import get_db, log_admin_activity
 
-        /* PAGE */
-        .page { max-width: 1300px; margin: 0 auto; padding: 36px 24px; display: flex; flex-direction: column; gap: 28px; }
 
-        /* CARD */
-        .card { background: var(--white); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
-        .card-header {
-            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
-            padding: 22px 28px; display: flex; align-items: center; gap: 12px;
-        }
-        .card-header-icon {
-            width: 40px; height: 40px; background: rgba(255,255,255,.15);
-            border-radius: 10px; display: flex; align-items: center;
-            justify-content: center; font-size: 18px;
-        }
-        .card-header h2 { color: var(--white); font-size: 17px; font-weight: 700; }
-        .card-header p  { color: rgba(255,255,255,.65); font-size: 12px; margin-top: 2px; }
-        .card-body { padding: 28px; }
+ABSENCE_WARNING_THRESHOLD = 0.15
+ABSENCE_DEPRIVATION_THRESHOLD = 0.25
+DEFAULT_COURSE_LECTURES = 33
 
-        /* FORM */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-full  { grid-column: 1 / -1; }
-        .form-group label { font-size: 13px; font-weight: 600; color: var(--navy); }
-        .form-group label span { color: var(--danger); margin-right: 2px; }
-        .input-wrap { position: relative; }
-        .input-icon {
-            position: absolute; right: 14px; top: 50%;
-            transform: translateY(-50%); font-size: 15px;
-            opacity: .45; pointer-events: none;
-        }
-        .form-group input,
-        .form-group select {
-            width: 100%; padding: 11px 42px 11px 14px;
-            border: 1.5px solid var(--border); border-radius: 10px;
-            font-size: 14px; font-family: 'Tajawal', sans-serif;
-            color: var(--text); background: #f8fafc;
-            transition: all .2s; outline: none;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: var(--navy); background: var(--white);
-            box-shadow: 0 0 0 3px rgba(11,60,93,.08);
-        }
-        .form-group input::placeholder { color: #a0aec0; }
 
-        /* DAYS */
-        .days-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
-        .day-label {
-            display: flex; align-items: center; gap: 5px;
-            background: #f1f5f9; border: 1.5px solid var(--border);
-            border-radius: 9px; padding: 8px 16px; cursor: pointer;
-            font-size: 13px; font-weight: 600; color: var(--text);
-            transition: all .2s; user-select: none;
-        }
-        .day-label input[type="checkbox"] { display: none; }
-        .day-label.checked { background: var(--navy); color: var(--white); border-color: var(--navy); }
+def _student_status_is_absent(status_value):
+    raw = (status_value or "").strip().lower()
+    if not raw:
+        return False
+    return any(t in raw for t in ["absent", "غياب", "غائب"])
 
-        .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
-            color: var(--white); border: none; border-radius: 12px;
-            padding: 13px; font-size: 15px; font-weight: 700;
-            font-family: 'Tajawal', sans-serif; cursor: pointer;
-            margin-top: 10px; transition: all .2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 4px 14px rgba(11,60,93,.3);
-        }
-        .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(11,60,93,.4); }
-        .submit-btn:active { transform: translateY(0); }
 
-        /* STATS */
-        .stats-bar {
-            display: flex; align-items: center; padding: 18px 28px;
-            border-bottom: 1px solid var(--border); background: #f8fafc;
-        }
-        .stats-bar .count { font-size: 14px; color: var(--muted); font-weight: 500; }
-        .stats-bar .count strong { color: var(--navy); font-size: 22px; font-weight: 800; margin-left: 6px; }
+def _student_is_valid_email(email_value):
+    email_value = (email_value or "").strip()
+    return "@" in email_value and "." in email_value and len(email_value) <= 255
 
-        /* TABLE */
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 950px; }
-        thead th {
-            background: #f1f5f9; color: var(--navy); font-size: 12px;
-            font-weight: 700; padding: 13px 16px; text-align: right;
-            letter-spacing: .4px; border-bottom: 2px solid var(--border);
-        }
-        tbody tr { transition: background .15s; animation: fadeIn .3s ease both; }
-        tbody tr:hover { background: #f8fafc; }
-        tbody tr:not(:last-child) td { border-bottom: 1px solid #eef2f7; }
-        td { padding: 13px 16px; font-size: 13px; color: var(--text); vertical-align: middle; }
 
-        .course-cell { display: flex; align-items: center; gap: 11px; }
-        .course-avatar {
-            width: 38px; height: 38px; border-radius: 10px;
-            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--white); font-size: 14px; font-weight: 700; flex-shrink: 0;
-        }
-        .course-name { font-weight: 600; color: var(--navy); }
-        .course-id   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+def _student_send_email_notification(to_email, subject, body):
+    smtp_host   = (os.environ.get("STUDENT_SMTP_HOST")   or "").strip()
+    smtp_port   = int((os.environ.get("STUDENT_SMTP_PORT") or "587").strip() or "587")
+    smtp_user   = (os.environ.get("STUDENT_SMTP_USER")   or "").strip()
+    smtp_pass   = (os.environ.get("STUDENT_SMTP_PASS")   or "").strip()
+    smtp_sender = (os.environ.get("STUDENT_SMTP_SENDER") or smtp_user).strip()
 
-        .badge { display: inline-block; border-radius: 7px; padding: 3px 10px; font-size: 12px; font-weight: 600; }
-        .badge-section  { background: #e0f2fe; color: #0369a1; font-family: monospace; }
-        .badge-active   { background: var(--success-lt); color: var(--success); }
-        .badge-inactive { background: var(--danger-lt); color: var(--danger); }
-        .badge-room     { background: #fef3c7; color: #92400e; }
+    if not smtp_host or not smtp_user or not smtp_pass or not smtp_sender:
+        return False, "missing_smtp_env"
 
-        .day-pill {
-            display: inline-block; background: #ede9fe; color: #6d28d9;
-            border-radius: 6px; padding: 2px 7px; font-size: 11px;
-            font-weight: 700; margin: 2px 2px 0 0;
-        }
+    msg = MIMEText(body, "plain", "utf-8")
+    msg["Subject"] = subject
+    msg["From"]    = smtp_sender
+    msg["To"]      = to_email
 
-        .delete-btn {
-            display: inline-flex; align-items: center; gap: 5px;
-            background: var(--danger-lt); color: var(--danger);
-            border: 1px solid #fecaca; border-radius: 8px;
-            padding: 6px 12px; font-size: 12px; font-weight: 700;
-            font-family: 'Tajawal', sans-serif; text-decoration: none;
-            cursor: pointer; transition: all .2s;
-        }
-        .delete-btn:hover { background: var(--danger); color: var(--white); border-color: var(--danger); }
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(smtp_sender, [to_email], msg.as_string())
+        return True, "sent"
+    except Exception as ex:
+        return False, str(ex)
 
-        .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
-        .empty-icon { font-size: 48px; margin-bottom: 12px; }
-        .empty p    { font-size: 15px; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
-    </style>
-</head>
-<body>
+def _student_process_alert_event(student_id, student_name, student_email,
+                                  risk_level, absence_rate_percent, risk_course_name=""):
+    if risk_level not in ("warning", "deprived"):
+        return {"created": False, "email_attempted": False, "email_sent": False}
 
-<header class="top-header">
-    <div class="logo">
-        <div class="logo-icon">🎓</div>
-        <div>
-            <div class="logo-text">جامعة حائل</div>
-            <div class="logo-sub">نظام الحضور والغياب</div>
-        </div>
-    </div>
-    <a class="back-btn" href="/admin/dashboard">← العودة للوحة الأدمن</a>
-</header>
+    alert_date = datetime.date.today().isoformat()
+    email_ok   = _student_is_valid_email(student_email)
+    conn       = None
+    event_id   = None
+    created    = False
 
-<div class="page">
+    try:
+        conn = get_db()
+        cur  = conn.cursor()
+        cur.execute("""
+            INSERT INTO student_alert_events (university_id, alert_level, alert_date, email_to)
+            VALUES (?, ?, ?, ?)
+        """, (student_id, risk_level, alert_date, student_email if email_ok else ""))
+        conn.commit()
+        event_id = cur.lastrowid
+        created  = True
+    except sqlite3.IntegrityError:
+        try:
+            if conn is None:
+                conn = get_db()
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT id, COALESCE(email_sent, 0) AS email_sent
+                FROM student_alert_events
+                WHERE university_id=? AND alert_level=? AND alert_date=?
+                LIMIT 1
+            """, (student_id, risk_level, alert_date))
+            existing = cur.fetchone()
+            if not existing:
+                return {"created": False, "email_attempted": False, "email_sent": False}
+            event_id = int(existing["id"])
+            if int(existing["email_sent"]) == 1:
+                return {"created": False, "email_attempted": False, "email_sent": True}
+            cur.execute(
+                "UPDATE student_alert_events SET email_to=? WHERE id=?",
+                (student_email if email_ok else "", event_id)
+            )
+            conn.commit()
+            created = False
+        finally:
+            if conn:
+                conn.close()
+                conn = None
+    finally:
+        if conn:
+            conn.close()
 
-    <!-- فورم الإضافة -->
-    <div class="card">
-        <div class="card-header">
-            <div class="card-header-icon">➕</div>
-            <div>
-                <h2>إضافة مقرر جديد</h2>
-                <p>أدخل بيانات المقرر والجدول الدراسي</p>
-            </div>
-        </div>
-        <div class="card-body">
-            <form method="post" action="/admin/sessions/add" id="addForm">
-                <div class="form-grid">
+    if not email_ok:
+        log_admin_activity(
+            student_id, student_name,
+            "STUDENT_ALERT_CREATED_NO_EMAIL",
+            details=f"level={risk_level},date={alert_date},rate={absence_rate_percent}%,course={risk_course_name}"
+        )
+        return {"created": created, "email_attempted": False, "email_sent": False}
 
-                    <div class="form-group">
-                        <label>اسم المقرر <span>*</span></label>
-                        <div class="input-wrap">
-                            <span class="input-icon">📚</span>
-                            <input type="text" name="course_name" placeholder="مثال: CS401 — هياكل بيانات" required>
-                        </div>
-                    </div>
+    subject = "تنبيه الغياب | Attendance Alert"
+    if risk_level == "deprived":
+        subject = "إشعار الحرمان | Deprivation Alert"
 
-                    <div class="form-group">
-                        <label>رقم الشعبة <span>*</span></label>
-                        <div class="input-wrap">
-                            <span class="input-icon">🔢</span>
-                            <input type="text" name="session_number" placeholder="مثال: 1 أو A1" required>
-                        </div>
-                    </div>
+    risk_label_ar = "قرب من الحرمان" if risk_level == "warning" else "حرمان"
+    risk_label_en = "Near Deprivation" if risk_level == "warning" else "Deprivation"
 
-                    <div class="form-group">
-                        <label>الدكتور المسؤول <span>*</span></label>
-                        <div class="input-wrap">
-                            <span class="input-icon">👨‍🏫</span>
-                            <select name="doctor_id" required>
-                                <option value="">— اختر الدكتور —</option>
-                                {% for d in doctors %}
-                                    <option value="{{ d[0] }}">{{ d[1] }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
+    body = (
+        f"مرحبًا {student_name}\n"
+        f"هذه رسالة آلية من نظام الحضور.\n"
+        f"حالتك الحالية: {risk_label_ar}\n"
+        f"نسبة الغياب الحالية: {absence_rate_percent}%\n"
+        f"المقرر الأكثر تأثرًا: {risk_course_name or '-'}\n"
+        f"يرجى مراجعة لوحة الطالب والتواصل مع الإدارة عند الحاجة.\n\n"
+        f"Hello {student_name},\n"
+        f"This is an automated message from the attendance system.\n"
+        f"Your current status: {risk_label_en}\n"
+        f"Current absence rate: {absence_rate_percent}%\n"
+        f"Most affected course: {risk_course_name or '-'}\n"
+        f"Please review your student dashboard and contact administration if needed.\n"
+    )
 
-                    <div class="form-group">
-                        <label>وقت البداية <span>*</span></label>
-                        <div class="input-wrap">
-                            <span class="input-icon">🕐</span>
-                            <input type="time" name="start_time" required>
-                        </div>
-                    </div>
+    sent, send_message = _student_send_email_notification(student_email, subject, body)
 
-                    <div class="form-group">
-                        <label>وقت النهاية <span>*</span></label>
-                        <div class="input-wrap">
-                            <span class="input-icon">🕔</span>
-                            <input type="time" name="end_time" required>
-                        </div>
-                    </div>
+    conn = None
+    try:
+        conn = get_db()
+        cur  = conn.cursor()
+        cur.execute(
+            "UPDATE student_alert_events SET email_sent=? WHERE id=?",
+            (1 if sent else 0, event_id)
+        )
+        conn.commit()
+    finally:
+        if conn:
+            conn.close()
 
-                    <div class="form-group">
-                        <label>اسم القاعة</label>
-                        <div class="input-wrap">
-                            <span class="input-icon">🏛️</span>
-                            <input type="text" name="room_name" placeholder="مثال: B12">
-                        </div>
-                    </div>
+    log_admin_activity(
+        student_id, student_name,
+        "STUDENT_ALERT_EMAIL_SENT" if sent else "STUDENT_ALERT_EMAIL_FAILED",
+        details=f"level={risk_level},date={alert_date},course={risk_course_name},message={send_message}"
+    )
+    return {"created": created, "email_attempted": True, "email_sent": bool(sent)}
 
-                    <div class="form-group">
-                        <label>كود القاعة</label>
-                        <div class="input-wrap">
-                            <span class="input-icon">🔑</span>
-                            <input type="text" name="room_code" placeholder="6 أرقام" maxlength="6" pattern="\d{6}">
-                        </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label>السعة الاستيعابية</label>
-                        <div class="input-wrap">
-                            <span class="input-icon">👥</span>
-                            <input type="number" name="capacity" placeholder="مثال: 40" min="1" max="500">
-                        </div>
-                    </div>
+def _student_collect_page_data(student_id, msg="", msg_type="info", process_alerts=False):
+    conn = None
+    try:
+        conn = get_db()
+        cur  = conn.cursor()
 
-                    <div class="form-group form-full">
-                        <label>أيام المحاضرة <span>*</span></label>
-                        <input type="hidden" name="days" id="daysInput" value="">
-                        <div class="days-wrap">
-                            <label class="day-label"><input type="checkbox" value="الأحد"> الأحد</label>
-                            <label class="day-label"><input type="checkbox" value="الاثنين"> الاثنين</label>
-                            <label class="day-label"><input type="checkbox" value="الثلاثاء"> الثلاثاء</label>
-                            <label class="day-label"><input type="checkbox" value="الأربعاء"> الأربعاء</label>
-                            <label class="day-label"><input type="checkbox" value="الخميس"> الخميس</label>
-                        </div>
-                    </div>
+        cur.execute(
+            "SELECT name, COALESCE(email, '') AS email FROM students WHERE university_id=? LIMIT 1",
+            (student_id,)
+        )
+        student = cur.fetchone()
 
-                </div>
-                <button class="submit-btn" type="submit">✅ إضافة المقرر</button>
-            </form>
-        </div>
-    </div>
+        cur.execute("""
+            SELECT
+                a.id AS attendance_id,
+                COALESCE(se.course_name, '-') AS course_name,
+                COALESCE(a.check_in, '')  AS check_in,
+                COALESCE(a.check_out, '') AS check_out,
+                COALESCE(a.status, '')    AS status,
+                COALESCE(ap.status, '')           AS appeal_status,
+                COALESCE(ap.reason, '')            AS appeal_reason,
+                COALESCE(ap.admin_note, '')        AS appeal_admin_note,
+                COALESCE(ap.reviewed_at, '')       AS appeal_reviewed_at,
+                COALESCE(ap.created_at, '')        AS appeal_created_at
+            FROM attendance a
+            LEFT JOIN sessions se
+                ON se.session_id = a.session_id
+            LEFT JOIN student_absence_appeals ap
+                ON ap.attendance_id = a.id
+               AND ap.university_id  = a.university_id
+            WHERE a.university_id=?
+            ORDER BY a.id DESC
+        """, (student_id,))
+        attendance_rows = cur.fetchall()
 
-    <!-- جدول المقررات -->
-    <div class="card">
-        <div class="card-header">
-            <div class="card-header-icon">📋</div>
-            <div>
-                <h2>المقررات المضافة</h2>
-                <p>جميع المقررات والشعب المسجلة في النظام</p>
-            </div>
-        </div>
+    finally:
+        if conn:
+            conn.close()
 
-        <div class="stats-bar">
-            <div class="count">إجمالي المقررات <strong>{{ sessions | length }}</strong></div>
-        </div>
+    student_name  = student["name"]  if student else session.get("student_name", "طالب")
+    student_email = student["email"] if student else ""
 
-        <div class="table-wrap">
-            {% if sessions %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>المقرر</th>
-                        <th>الشعبة</th>
-                        <th>الدكتور</th>
-                        <th>الأيام</th>
-                        <th>الوقت</th>
-                        <th>القاعة</th>
-                        <th>السعة</th>
-                        <th>الحالة</th>
-                        <th>حذف</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for s in sessions %}
-                    <tr style="animation-delay: {{ loop.index0 * 0.04 }}s">
-                        <td>
-                            <div class="course-cell">
-                                <div class="course-avatar">{{ s[1][0] if s[1] else '؟' }}</div>
-                                <div>
-                                    <div class="course-name">{{ s[1] }}</div>
-                                    <div class="course-id">#{{ s[0] }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="badge badge-section">{{ s[2] or '—' }}</span></td>
-                        <td>{{ s[3] }}</td>
-                        <td>
-                            {% if s[9] %}
-                                {% for day in s[9].split(',') %}
-                                    <span class="day-pill">{{ day.strip() }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <span style="color:#9ca3af">—</span>
-                            {% endif %}
-                        </td>
-                        <td style="font-family:monospace; font-size:12px; color:var(--muted);">
-                            {{ s[5] or '—' }} — {{ s[6] or '—' }}
-                        </td>
-                        <td>
-                            {% if s[7] %}
-                                <span class="badge badge-room">{{ s[7] }}{% if s[8] %} ({{ s[8] }}){% endif %}</span>
-                            {% else %}<span style="color:#9ca3af">—</span>{% endif %}
-                        </td>
-                        <td>
-                            {% if s[10] %}
-                                <span style="font-weight:600;">{{ s[10] }}</span>
-                                <span style="color:var(--muted);font-size:11px;"> طالب</span>
-                            {% else %}—{% endif %}
-                        </td>
-                        <td>
-                            {% if s[4] == 1 %}
-                                <span class="badge badge-active">✓ نشطة</span>
-                            {% else %}
-                                <span class="badge badge-inactive">✗ مغلقة</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a class="delete-btn"
-                               href="/admin/sessions/delete/{{ s[0] }}"
-                               onclick="return confirm('هل أنت متأكد من حذف مقرر {{ s[1] }}؟')">
-                                🗑 حذف
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="empty">
-                <div class="empty-icon">📚</div>
-                <p>لا توجد مقررات مضافة بعد.</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
+    total_sessions = len(attendance_rows)
+    absent_count   = sum(1 for r in attendance_rows if _student_status_is_absent(r["status"]))
+    present_count  = max(total_sessions - absent_count, 0)
 
-</div>
+    # نسبة الغياب لكل مقرر
+    course_map = {}
+    for row in attendance_rows:
+        cn = (row["course_name"] or "-").strip() or "-"
+        if cn not in course_map:
+            course_map[cn] = {"course_name": cn, "absent_count": 0}
+        if _student_status_is_absent(row["status"]):
+            course_map[cn]["absent_count"] += 1
 
-<script>
-const dayLabels = document.querySelectorAll('.day-label');
-const daysInput = document.getElementById('daysInput');
+    course_stats = []
+    for item in course_map.values():
+        rate = item["absent_count"] / float(DEFAULT_COURSE_LECTURES)
+        course_stats.append({
+            "course_name":           item["course_name"],
+            "absent_count":          item["absent_count"],
+            "expected_lectures":     DEFAULT_COURSE_LECTURES,
+            "absence_rate":          rate,
+            "absence_rate_percent":  round(rate * 100, 2)
+        })
+    course_stats.sort(key=lambda x: x["absence_rate"], reverse=True)
 
-function updateDaysInput() {
-    const selected = [];
-    dayLabels.forEach(lbl => {
-        if (lbl.querySelector('input[type="checkbox"]').checked)
-            selected.push(lbl.querySelector('input[type="checkbox"]').value);
-    });
-    daysInput.value = selected.join(',');
-}
+    top_risk_course = course_stats[0] if course_stats else None
+    absence_rate    = top_risk_course["absence_rate"] if top_risk_course else 0.0
 
-dayLabels.forEach(lbl => {
-    lbl.addEventListener('click', function(e) {
-        e.preventDefault();
-        const cb = this.querySelector('input[type="checkbox"]');
-        cb.checked = !cb.checked;
-        this.classList.toggle('checked', cb.checked);
-        updateDaysInput();
-    });
-});
+    risk_level = "safe"
+    alerts     = []
 
-document.getElementById('addForm').addEventListener('submit', function(e) {
-    if (!daysInput.value) {
-        e.preventDefault();
-        alert('الرجاء اختيار يوم واحد على الأقل للمحاضرة.');
+    if total_sessions == 0:
+        alerts.append({"type": "info", "text": "لا توجد سجلات حضور حتى الآن."})
+    elif absence_rate >= ABSENCE_DEPRIVATION_THRESHOLD:
+        risk_level = "deprived"
+        alerts.append({
+            "type": "danger",
+            "text": f"تم تجاوز حد الحرمان في مقرر: {top_risk_course['course_name'] if top_risk_course else '-'}."
+        })
+    elif absence_rate >= ABSENCE_WARNING_THRESHOLD:
+        risk_level = "warning"
+        alerts.append({
+            "type": "warning",
+            "text": f"تنبيه: نسبة الغياب قريبة من الحرمان في مقرر: {top_risk_course['course_name'] if top_risk_course else '-'}."
+        })
+
+    if risk_level in ("warning", "deprived") and not student_email:
+        alerts.append({"type": "info", "text": "لا يوجد بريد إلكتروني مسجل لتفعيل تنبيهات البريد."})
+
+    alert_event = {"created": False, "email_attempted": False, "email_sent": False}
+    if process_alerts:
+        alert_event = _student_process_alert_event(
+            student_id=student_id,
+            student_name=student_name,
+            student_email=student_email,
+            risk_level=risk_level,
+            absence_rate_percent=round(absence_rate * 100, 2),
+            risk_course_name=(top_risk_course["course_name"] if top_risk_course else "")
+        )
+        if alert_event.get("created") and risk_level in ("warning", "deprived"):
+            if alert_event.get("email_sent"):
+                alerts.append({"type": "info", "text": "تم إرسال تنبيه الغياب على البريد الإلكتروني المسجل."})
+            elif alert_event.get("email_attempted"):
+                alerts.append({"type": "warning", "text": "تعذر إرسال تنبيه البريد حاليًا، والتنبيه موجود داخل الحساب."})
+
+    appeals_rows = [r for r in attendance_rows if (r["appeal_status"] or "").strip()]
+
+    return {
+        "student_name":          student_name,
+        "student_id":            student_id,
+        "student_email":         student_email,
+        "total_sessions":        total_sessions,
+        "present_count":         present_count,
+        "absent_count":          absent_count,
+        "absence_rate_percent":  round(absence_rate * 100, 2),
+        "top_risk_course_name":  (top_risk_course["course_name"] if top_risk_course else "-"),
+        "default_course_lectures": DEFAULT_COURSE_LECTURES,
+        "course_stats":          course_stats,
+        "risk_level":            risk_level,
+        "alerts":                alerts,
+        "alert_event":           alert_event,
+        "attendance":            attendance_rows,
+        "appeals":               appeals_rows,
+        "msg":                   msg,
+        "msg_type":              msg_type
     }
-});
-</script>
 
-</body>
-</html>
+
+def register_student_routes(app):
+
+    # ================= INIT TABLES =================
+    def ensure_student_section_tables():
+        conn = None
+        try:
+            conn = get_db()
+            cur  = conn.cursor()
+
+            cur.execute("PRAGMA table_info(students)")
+            cols = {r["name"] for r in cur.fetchall()}
+            if "email" not in cols:
+                cur.execute("ALTER TABLE students ADD COLUMN email TEXT")
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS student_absence_appeals (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    attendance_id INTEGER NOT NULL,
+                    university_id TEXT    NOT NULL,
+                    reason        TEXT    NOT NULL,
+                    status        TEXT    NOT NULL DEFAULT 'pending',
+                    admin_note    TEXT,
+                    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    reviewed_at   DATETIME,
+                    UNIQUE(attendance_id, university_id)
+                )
+            """)
+
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_student_appeals_student
+                ON student_absence_appeals(university_id)
+            """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS student_alert_events (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    university_id TEXT    NOT NULL,
+                    alert_level   TEXT    NOT NULL,
+                    alert_date    TEXT    NOT NULL,
+                    email_to      TEXT,
+                    email_sent    INTEGER NOT NULL DEFAULT 0,
+                    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(university_id, alert_level, alert_date)
+                )
+            """)
+
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_student_alert_events_student
+                ON student_alert_events(university_id)
+            """)
+
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+
+    ensure_student_section_tables()
+
+    # ================= LOGIN =================
+    @app.route("/student/login", methods=["GET", "POST"])
+    def student_login():
+        if request.method == "POST":
+            uid = (request.form.get("university_id") or "").strip()
+
+            if not uid:
+                return render_template("student/student_login.html", error="الرقم الجامعي مطلوب")
+
+            conn = None
+            try:
+                conn = get_db()
+                cur  = conn.cursor()
+                cur.execute(
+                    "SELECT university_id, name FROM students WHERE university_id=? LIMIT 1",
+                    (uid,)
+                )
+                stu = cur.fetchone()
+            finally:
+                if conn:
+                    conn.close()
+
+            if not stu:
+                return render_template("student/student_login.html", error="الطالب غير موجود في النظام")
+
+            session["student_id"]   = stu["university_id"]
+            session["student_name"] = stu["name"]
+            return redirect("/student/dashboard")
+
+        return render_template("student/student_login.html")
+
+    # ================= LOGOUT =================
+    @app.route("/student/logout")
+    def student_logout():
+        session.pop("student_id",   None)
+        session.pop("student_name", None)
+        return redirect("/student/login")
+
+    # ================= DASHBOARD =================
+    @app.route("/student/dashboard")
+    def student_dashboard():
+        if "student_id" not in session:
+            return redirect("/student/login")
+
+        page_data = _student_collect_page_data(
+            student_id=str(session["student_id"]),
+            msg=(request.args.get("msg") or "").strip(),
+            msg_type=(request.args.get("msg_type") or "info").strip(),
+            process_alerts=True
+        )
+        return render_template("student/student_dashboard.html", **page_data, nav_page="dashboard")
+
+    # ================= ATTENDANCE =================
+    @app.route("/student/attendance")
+    def student_attendance_page():
+        if "student_id" not in session:
+            return redirect("/student/login")
+
+        page_data = _student_collect_page_data(
+            student_id=str(session["student_id"]),
+            msg=(request.args.get("msg") or "").strip(),
+            msg_type=(request.args.get("msg_type") or "info").strip(),
+            process_alerts=False
+        )
+        return render_template("student/student_attendance.html", **page_data, nav_page="attendance")
+
+    # ================= APPEALS PAGE =================
+    @app.route("/student/appeals")
+    def student_appeals_page():
+        if "student_id" not in session:
+            return redirect("/student/login")
+
+        page_data = _student_collect_page_data(
+            student_id=str(session["student_id"]),
+            msg=(request.args.get("msg") or "").strip(),
+            msg_type=(request.args.get("msg_type") or "info").strip(),
+            process_alerts=False
+        )
+        return render_template("student/student_appeals.html", **page_data, nav_page="appeals")
+
+    # ================= ALERTS PAGE =================
+    @app.route("/student/alerts")
+    def student_alerts_page():
+        if "student_id" not in session:
+            return redirect("/student/login")
+
+        page_data = _student_collect_page_data(
+            student_id=str(session["student_id"]),
+            msg=(request.args.get("msg") or "").strip(),
+            msg_type=(request.args.get("msg_type") or "info").strip(),
+            process_alerts=True
+        )
+        return render_template("student/student_alerts.html", **page_data, nav_page="alerts")
+
+    # ================= UPDATE EMAIL =================
+    @app.route("/student/profile/email", methods=["POST"])
+    def student_update_email():
+        if "student_id" not in session:
+            return redirect("/student/login")
+
+        student_id  = str(session["student_id"])
+        email_value = (request.form.get("email") or "").strip()
+
+        if email_value and not _student_is_valid_email(email_value):
+            return redirect("/student/alerts?msg=البريد الإلكتروني غير صالح&msg_type=danger")
+
+        conn = None
+        try:
+            conn = get_db()
+            cur  = conn.cursor()
+            cur.execute(
+                "UPDATE students SET email=? WHERE university_id=?",
+                (email_value, student_id)
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+
+        return redirect("/student/alerts?msg=تم تحديث البريد الإلكتروني&msg_type=success")
+
+    # ================= CREATE APPEAL =================
+    @app.route("/student/appeals/create", methods=["POST"])
+    def student_create_appeal():
+        if "student_id" not in session:
+            return redirect("/student/login")
+
+        student_id       = str(session["student_id"])
+        attendance_id_raw = (request.form.get("attendance_id") or "").strip()
+        reason            = (request.form.get("reason") or "").strip()
+
+        if not attendance_id_raw.isdigit():
+            return redirect("/student/attendance?msg=رقم السجل غير صالح&msg_type=danger")
+
+        if len(reason) < 10:
+            return redirect("/student/attendance?msg=سبب الاعتراض يجب أن يكون أوضح (10 أحرف على الأقل)&msg_type=danger")
+
+        if len(reason) > 1000:
+            return redirect("/student/attendance?msg=سبب الاعتراض طويل جدًا&msg_type=danger")
+
+        attendance_id = int(attendance_id_raw)
+
+        conn = None
+        try:
+            conn = get_db()
+            cur  = conn.cursor()
+
+            cur.execute("""
+                SELECT id, status
+                FROM attendance
+                WHERE id=? AND university_id=?
+                LIMIT 1
+            """, (attendance_id, student_id))
+            attendance_row = cur.fetchone()
+
+            if not attendance_row:
+                return redirect("/student/attendance?msg=سجل الحضور غير موجود&msg_type=danger")
+
+            if not _student_status_is_absent(attendance_row["status"]):
+                return redirect("/student/attendance?msg=الاعتراض متاح على حالات الغياب فقط&msg_type=danger")
+
+            cur.execute("""
+                INSERT INTO student_absence_appeals (attendance_id, university_id, reason, status)
+                VALUES (?, ?, ?, 'pending')
+            """, (attendance_id, student_id, reason))
+
+            log_admin_activity(
+                student_id,
+                session.get("student_name", "طالب"),
+                "ABSENCE_APPEAL_SUBMITTED",
+                details=f"attendance_id={attendance_id}"
+            )
+
+            conn.commit()
+
+        except sqlite3.IntegrityError:
+            return redirect("/student/attendance?msg=تم إرسال اعتراض مسبقًا على هذا الغياب&msg_type=warning")
+
+        finally:
+            if conn:
+                conn.close()
+
+        return redirect("/student/attendance?msg=تم إرسال الاعتراض للإدارة بنجاح&msg_type=success")
