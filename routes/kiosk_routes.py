@@ -304,8 +304,4 @@ def register_kiosk_routes(app):
             })
 
         finally:
-<<<<<<< HEAD
             if conn: conn.close()
-=======
-            if conn: conn.close()
->>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704

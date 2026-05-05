@@ -45,15 +45,12 @@ def ensure_session_extra_columns():
         if "room_code" not in cols:
             cur.execute("ALTER TABLE sessions ADD COLUMN room_code TEXT")
 
-<<<<<<< HEAD
-=======
         if "days" not in cols:
             cur.execute("ALTER TABLE sessions ADD COLUMN days TEXT")
 
         if "capacity" not in cols:
             cur.execute("ALTER TABLE sessions ADD COLUMN capacity INTEGER")
 
->>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
         conn.commit()
     finally:
         if conn:
@@ -89,11 +86,7 @@ def register_admin_routes(app):
                 session["admin"] = username
                 return redirect("/admin/dashboard")
 
-<<<<<<< HEAD
             return render_template("admin/admin_login.html", error="اسم المستخدم أو كلمة المرور غير صحيحة")
-=======
-            return "Invalid login", 401
->>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
 
         return render_template("admin/admin_login.html")
 
@@ -215,7 +208,6 @@ def register_admin_routes(app):
     def admin_students():
         if "admin" not in session:
             return redirect("/admin/login")
-<<<<<<< HEAD
 
         conn = get_db()
         cur = conn.cursor()
@@ -288,9 +280,6 @@ def register_admin_routes(app):
             recognition_accuracy=recognition_accuracy,
             last_update=last_update
         )
-=======
-        return render_template("admin/admin_students.html")
->>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
 
 
     # ================= ADMIN DOCTORS =================
@@ -1022,13 +1011,8 @@ def register_admin_routes(app):
                 return jsonify({"message": "الطالب مسجل بالفعل"}), 400
 
             cur.execute("""
-<<<<<<< HEAD
                 INSERT INTO students (university_id, name, academic_number, created_at)
                 VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-=======
-                INSERT INTO students (university_id, name, academic_number)
-                VALUES (?, ?, ?)
->>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
             """, (university_id, name, university_id))
 
             embeddings = []
@@ -1081,7 +1065,6 @@ def register_admin_routes(app):
 
             conn.commit()
 
-<<<<<<< HEAD
             # Log successful registration for today's statistics
             log_admin_activity(
                 university_id,
@@ -1089,9 +1072,6 @@ def register_admin_routes(app):
                 "STUDENT_REGISTERED",
                 details=f"تم تسجيل الطالب بنجاح باستخدام {used} صورة"
             )
-
-=======
->>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
         except Exception as e:
             return jsonify({"message": f"❌ خطأ: {str(e)}"}), 500
 
@@ -1104,8 +1084,4 @@ def register_admin_routes(app):
         return jsonify({
             "message": "✅ تم تسجيل الطالب بنجاح",
             "images_used": used
-<<<<<<< HEAD
         })
-=======
-        })
->>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
