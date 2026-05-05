@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>دخول الطالب</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- STUDENT SECTION ONLY - هذا الكود مخصص لقسم الطالب -->
+<div class="header">
+    جامعة حائل | دخول الطالب
+</div>
+
+<!-- STUDENT SECTION ONLY - هذا الكود مخصص لقسم الطالب -->
+<div class="card center">
+    <h2 class="title">تسجيل دخول الطالب</h2>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+        <input type="text" name="university_id" placeholder="الرقم الجامعي" required>
+        <button class="btn" type="submit">دخول</button>
+    </form>
+</div>
+
+</body>
+</html>

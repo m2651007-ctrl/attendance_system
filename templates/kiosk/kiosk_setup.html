@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>إعداد جهاز القاعة</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { background: #0b1a24; }
+        .setup-wrap { max-width: 520px; margin: 50px auto; background: #0f2433; color: #fff; padding: 24px; border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+        .setup-wrap h2 { margin: 0 0 10px; color: #f8fafc; }
+        .setup-wrap p { color: #cbd5e1; margin: 0 0 16px; }
+        .setup-wrap label { display:block; margin: 10px 0 6px; color: #e2e8f0; }
+        .setup-wrap select, .setup-wrap input {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #1f3b50; background: #0b1a24; color: #fff;
+        }
+        .btns { display:flex; gap:10px; margin-top: 16px; }
+        .btns button { flex:1; padding: 12px; border: 0; border-radius: 10px; cursor: pointer; font-weight: 700; }
+        .btn-primary { background: #22c55e; color: #062014; }
+        .btn-secondary { background: #334155; color: #e2e8f0; }
+        .msg { margin-top: 12px; font-size: 14px; color: #fef3c7; }
+    </style>
+</head>
+<body>
+<div class="setup-wrap">
+    <h2>إعداد جهاز القاعة</h2>
+    <p>اختر القاعة وأدخل الكود لمرة واحدة لكل تشغيل.</p>
+
+    <label>القاعة</label>
+    <select id="room_name">
+        <option value="">-- اختر القاعة --</option>
+        {% for r in rooms %}
+            <option value="{{ r }}">{{ r }}</option>
+        {% endfor %}
+    </select>
+
+    <label>كود القاعة (6 أرقام)</label>
+    <input id="room_code" inputmode="numeric" placeholder="مثال: 123456" />
+
+    <div class="btns">
+        <button class="btn-primary" id="saveBtn">حفظ وبدء الكاميرا</button>
+        <button class="btn-secondary" id="clearBtn">مسح الإعدادات</button>
+    </div>
+    <div class="msg" id="msg"></div>
+</div>
+
+<script>
+const roomEl = document.getElementById("room_name");
+const codeEl = document.getElementById("room_code");
+const msgEl = document.getElementById("msg");
+const saveBtn = document.getElementById("saveBtn");
+const clearBtn = document.getElementById("clearBtn");
+
+clearBtn.addEventListener("click", () => {
+  sessionStorage.removeItem("kiosk_room");
+  sessionStorage.removeItem("kiosk_code");
+  msgEl.textContent = "تم المسح.";
+});
+
+saveBtn.addEventListener("click", async () => {
+  msgEl.textContent = "";
+  const room_name = (roomEl.value || "").trim();
+  const room_code = (codeEl.value || "").trim();
+
+  if (!room_name || room_code.length !== 6) {
+    msgEl.textContent = "تأكد من اختيار القاعة وإدخال كود صحيح.";
+    return;
+  }
+
+  try {
+    const res = await fetch("/kiosk/authorize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ room_name, room_code })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      msgEl.textContent = data.message || "فشل التحقق.";
+      return;
+    }
+    sessionStorage.setItem("kiosk_room", room_name);
+    sessionStorage.setItem("kiosk_code", room_code);
+    window.location.href = "/kiosk/camera";
+  } catch (e) {
+    msgEl.textContent = "تعذر الاتصال بالخادم.";
+  }
+});
+</script>
+</body>
+</html>

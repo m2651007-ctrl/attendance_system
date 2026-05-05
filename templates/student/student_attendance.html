@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الحضور والغياب — جامعة حائل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--navy:#0b3c5d;--navy-mid:#0d4f7a;--navy-lt:#1a6494;--bg:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#64748b;--danger:#dc2626;--danger-lt:#fee2e2;--success:#16a34a;--success-lt:#dcfce7;--warning:#d97706;--warning-lt:#fef3c7;--border:#dde4ed;--shadow:0 4px 24px rgba(11,60,93,.10);}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+        .top-header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--navy-lt) 100%);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:70px;box-shadow:0 2px 20px rgba(0,0,0,.2);position:sticky;top:0;z-index:100;}
+        .logo{display:flex;align-items:center;gap:12px;color:#fff;}
+        .logo-icon{width:42px;height:42px;background:rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid rgba(255,255,255,.2);}
+        .logo-text{font-size:18px;font-weight:700;}.logo-sub{font-size:12px;opacity:.7;}
+        .logout-btn{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.85);text-decoration:none;font-size:14px;font-weight:500;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:8px 16px;transition:all .2s;}
+        .logout-btn:hover{background:rgba(255,255,255,.2);color:#fff;}
+        .student-nav{display:flex;gap:8px;flex-wrap:wrap;padding:20px 40px 0;}
+        .student-nav a{background:var(--white);color:var(--navy);border-radius:10px;padding:9px 18px;font-weight:600;font-size:14px;text-decoration:none;border:1.5px solid var(--border);transition:all .2s;}
+        .student-nav a:hover{border-color:var(--navy);}
+        .student-nav a.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+        .page{max-width:1200px;margin:0 auto;padding:24px 40px;}
+        .alert{border-radius:10px;padding:12px 16px;margin-bottom:10px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;}
+        .alert-info{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;}
+        .alert-warning{background:var(--warning-lt);color:#92400e;border:1px solid #fde68a;}
+        .alert-danger{background:var(--danger-lt);color:var(--danger);border:1px solid #fecaca;}
+        .alert-success{background:var(--success-lt);color:var(--success);border:1px solid #bbf7d0;}
+
+        /* CARD */
+        .card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px;}
+        .card-header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);padding:20px 28px;display:flex;align-items:center;gap:12px;}
+        .card-header-icon{width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+        .card-header h2{color:#fff;font-size:16px;font-weight:700;}
+        .card-header p{color:rgba(255,255,255,.65);font-size:12px;margin-top:2px;}
+
+        /* TABLE */
+        .table-wrap{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;min-width:700px;}
+        thead th{background:#f1f5f9;color:var(--navy);font-size:12px;font-weight:700;padding:13px 16px;text-align:right;border-bottom:2px solid var(--border);}
+        tbody tr{transition:background .15s;}
+        tbody tr:hover{background:#f8fafc;}
+        tbody tr:not(:last-child) td{border-bottom:1px solid #eef2f7;}
+        td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middle;}
+
+        .badge{display:inline-block;border-radius:7px;padding:3px 10px;font-size:11px;font-weight:700;}
+        .badge-present{background:var(--success-lt);color:var(--success);}
+        .badge-absent{background:var(--danger-lt);color:var(--danger);}
+        .badge-late{background:var(--warning-lt);color:var(--warning);}
+        .badge-pending{background:#fef3c7;color:#92400e;}
+        .badge-approved{background:var(--success-lt);color:var(--success);}
+        .badge-rejected{background:var(--danger-lt);color:var(--danger);}
+
+        .ts{font-family:monospace;font-size:11px;color:var(--muted);}
+
+        /* APPEAL FORM */
+        .appeal-form{display:flex;flex-direction:column;gap:6px;min-width:220px;}
+        .appeal-form textarea{width:100%;min-height:54px;resize:vertical;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-family:'Tajawal',sans-serif;font-size:13px;outline:none;}
+        .appeal-form textarea:focus{border-color:var(--navy);}
+        .appeal-form button{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:13px;}
+        .appeal-form button:hover{background:var(--navy-mid);}
+        .appeal-note{margin-top:6px;font-size:12px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);}
+
+        .empty{text-align:center;padding:50px 20px;color:var(--muted);}
+        .empty-icon{font-size:40px;margin-bottom:10px;}
+
+        @media(max-width:700px){.page{padding:16px;}.student-nav{padding:16px 16px 0;}.top-header{padding:0 16px;}}
+    </style>
+</head>
+<body>
+
+<header class="top-header">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <div><div class="logo-text">جامعة حائل</div><div class="logo-sub">بوابة الطالب</div></div>
+    </div>
+    <a class="logout-btn" href="/student/logout">تسجيل خروج ←</a>
+</header>
+
+<nav class="student-nav">
+    <a href="/student/dashboard" class="{{ 'active' if nav_page == 'dashboard' else '' }}">🏠 الرئيسية</a>
+    <a href="/student/attendance" class="{{ 'active' if nav_page == 'attendance' else '' }}">📋 الحضور والغياب</a>
+    <a href="/student/appeals"    class="{{ 'active' if nav_page == 'appeals' else '' }}">📝 اعتراضاتي</a>
+    <a href="/student/alerts"     class="{{ 'active' if nav_page == 'alerts' else '' }}">🔔 التنبيهات</a>
+</nav>
+
+<div class="page">
+
+    {% if msg %}
+    <div class="alert alert-{{ msg_type if msg_type in ['info','warning','danger','success'] else 'info' }}">{{ msg }}</div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">📋</div>
+            <div>
+                <h2>سجل الحضور والغياب</h2>
+                <p>{{ student_name }} — {{ student_id }}</p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            {% if attendance %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>المقرر</th>
+                        <th>تسجيل الدخول</th>
+                        <th>تسجيل الخروج</th>
+                        <th>الحالة</th>
+                        <th>حالة الانصراف</th>
+                        <th>اعتراض الغياب</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in attendance %}
+                <tr>
+                    <td><strong style="color:var(--navy);">{{ row.course_name }}</strong></td>
+                    <td><span class="ts">{{ row.check_in or '—' }}</span></td>
+                    <td><span class="ts">{{ row.check_out or '—' }}</span></td>
+                    <td>
+                        {% set st = (row.status or '')|lower %}
+                        {% if 'present' in st %}
+                            <span class="badge badge-present">✓ حاضر</span>
+                        {% elif 'late' in st %}
+                            <span class="badge badge-late">⏰ متأخر</span>
+                        {% elif 'absent' in st or 'غيا' in st %}
+                            <span class="badge badge-absent">✗ غائب</span>
+                        {% else %}
+                            <span class="badge" style="background:#f1f5f9;color:var(--muted);">{{ row.status or '—' }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if row.check_out %}
+                            <span style="color:var(--success);font-weight:600;font-size:12px;">✓ تم الانصراف</span>
+                        {% else %}
+                            <span style="color:var(--muted);font-size:12px;">لم ينصرف</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% set st = (row.status or '')|lower %}
+                        {% if 'absent' in st or 'غيا' in st %}
+                            {% if row.appeal_status %}
+                                <span class="badge badge-{{ 'pending' if row.appeal_status == 'pending' else 'approved' if row.appeal_status == 'approved' else 'rejected' }}">
+                                    {% if row.appeal_status == 'pending' %}⏳ قيد المراجعة
+                                    {% elif row.appeal_status == 'approved' %}✓ مقبول
+                                    {% else %}✗ مرفوض{% endif %}
+                                </span>
+                                {% if row.appeal_admin_note %}
+                                <div class="appeal-note">
+                                    <strong>ملاحظة الأدمن:</strong> {{ row.appeal_admin_note }}
+                                    {% if row.appeal_reviewed_at %}<br><small style="color:var(--muted);">{{ row.appeal_reviewed_at }}</small>{% endif %}
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <form action="/student/appeals/create" method="post" class="appeal-form">
+                                    <input type="hidden" name="attendance_id" value="{{ row.attendance_id }}">
+                                    <textarea name="reason" required placeholder="اكتب سبب الاعتراض (10 أحرف على الأقل)"></textarea>
+                                    <button type="submit">📤 إرسال اعتراض</button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <span style="color:var(--muted);font-size:12px;">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">
+                <div class="empty-icon">📋</div>
+                <p>لا توجد سجلات حضور حتى الآن.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
