@@ -103,7 +103,106 @@ def register_admin_routes(app):
             return redirect("/admin/login")
         return render_template("admin/admin_dashboard.html")
 
+# ================= ADMIN APPEALS =================
+    @app.route("/admin/appeals")
+    def admin_appeals():
+        if "admin" not in session:
+            return redirect("/admin/login")
 
+        status_filter = (request.args.get("status") or "all").strip().lower()
+        if status_filter not in {"all", "pending", "approved", "rejected"}:
+            status_filter = "all"
+
+        conn = None
+        try:
+            conn = get_db()
+            cur = conn.cursor()
+            query = """
+                SELECT
+                    ap.id,
+                    ap.attendance_id,
+                    ap.university_id,
+                    COALESCE(st.name, '-') AS student_name,
+                    COALESCE(se.course_name, '-') AS course_name,
+                    COALESCE(a.check_in, '') AS check_in,
+                    COALESCE(a.status, '') AS attendance_status,
+                    ap.reason,
+                    ap.status,
+                    COALESCE(ap.admin_note, '') AS admin_note,
+                    COALESCE(ap.created_at, '') AS created_at,
+                    COALESCE(ap.reviewed_at, '') AS reviewed_at
+                FROM student_absence_appeals ap
+                LEFT JOIN attendance a ON a.id = ap.attendance_id
+                LEFT JOIN sessions se ON se.session_id = a.session_id
+                LEFT JOIN students st ON st.university_id = ap.university_id
+            """
+            params = []
+            if status_filter != "all":
+                query += " WHERE ap.status=?"
+                params.append(status_filter)
+            query += " ORDER BY CASE WHEN ap.status='pending' THEN 0 ELSE 1 END, ap.id DESC"
+            cur.execute(query, params)
+            appeals = cur.fetchall()
+        finally:
+            if conn:
+                conn.close()
+
+        return render_template("admin/admin_appeals.html", appeals=appeals, status_filter=status_filter)
+
+
+    @app.route("/admin/appeals/<int:appeal_id>/review", methods=["POST"])
+    def admin_review_appeal(appeal_id):
+        if "admin" not in session:
+            return redirect("/admin/login")
+
+        decision = (request.form.get("decision") or "").strip().lower()
+        admin_note = (request.form.get("admin_note") or "").strip()
+        if decision not in ("approved", "rejected"):
+            return redirect("/admin/appeals?status=pending")
+
+        conn = None
+        try:
+            conn = get_db()
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT ap.id, ap.status, ap.university_id, ap.attendance_id,
+                       COALESCE(st.name, 'طالب') AS student_name
+                FROM student_absence_appeals ap
+                LEFT JOIN students st ON st.university_id = ap.university_id
+                WHERE ap.id=?
+                LIMIT 1
+            """, (appeal_id,))
+            appeal = cur.fetchone()
+            if not appeal:
+                return redirect("/admin/appeals?status=pending")
+            if (appeal["status"] or "") != "pending":
+                return redirect("/admin/appeals?status=all")
+
+            cur.execute("""
+                UPDATE student_absence_appeals
+                SET status=?, admin_note=?, reviewed_at=CURRENT_TIMESTAMP
+                WHERE id=?
+            """, (decision, admin_note, appeal_id))
+
+            if decision == "approved":
+                cur.execute(
+                    "UPDATE attendance SET status='Present (Appeal Approved)' WHERE id=?",
+                    (appeal["attendance_id"],)
+                )
+
+            log_admin_activity(
+                appeal["university_id"],
+                appeal["student_name"],
+                "ABSENCE_APPEAL_APPROVED" if decision == "approved" else "ABSENCE_APPEAL_REJECTED",
+                details=f"appeal_id={appeal_id},attendance_id={appeal['attendance_id']},note={admin_note}"
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+
+        return redirect("/admin/appeals?status=pending")
+    
     # ================= ADMIN PAGES =================
     @app.route("/admin/students")
     def admin_students():
@@ -824,10 +923,11 @@ def register_admin_routes(app):
             conn = get_db()
             cur = conn.cursor()
 
-            cur.execute(
-                "SELECT university_id FROM students WHERE university_id=?",
-                (university_id,)
-            )
+            cur.execute("""
+                INSERT INTO students (university_id, name, academic_number, password_hash)
+                VALUES (?, ?, ?, ?)
+            """, (university_id, name, university_id, hashlib.sha256(university_id.encode()).hexdigest()))
+
             existing = cur.fetchone()
 
             if existing:
