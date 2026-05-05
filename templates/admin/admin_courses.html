@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+<<<<<<< HEAD
     <title>إدارة المقررات — جامعة حائل</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
@@ -342,6 +343,50 @@
             color: var(--white);
             border-color: var(--danger);
         }
+=======
+    <title>إدارة المقررات</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
+        .header { background: #0b3c5d; color: #fff; padding: 18px 30px; font-size: 20px; font-weight: 700; }
+
+        .wrap { max-width: 1300px; margin: 30px auto; padding: 0 20px; }
+
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0,0,0,.08);
+            padding: 28px 32px;
+            margin-bottom: 30px;
+        }
+
+        h2 { color: #0b3c5d; font-size: 18px; margin: 0 0 20px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 13px; font-weight: 600; color: #374151; }
+
+        input[type="text"],
+        input[type="time"],
+        input[type="number"],
+        select {
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s;
+            background: #fff;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus { border-color: #0b3c5d; }
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
 
         /* أيام الأسبوع */
         .days-grid {
@@ -361,12 +406,17 @@
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
+<<<<<<< HEAD
             color: var(--text);
+=======
+            color: #374151;
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
             transition: all .2s;
             user-select: none;
         }
         .day-label input[type="checkbox"] { display: none; }
         .day-label.checked {
+<<<<<<< HEAD
             background: var(--navy);
             color: var(--white);
             border-color: var(--navy);
@@ -391,10 +441,94 @@
         @media (max-width: 900px) {
             .page { grid-template-columns: 1fr; }
         }
+=======
+            background: #0b3c5d;
+            color: #fff;
+            border-color: #0b3c5d;
+        }
+
+        .form-full { grid-column: 1 / -1; }
+
+        .btn-submit {
+            background: #0b3c5d;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 30px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background .2s;
+        }
+        .btn-submit:hover { background: #0d4f7a; }
+
+        /* الجدول */
+        .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid #e5e7eb; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th {
+            background: #0b3c5d;
+            color: #fff;
+            padding: 13px 14px;
+            text-align: right;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+            color: #1f2937;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8fafc; }
+
+        .badge-active   { background: #dcfce7; color: #166534; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; }
+        .badge-inactive { background: #fee2e2; color: #991b1b; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; }
+
+        .day-pill {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-size: 11px;
+            font-weight: 700;
+            margin: 2px 2px 0 0;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            border-radius: 7px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background .2s;
+        }
+        .delete-btn:hover { background: #fecaca; }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 18px;
+            color: #0b3c5d;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        .empty-msg { text-align: center; color: #6b7280; padding: 30px; font-size: 14px; }
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
     </style>
 </head>
 <body>
 
+<<<<<<< HEAD
 <!-- Header -->
 <header class="top-header">
     <div class="logo">
@@ -466,26 +600,76 @@
                         <span class="input-icon">🕑</span>
                         <input type="time" name="end_time" required>
                     </div>
+=======
+<div class="header">📚 إدارة المقررات والجداول الدراسية</div>
+
+<div class="wrap">
+    <a class="back-link" href="/admin/dashboard">← العودة للوحة الأدمن</a>
+
+    <!-- فورم الإضافة -->
+    <div class="card">
+        <h2>➕ إضافة مقرر جديد</h2>
+        <form method="post" action="/admin/sessions/add" id="addForm">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>اسم المقرر *</label>
+                    <input type="text" name="course_name" placeholder="مثال: CS401 - هياكل بيانات" required>
+                </div>
+
+                <div class="form-group">
+                    <label>رقم الشعبة *</label>
+                    <input type="text" name="session_number" placeholder="مثال: 1 أو A1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>الدكتور المسؤول *</label>
+                    <select name="doctor_id" required>
+                        <option value="">— اختر الدكتور —</option>
+                        {% for d in doctors %}
+                            <option value="{{ d[0] }}">{{ d[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>وقت بداية المحاضرة *</label>
+                    <input type="time" name="start_time" required>
+                </div>
+
+                <div class="form-group">
+                    <label>وقت نهاية المحاضرة *</label>
+                    <input type="time" name="end_time" required>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
                 </div>
 
                 <div class="form-group">
                     <label>اسم القاعة</label>
+<<<<<<< HEAD
                     <div class="input-wrap">
                         <span class="input-icon">🏢</span>
                         <input type="text" name="room_name" placeholder="مثال: B12">
                     </div>
+=======
+                    <input type="text" name="room_name" placeholder="مثال: B12">
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
                 </div>
 
                 <div class="form-group">
                     <label>كود القاعة (6 أرقام)</label>
+<<<<<<< HEAD
                     <div class="input-wrap">
                         <span class="input-icon">🔢</span>
                         <input type="text" name="room_code" placeholder="مثال: 123456" maxlength="6" pattern="\d{6}">
                     </div>
+=======
+                    <input type="text" name="room_code" placeholder="مثال: 123456" maxlength="6" pattern="\d{6}">
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
                 </div>
 
                 <div class="form-group">
                     <label>السعة الاستيعابية (عدد الطلاب)</label>
+<<<<<<< HEAD
                     <div class="input-wrap">
                         <span class="input-icon">👥</span>
                         <input type="number" name="capacity" placeholder="مثال: 40" min="1" max="500">
@@ -493,6 +677,13 @@
                 </div>
 
                 <div class="form-group">
+=======
+                    <input type="number" name="capacity" placeholder="مثال: 40" min="1" max="500">
+                </div>
+
+                <!-- أيام الأسبوع — full row -->
+                <div class="form-group form-full">
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
                     <label>أيام المحاضرة</label>
                     <input type="hidden" name="days" id="daysInput" value="">
                     <div class="days-grid" id="daysGrid">
@@ -514,16 +705,24 @@
                     </div>
                 </div>
 
+<<<<<<< HEAD
                 <button class="submit-btn" type="submit">
                     ✅ إضافة المقرر
                 </button>
 
             </form>
         </div>
+=======
+            </div>
+
+            <button class="btn-submit" type="submit">✅ إضافة المقرر</button>
+        </form>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
     </div>
 
     <!-- جدول المقررات -->
     <div class="card">
+<<<<<<< HEAD
         <div class="card-header">
             <div class="card-header-icon">📋</div>
             <div>
@@ -552,10 +751,29 @@
                         <th>السعة</th>
                         <th>الحالة</th>
                         <th>إجراء</th>
+=======
+        <h2>📋 المقررات المضافة</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم المقرر</th>
+                        <th>الشعبة</th>
+                        <th>الدكتور</th>
+                        <th>الأيام</th>
+                        <th>البداية</th>
+                        <th>النهاية</th>
+                        <th>القاعة</th>
+                        <th>السعة</th>
+                        <th>الحالة</th>
+                        <th>حذف</th>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
                     </tr>
                 </thead>
                 <tbody>
                     {% for s in sessions %}
+<<<<<<< HEAD
                     <tr style="animation-delay: {{ loop.index0 * 0.05 }}s">
                         <td>
                             <div class="course-cell">
@@ -563,6 +781,11 @@
                                 <div class="course-id">#{{ s[0] }}</div>
                             </div>
                         </td>
+=======
+                    <tr>
+                        <td>{{ s[0] }}</td>
+                        <td><strong>{{ s[1] }}</strong></td>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
                         <td>{{ s[2] or '—' }}</td>
                         <td>{{ s[3] }}</td>
                         <td>
@@ -574,6 +797,7 @@
                                 <span style="color:#9ca3af">—</span>
                             {% endif %}
                         </td>
+<<<<<<< HEAD
                         <td>
                             {% if s[5] and s[6] %}
                                 {{ s[5] }} - {{ s[6] }}
@@ -581,6 +805,10 @@
                                 —
                             {% endif %}
                         </td>
+=======
+                        <td>{{ s[5] or '—' }}</td>
+                        <td>{{ s[6] or '—' }}</td>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
                         <td>
                             {% if s[7] %}{{ s[7] }}{% if s[8] %} ({{ s[8] }}){% endif %}{% else %}—{% endif %}
                         </td>
@@ -597,6 +825,7 @@
                         <td>
                             <a class="delete-btn"
                                href="/admin/sessions/delete/{{ s[0] }}"
+<<<<<<< HEAD
                                onclick="return confirm('هل أنت متأكد من حذف هذا المقرر؟')">
                                 🗑 حذف
                             </a>
@@ -614,6 +843,19 @@
         </div>
     </div>
 
+=======
+                               onclick="return confirm('هل أنت متأكد من حذف هذا المقرر؟')">❌ حذف</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not sessions %}
+                    <tr><td colspan="11" class="empty-msg">لا توجد مقررات مضافة بعد.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
 </div>
 
 <script>
