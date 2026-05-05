@@ -2,90 +2,179 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>اعتراضات الغياب</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>اعتراضات الغياب - جامعة حائل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        .wrap { max-width: 1200px; margin: 0 auto; padding: 22px; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        .back { color: #0b3c5d; font-weight: 700; text-decoration: none; }
-        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
-        .filters a { background: #e2e8f0; color: #0f172a; padding: 8px 12px; border-radius: 9px; text-decoration: none; font-weight: 700; }
-        .filters a.active { background: #0b3c5d; color: #fff; }
-        .table-wrap { background: #fff; border-radius: 12px; overflow: auto; box-shadow: 0 6px 20px rgba(0,0,0,.1); }
-        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-        th, td { padding: 11px; border-bottom: 1px solid #e5e7eb; text-align: right; vertical-align: top; }
-        th { background: #0b3c5d; color: #fff; }
-        .reason { max-width: 280px; white-space: pre-wrap; }
-        .badge { display: inline-block; border-radius: 999px; padding: 5px 9px; font-size: 12px; font-weight: 700; }
-        .pending { background: #fef3c7; color: #92400e; }
-        .approved { background: #dcfce7; color: #166534; }
-        .rejected { background: #fee2e2; color: #991b1b; }
-        .review-form { display: flex; gap: 6px; align-items: center; min-width: 280px; }
-        .review-form input { margin: 0; width: 100%; max-width: 210px; }
-        .btn-ok, .btn-no { border: none; border-radius: 7px; color: #fff; padding: 8px 9px; cursor: pointer; font-weight: 700; }
-        .btn-ok { background: #166534; }
-        .btn-no { background: #b91c1c; }
-        .empty { padding: 20px; text-align: center; color: #475569; }
+        :root{
+            --navy:#0b3c5d; --navy-mid:#0d4f7a; --navy-lt:#1a6494;
+            --bg:#f0f4f8; --white:#ffffff; --text:#1a2332; --muted:#64748b;
+            --danger:#dc2626; --danger-lt:#fee2e2;
+            --success:#16a34a; --success-lt:#dcfce7;
+            --warning:#d97706; --warning-lt:#fef3c7;
+            --border:#dde4ed; --shadow:0 4px 24px rgba(11,60,93,.10);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+        .top-header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--navy-lt) 100%);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:70px;box-shadow:0 2px 20px rgba(0,0,0,.2);position:sticky;top:0;z-index:100;}
+        .logo{display:flex;align-items:center;gap:12px;color:#fff;}
+        .logo-icon{width:42px;height:42px;background:rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid rgba(255,255,255,.2);}
+        .logo-text{font-size:18px;font-weight:700;}
+        .logo-sub{font-size:12px;opacity:.7;}
+        .back-btn{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.85);text-decoration:none;font-size:14px;font-weight:500;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:8px 16px;transition:all .2s;}
+        .back-btn:hover{background:rgba(255,255,255,.2);color:#fff;}
+        .page{max-width:1400px;margin:0 auto;padding:30px 24px;}
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+        .stat-card{background:var(--white);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;}
+        .stat-info small{font-size:12px;color:var(--muted);}
+        .stat-info b{display:block;font-size:22px;font-weight:800;color:var(--navy);margin:4px 0 2px;}
+        .stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+        .si-blue{background:#dbeafe;}.si-yellow{background:var(--warning-lt);}.si-green{background:var(--success-lt);}.si-red{background:var(--danger-lt);}
+        .card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;}
+        .card-header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);padding:20px 28px;display:flex;align-items:center;gap:12px;}
+        .card-header-icon{width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+        .card-header h2{color:#fff;font-size:16px;font-weight:700;}
+        .card-header p{color:rgba(255,255,255,.65);font-size:12px;margin-top:2px;}
+        .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 24px;border-bottom:1px solid var(--border);background:#f8fafc;}
+        .filter-pill{background:#fff;color:var(--navy);padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;font-weight:700;text-decoration:none;}
+        .filter-pill.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+        .table-wrap{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;min-width:1180px;}
+        thead th{background:#f1f5f9;color:var(--navy);font-size:12px;font-weight:700;padding:12px 14px;text-align:right;border-bottom:2px solid var(--border);}
+        tbody tr{transition:background .15s;}
+        tbody tr:hover{background:#f8fafc;}
+        tbody tr:not(:last-child) td{border-bottom:1px solid #eef2f7;}
+        td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:top;}
+        .student-name{font-weight:700;color:var(--navy);}
+        .sub{font-size:11px;color:var(--muted);}
+        .badge{display:inline-block;border-radius:7px;padding:3px 9px;font-size:11px;font-weight:700;}
+        .badge-pending{background:var(--warning-lt);color:var(--warning);}
+        .badge-approved{background:var(--success-lt);color:var(--success);}
+        .badge-rejected{background:var(--danger-lt);color:var(--danger);}
+        .note-box{margin-top:6px;font-size:12px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);line-height:1.8;}
+        .review-form{display:flex;flex-direction:column;gap:8px;min-width:240px;}
+        .review-form input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Tajawal',sans-serif;outline:none;}
+        .review-form input:focus{border-color:var(--navy);}
+        .actions{display:flex;gap:8px;flex-wrap:wrap;}
+        .btn{border:none;border-radius:10px;padding:9px 12px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;}
+        .btn-approve{background:var(--success-lt);color:var(--success);}
+        .btn-reject{background:var(--danger-lt);color:var(--danger);}
+        .empty{text-align:center;padding:60px 20px;color:var(--muted);}
+        .empty-icon{font-size:48px;margin-bottom:12px;}
+        @media(max-width:700px){.stats-row{grid-template-columns:1fr 1fr;}}
     </style>
 </head>
 <body>
+<header class="top-header">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <div><div class="logo-text">جامعة حائل</div><div class="logo-sub">نظام الحضور والغياب</div></div>
+    </div>
+    <a class="back-btn" href="/admin/dashboard">العودة للوحة الأدمن</a>
+</header>
 
-<div class="header">جامعة حائل | اعتراضات الغياب</div>
-
-<div class="wrap">
-    <div class="topbar">
-        <a class="back" href="/admin/dashboard">العودة للوحة الأدمن</a>
-        <div class="filters">
-            <a href="/admin/appeals?status=all" class="{{ 'active' if status_filter == 'all' else '' }}">الكل</a>
-            <a href="/admin/appeals?status=pending" class="{{ 'active' if status_filter == 'pending' else '' }}">قيد المراجعة</a>
-            <a href="/admin/appeals?status=approved" class="{{ 'active' if status_filter == 'approved' else '' }}">مقبول</a>
-            <a href="/admin/appeals?status=rejected" class="{{ 'active' if status_filter == 'rejected' else '' }}">مرفوض</a>
+<div class="page">
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-info"><small>إجمالي الاعتراضات</small><b>{{ appeals|length }}</b><small>جميع الطلبات الحالية</small></div>
+            <div class="stat-icon si-blue">📋</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>قيد المراجعة</small><b>{{ appeals|selectattr('status', 'equalto', 'pending')|list|length }}</b><small>بانتظار القرار</small></div>
+            <div class="stat-icon si-yellow">⏳</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>المقبولة</small><b>{{ appeals|selectattr('status', 'equalto', 'approved')|list|length }}</b><small>تمت الموافقة</small></div>
+            <div class="stat-icon si-green">✅</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>المرفوضة</small><b>{{ appeals|selectattr('status', 'equalto', 'rejected')|list|length }}</b><small>تم الرفض</small></div>
+            <div class="stat-icon si-red">❌</div>
         </div>
     </div>
 
-    <div class="table-wrap">
-        <table>
-            <tr>
-                <th>الطالب</th>
-                <th>المقرر</th>
-                <th>وقت المحاضرة</th>
-                <th>حالة السجل</th>
-                <th>سبب الاعتراض</th>
-                <th>الحالة</th>
-                <th>إجراء الأدمن</th>
-            </tr>
-            {% for ap in appeals %}
-            <tr>
-                <td>{{ ap.student_name }}<br><small>{{ ap.university_id }}</small></td>
-                <td>{{ ap.course_name }}</td>
-                <td>{{ ap.check_in or '-' }}</td>
-                <td>{{ ap.attendance_status or '-' }}</td>
-                <td class="reason">{{ ap.reason }}</td>
-                <td>
-                    <span class="badge {{ ap.status }}">{{ ap.status }}</span>
-                    {% if ap.admin_note %}
-                    <div><small>ملاحظة: {{ ap.admin_note }}</small></div>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if ap.status == 'pending' %}
-                    <form class="review-form" method="post" action="/admin/appeals/{{ ap.id }}/review">
-                        <input type="text" name="admin_note" placeholder="ملاحظة الأدمن (اختياري)">
-                        <button class="btn-ok" type="submit" name="decision" value="approved">قبول</button>
-                        <button class="btn-no" type="submit" name="decision" value="rejected">رفض</button>
-                    </form>
-                    {% else %}
-                    <small>تمت المراجعة {{ ap.reviewed_at or '' }}</small>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% if not appeals %}
-        <div class="empty">لا توجد اعتراضات حسب الفلتر الحالي.</div>
-        {% endif %}
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">📝</div>
+            <div><h2>اعتراضات الغياب</h2><p>راجع سبب اعتراض الطالب وأضف ملاحظتك قبل قبول الطلب أو رفضه.</p></div>
+        </div>
+
+        <div class="toolbar">
+            <a class="filter-pill {{ 'active' if status_filter == 'all' else '' }}" href="/admin/appeals?status=all">الكل</a>
+            <a class="filter-pill {{ 'active' if status_filter == 'pending' else '' }}" href="/admin/appeals?status=pending">قيد المراجعة</a>
+            <a class="filter-pill {{ 'active' if status_filter == 'approved' else '' }}" href="/admin/appeals?status=approved">مقبول</a>
+            <a class="filter-pill {{ 'active' if status_filter == 'rejected' else '' }}" href="/admin/appeals?status=rejected">مرفوض</a>
+        </div>
+
+        <div class="table-wrap">
+            {% if appeals %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>الطالب</th>
+                        <th>المقرر</th>
+                        <th>وقت السجل</th>
+                        <th>حالة الحضور</th>
+                        <th>سبب اعتراض الطالب</th>
+                        <th>قرار الإدارة</th>
+                        <th>إجراء المراجعة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for ap in appeals %}
+                    <tr>
+                        <td>
+                            <div class="student-name">{{ ap.student_name }}</div>
+                            <div class="sub">{{ ap.university_id }}</div>
+                        </td>
+                        <td><div class="student-name">{{ ap.course_name }}</div></td>
+                        <td><div class="sub">{{ ap.check_in or '-' }}</div></td>
+                        <td>{{ ap.attendance_status or '-' }}</td>
+                        <td>
+                            <div class="note-box">{{ ap.reason }}</div>
+                            {% if ap.created_at %}
+                            <div class="sub" style="margin-top:6px;">وقت الإرسال: {{ ap.created_at }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ 'pending' if ap.status == 'pending' else 'approved' if ap.status == 'approved' else 'rejected' }}">
+                                {% if ap.status == 'pending' %}قيد المراجعة{% elif ap.status == 'approved' %}مقبول{% else %}مرفوض{% endif %}
+                            </span>
+                            {% if ap.admin_note %}
+                            <div class="note-box">
+                                <strong>ملاحظة الأدمن:</strong><br>
+                                {{ ap.admin_note }}
+                            </div>
+                            {% endif %}
+                            {% if ap.reviewed_at %}
+                            <div class="sub" style="margin-top:6px;">وقت المراجعة: {{ ap.reviewed_at }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ap.status == 'pending' %}
+                            <form class="review-form" method="post" action="/admin/appeals/{{ ap.id }}/review">
+                                <input type="text" name="admin_note" placeholder="اكتب ملاحظة للطالب">
+                                <div class="actions">
+                                    <button class="btn btn-approve" type="submit" name="decision" value="approved">قبول</button>
+                                    <button class="btn btn-reject" type="submit" name="decision" value="rejected">رفض</button>
+                                </div>
+                            </form>
+                            {% else %}
+                            <span class="sub">تمت مراجعة هذا الاعتراض</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">
+                <div class="empty-icon">📝</div>
+                <p>لا توجد اعتراضات مطابقة للفلاتر الحالية.</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
-
 </body>
 </html>
