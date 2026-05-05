@@ -45,6 +45,12 @@ def ensure_session_extra_columns():
         if "room_code" not in cols:
             cur.execute("ALTER TABLE sessions ADD COLUMN room_code TEXT")
 
+        if "days" not in cols:
+            cur.execute("ALTER TABLE sessions ADD COLUMN days TEXT")
+
+        if "capacity" not in cols:
+            cur.execute("ALTER TABLE sessions ADD COLUMN capacity INTEGER")
+
         conn.commit()
     finally:
         if conn:
@@ -80,7 +86,7 @@ def register_admin_routes(app):
                 session["admin"] = username
                 return redirect("/admin/dashboard")
 
-            return render_template("admin/admin_login.html", error="اسم المستخدم أو كلمة المرور غير صحيحة")
+            return "Invalid login", 401
 
         return render_template("admin/admin_login.html")
 
