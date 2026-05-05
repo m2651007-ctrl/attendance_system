@@ -93,10 +93,8 @@ def register_kiosk_routes(app):
             cur.execute("""
                 SELECT s.session_id, s.course_name,
                        s.start_time, s.end_time,
-                       COALESCE(s.session_number, '') AS session_number,
-                       COALESCE(d.name, '') AS doctor_name
+                       COALESCE(s.session_number, '') AS session_number
                 FROM sessions s
-                LEFT JOIN doctors d ON d.doctor_id = s.doctor_id
                 WHERE s.room_name = ?
                   AND s.room_code = ?
                   AND s.active    = 1
@@ -118,8 +116,7 @@ def register_kiosk_routes(app):
                 "course_name":    row["course_name"],
                 "session_number": row["session_number"],
                 "start_time":     row["start_time"],
-                "end_time":       row["end_time"],
-                "doctor_name":    row["doctor_name"]
+                "end_time":       row["end_time"]
             }
         })
 
