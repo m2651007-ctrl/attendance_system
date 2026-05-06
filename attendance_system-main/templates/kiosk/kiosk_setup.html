@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>جامعة حائل | جهاز القاعة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0b3c5d;
+            --navy-mid: #0d4f7a;
+            --navy-lt: #1a6494;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a1929 0%, #0d4f7a 55%, #1a6494 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* LOGO */
+        .logo-area {
+            text-align: center;
+            margin-bottom: 28px;
+            animation: fadeDown .5s ease both;
+        }
+
+        .logo-icon {
+            width: 82px; height: 82px;
+            background: rgba(255,255,255,.12);
+            border: 2px solid rgba(255,255,255,.22);
+            border-radius: 22px;
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            font-size: 40px; margin-bottom: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.25);
+        }
+
+        .logo-title {
+            font-size: 28px; font-weight: 800;
+            color: #fff; letter-spacing: .3px;
+        }
+
+        .logo-sub {
+            font-size: 14px;
+            color: rgba(255,255,255,.6);
+            margin-top: 5px;
+        }
+
+        /* CARD */
+        .card {
+            background: #fff;
+            border-radius: 22px;
+            padding: 38px 34px;
+            width: 100%; max-width: 440px;
+            box-shadow: 0 24px 64px rgba(0,0,0,.25);
+            animation: fadeUp .5s ease both;
+        }
+
+        .card-title {
+            font-size: 21px; font-weight: 800;
+            color: var(--navy); text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .card-sub {
+            font-size: 13px; color: #64748b;
+            text-align: center; margin-bottom: 28px;
+        }
+
+        /* FORM */
+        .form-group { margin-bottom: 18px; }
+
+        .form-group label {
+            display: block; font-size: 13px;
+            font-weight: 600; color: var(--navy);
+            margin-bottom: 7px;
+        }
+
+        .form-group label .req { color: #dc2626; margin-right: 2px; }
+
+        .input-wrap { position: relative; }
+
+        .input-icon {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px; opacity: .4; pointer-events: none;
+        }
+
+        .form-group select,
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 12px 44px 12px 14px;
+            border: 1.5px solid #dde4ed;
+            border-radius: 11px;
+            font-size: 14px;
+            font-family: 'Tajawal', sans-serif;
+            color: #1a2332;
+            background: #f8fafc;
+            outline: none;
+            transition: all .2s;
+            -webkit-appearance: none;
+        }
+
+        .form-group select:focus,
+        .form-group input[type="text"]:focus {
+            border-color: var(--navy);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(11,60,93,.08);
+        }
+
+        .form-group input::placeholder { color: #a0aec0; }
+
+        /* BUTTONS */
+        .btn-start {
+            width: 100%;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+            color: #fff; border: none; border-radius: 12px;
+            padding: 14px; font-size: 16px; font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer; transition: all .2s; margin-top: 6px;
+            box-shadow: 0 4px 16px rgba(11,60,93,.35);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        .btn-start:hover  { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(11,60,93,.45); }
+        .btn-start:active { transform: translateY(0); }
+        .btn-start:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+        .btn-clear {
+            width: 100%;
+            background: transparent;
+            color: #64748b;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px; font-size: 14px; font-weight: 600;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer; transition: all .2s; margin-top: 10px;
+        }
+
+        .btn-clear:hover { border-color: #dc2626; color: #dc2626; }
+
+        /* MSG */
+        .msg {
+            margin-top: 14px; border-radius: 10px;
+            padding: 11px 14px; font-size: 13px; font-weight: 600;
+            text-align: center; display: none;
+            animation: fadeUp .3s ease both;
+        }
+        .msg.error   { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .msg.success { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+        /* FOOTER */
+        .footer {
+            margin-top: 26px;
+            font-size: 12px; color: rgba(255,255,255,.4);
+            text-align: center;
+            animation: fadeUp .6s ease .1s both;
+        }
+
+        /* LOADING SPINNER */
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin     { to { transform: rotate(360deg); } }
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp   { from{opacity:0;transform:translateY(16px)}  to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body>
+
+    <!-- Logo -->
+    <div class="logo-area">
+        <div class="logo-icon">🎓</div>
+        <div class="logo-title">جامعة حائل</div>
+        <div class="logo-sub">نظام الحضور الذكي — جهاز القاعة</div>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+        <div class="card-title">تسجيل دخول جهاز القاعة</div>
+        <div class="card-sub">أدخل بيانات القاعة للمتابعة</div>
+
+        <div class="form-group">
+            <label>القاعة <span class="req">*</span></label>
+            <div class="input-wrap">
+                <span class="input-icon">🏛️</span>
+                <select id="room_name">
+                    <option value="">— اختر القاعة —</option>
+                    {% for r in rooms %}
+                        <option value="{{ r }}">{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>كود القاعة <span class="req">*</span></label>
+            <div class="input-wrap">
+                <span class="input-icon">🔑</span>
+                <input type="text" id="room_code"
+                       inputmode="numeric"
+                       placeholder="أدخل الكود (6 أرقام)"
+                       maxlength="6"
+                       autocomplete="off">
+            </div>
+        </div>
+
+        <button class="btn-start" id="saveBtn">
+            <div class="spinner" id="spinner"></div>
+            <span id="btnText">🚀 بدء تسجيل الحضور</span>
+        </button>
+
+        <button class="btn-clear" id="clearBtn">🗑 مسح الإعدادات</button>
+
+        <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="footer">
+        جامعة حائل © 2026 — نظام الحضور الذكي
+    </div>
+
+<script>
+const roomEl   = document.getElementById("room_name");
+const codeEl   = document.getElementById("room_code");
+const msgEl    = document.getElementById("msg");
+const saveBtn  = document.getElementById("saveBtn");
+const clearBtn = document.getElementById("clearBtn");
+const spinner  = document.getElementById("spinner");
+const btnText  = document.getElementById("btnText");
+
+function showMsg(text, type) {
+    msgEl.innerHTML = text;
+    msgEl.className = "msg " + type;
+}
+
+function setLoading(on) {
+    saveBtn.disabled = on;
+    spinner.style.display = on ? "block" : "none";
+    btnText.textContent = on ? "جاري التحقق..." : "🚀 بدء تسجيل الحضور";
+}
+
+clearBtn.addEventListener("click", () => {
+    sessionStorage.removeItem("kiosk_room");
+    sessionStorage.removeItem("kiosk_code");
+    roomEl.value = "";
+    codeEl.value = "";
+    showMsg("✅ تم مسح الإعدادات.", "success");
+});
+
+saveBtn.addEventListener("click", async () => {
+    msgEl.className = "msg";
+    const room_name = (roomEl.value || "").trim();
+    const room_code = (codeEl.value || "").trim();
+
+    if (!room_name) { showMsg("⚠️ الرجاء اختيار القاعة.", "error"); return; }
+    if (!/^\d{6}$/.test(room_code)) { showMsg("⚠️ الكود يجب أن يكون 6 أرقام.", "error"); return; }
+
+    setLoading(true);
+
+    try {
+        const res  = await fetch("/kiosk/authorize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ room_name, room_code })
+        });
+        const data = await res.json();
+
+        if (!data.ok) {
+            showMsg("❌ " + (data.message || "القاعة أو الكود غير صحيح."), "error");
+            return;
+        }
+
+        sessionStorage.setItem("kiosk_room", room_name);
+        sessionStorage.setItem("kiosk_code", room_code);
+        showMsg("✅ تم التحقق — جاري الانتقال...", "success");
+        setTimeout(() => { window.location.href = "/kiosk/camera"; }, 700);
+
+    } catch(e) {
+        showMsg("❌ تعذر الاتصال بالخادم.", "error");
+    } finally {
+        setLoading(false);
+    }
+});
+
+codeEl.addEventListener("keydown", e => { if(e.key === "Enter") saveBtn.click(); });
+
+// تحقق من وجود إعدادات محفوظة
+const savedRoom = sessionStorage.getItem("kiosk_room");
+const savedCode = sessionStorage.getItem("kiosk_code");
+if (savedRoom && savedCode) {
+    roomEl.value = savedRoom;
+    codeEl.value = savedCode;
+}
+</script>
+</body>
+</html>

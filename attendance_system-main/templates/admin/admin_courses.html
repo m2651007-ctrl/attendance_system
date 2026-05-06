@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة المقررات — جامعة حائل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:     #0b3c5d;
+            --navy-mid: #0d4f7a;
+            --navy-lt:  #1a6494;
+            --gold:     #c9a84c;
+            --gold-lt:  #f0d080;
+            --bg:       #f0f4f8;
+            --white:    #ffffff;
+            --text:     #1a2332;
+            --muted:    #64748b;
+            --danger:   #dc2626;
+            --danger-lt:#fee2e2;
+            --success:  #16a34a;
+            --success-lt:#dcfce7;
+            --border:   #dde4ed;
+            --shadow:   0 4px 24px rgba(11,60,93,.10);
+            --shadow-lg:0 8px 40px rgba(11,60,93,.16);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        .top-header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-lt) 100%);
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            box-shadow: 0 2px 20px rgba(0,0,0,.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--white);
+        }
+
+        .top-header .logo-icon {
+            width: 42px; height: 42px;
+            background: rgba(255,255,255,.12);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            border: 1px solid rgba(255,255,255,.2);
+        }
+
+        .top-header .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: .3px;
+        }
+
+        .top-header .logo-sub {
+            font-size: 12px;
+            opacity: .7;
+            font-weight: 400;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,.85);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 9px;
+            padding: 8px 16px;
+            transition: all .2s;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,.2);
+            color: var(--white);
+        }
+
+        /* ===== LAYOUT ===== */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 36px 24px;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--white);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+            padding: 22px 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header-icon {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,.15);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+
+        .card-header h2 {
+            color: var(--white);
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .card-header p {
+            color: rgba(255,255,255,.65);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .card-body { padding: 28px; }
+
+        /* ===== FORM ===== */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 7px;
+        }
+
+        .form-group label span {
+            color: var(--danger);
+            margin-right: 2px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap .input-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            opacity: .5;
+            pointer-events: none;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 11px 42px 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Tajawal', sans-serif;
+            color: var(--text);
+            background: #f8fafc;
+            transition: all .2s;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--navy);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(11,60,93,.08);
+        }
+
+        .form-group input::placeholder,
+        .form-group select::placeholder { color: #a0aec0; }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            padding: 13px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(11,60,93,.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(11,60,93,.4);
+        }
+
+        .submit-btn:active { transform: translateY(0); }
+
+        /* ===== FLASH MSG ===== */
+        .flash {
+            background: var(--success-lt);
+            border: 1px solid #bbf7d0;
+            color: var(--success);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 28px;
+            border-bottom: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .stats-bar .count {
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .stats-bar .count strong {
+            color: var(--navy);
+            font-size: 22px;
+            font-weight: 800;
+            margin-left: 6px;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: #f1f5f9;
+            color: var(--navy);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 13px 20px;
+            text-align: right;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border);
+        }
+
+        tbody tr {
+            transition: background .15s;
+            animation: fadeIn .3s ease both;
+        }
+
+        tbody tr:hover { background: #f8fafc; }
+
+        tbody tr:not(:last-child) td {
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        td {
+            padding: 14px 20px;
+            font-size: 14px;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        .course-name { font-weight: 600; color: var(--navy); }
+        .course-id   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        .badge-active   { background: var(--success-lt); color: var(--success); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; }
+        .badge-inactive { background: var(--danger-lt); color: var(--danger); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; }
+
+        .day-pill {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 6px;
+            padding: 2px 7px;
+            font-size: 11px;
+            font-weight: 700;
+            margin: 2px 2px 0 0;
+        }
+
+        .delete-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--danger-lt);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
+        }
+
+        /* أيام الأسبوع */
+        .days-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 2px;
+        }
+        .day-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #f1f5f9;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 7px 13px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all .2s;
+            user-select: none;
+        }
+        .day-label input[type="checkbox"] { display: none; }
+        .day-label.checked {
+            background: var(--navy);
+            color: var(--white);
+            border-color: var(--navy);
+        }
+
+        /* empty */
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty p    { font-size: 15px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* responsive */
+        @media (max-width: 900px) {
+            .page { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="top-header">
+    <div class="logo">
+        <div class="logo-icon">📚</div>
+        <div>
+            <div class="logo-text">جامعة حائل</div>
+            <div class="logo-sub">نظام الحضور والغياب</div>
+        </div>
+    </div>
+    <a class="back-btn" href="/admin/dashboard">
+        ← العودة للوحة الأدمن
+    </a>
+</header>
+
+<div class="page">
+
+    <!-- فورم الإضافة -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">➕</div>
+            <div>
+                <h2>إضافة مقرر جديد</h2>
+                <p>أدخل بيانات المقرر أدناه</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="post" action="/admin/sessions/add" id="addForm">
+
+                <div class="form-group">
+                    <label>اسم المقرر <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">📚</span>
+                        <input type="text" name="course_name" placeholder="مثال: CS401 - هياكل بيانات" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>رقم الشعبة <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔢</span>
+                        <input type="text" name="session_number" placeholder="مثال: 1 أو A1" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>الدكتور المسؤول <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">👨‍🏫</span>
+                        <select name="doctor_id" required>
+                            <option value="">— اختر الدكتور —</option>
+                            {% for d in doctors %}
+                                <option value="{{ d[0] }}">{{ d[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>وقت بداية المحاضرة <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🕐</span>
+                        <input type="time" name="start_time" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>وقت نهاية المحاضرة <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🕑</span>
+                        <input type="time" name="end_time" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>اسم القاعة</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🏢</span>
+                        <input type="text" name="room_name" placeholder="مثال: B12">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>كود القاعة (6 أرقام)</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔢</span>
+                        <input type="text" name="room_code" placeholder="مثال: 123456" maxlength="6" pattern="\d{6}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>السعة الاستيعابية (عدد الطلاب)</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">👥</span>
+                        <input type="number" name="capacity" placeholder="مثال: 40" min="1" max="500">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>أيام المحاضرة</label>
+                    <input type="hidden" name="days" id="daysInput" value="">
+                    <div class="days-grid" id="daysGrid">
+                        <label class="day-label" data-day="الأحد">
+                            <input type="checkbox" value="الأحد"> الأحد
+                        </label>
+                        <label class="day-label" data-day="الاثنين">
+                            <input type="checkbox" value="الاثنين"> الاثنين
+                        </label>
+                        <label class="day-label" data-day="الثلاثاء">
+                            <input type="checkbox" value="الثلاثاء"> الثلاثاء
+                        </label>
+                        <label class="day-label" data-day="الأربعاء">
+                            <input type="checkbox" value="الأربعاء"> الأربعاء
+                        </label>
+                        <label class="day-label" data-day="الخميس">
+                            <input type="checkbox" value="الخميس"> الخميس
+                        </label>
+                    </div>
+                </div>
+
+                <button class="submit-btn" type="submit">
+                    ✅ إضافة المقرر
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- جدول المقررات -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">📋</div>
+            <div>
+                <h2>قائمة المقررات</h2>
+                <p>جميع المقررات المضافة في النظام</p>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="count">
+                إجمالي المقررات <strong>{{ sessions | length }}</strong>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            {% if sessions %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>المقرر</th>
+                        <th>الشعبة</th>
+                        <th>الدكتور</th>
+                        <th>الأيام</th>
+                        <th>الوقت</th>
+                        <th>القاعة</th>
+                        <th>السعة</th>
+                        <th>الحالة</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in sessions %}
+                    <tr style="animation-delay: {{ loop.index0 * 0.05 }}s">
+                        <td>
+                            <div class="course-cell">
+                                <div class="course-name">{{ s[1] }}</div>
+                                <div class="course-id">#{{ s[0] }}</div>
+                            </div>
+                        </td>
+                        <td>{{ s[2] or '—' }}</td>
+                        <td>{{ s[3] }}</td>
+                        <td>
+                            {% if s[9] %}
+                                {% for day in s[9].split(',') %}
+                                    <span class="day-pill">{{ day.strip() }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span style="color:#9ca3af">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if s[5] and s[6] %}
+                                {{ s[5] }} - {{ s[6] }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if s[7] %}{{ s[7] }}{% if s[8] %} ({{ s[8] }}){% endif %}{% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if s[10] %}{{ s[10] }} طالب{% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if s[4] == 1 %}
+                                <span class="badge-active">نشطة</span>
+                            {% else %}
+                                <span class="badge-inactive">مغلقة</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="delete-btn"
+                               href="/admin/sessions/delete/{{ s[0] }}"
+                               onclick="return confirm('هل أنت متأكد من حذف هذا المقرر؟')">
+                                🗑 حذف
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">
+                <div class="empty-icon">📚</div>
+                <p>لا توجد مقررات مضافة بعد.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+// أيام الأسبوع — Toggle
+const dayLabels = document.querySelectorAll('.day-label');
+const daysInput = document.getElementById('daysInput');
+
+function updateDaysInput() {
+    const selected = [];
+    dayLabels.forEach(lbl => {
+        const cb = lbl.querySelector('input[type="checkbox"]');
+        if (cb.checked) selected.push(cb.value);
+    });
+    daysInput.value = selected.join(',');
+}
+
+dayLabels.forEach(lbl => {
+    lbl.addEventListener('click', function(e) {
+        e.preventDefault();
+        const cb = this.querySelector('input[type="checkbox"]');
+        cb.checked = !cb.checked;
+        this.classList.toggle('checked', cb.checked);
+        updateDaysInput();
+    });
+});
+
+// التحقق: لازم يختار يوم واحد على الأقل
+document.getElementById('addForm').addEventListener('submit', function(e) {
+    if (!daysInput.value) {
+        e.preventDefault();
+        alert('الرجاء اختيار يوم واحد على الأقل للمحاضرة.');
+    }
+});
+</script>
+
+</body>
+</html>

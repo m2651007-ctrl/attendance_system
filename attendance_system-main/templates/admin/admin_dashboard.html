@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        /* ربط كامل المربع */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            padding: 40px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .box {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .box h3 {
+            margin-bottom: 10px;
+            color: #0b3c5d;
+        }
+
+        .box p {
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .box span {
+            color: #d4a017;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    جامعة حائل | لوحة تحكم الإدارة
+</div>
+
+<div class="dashboard">
+
+    <!-- الدكاترة -->
+    <a href="/admin/doctors" class="card-link">
+        <div class="box">
+            <h3>الدكاترة</h3>
+            <p>إضافة / تعديل / عرض</p>
+            <span>إدارة الدكاترة</span>
+        </div>
+    </a>
+
+    <!-- المقررات -->
+    <a href="/admin/courses" class="card-link">
+        <div class="box">
+            <h3>المقررات</h3>
+            <p>إضافة المواد والشعب</p>
+            <span>إدارة المقررات</span>
+        </div>
+    </a>
+
+    <!-- الطلاب -->
+    <a href="/admin/students" class="card-link">
+        <div class="box">
+            <h3>الطلاب</h3>
+            <p>عرض الطلاب المسجلين</p>
+            <span>عرض الطلاب</span>
+        </div>
+    </a>
+    
+    <!-- الاعتراضات -->
+    <a href="/admin/appeals" class="card-link">
+            <div class="box">
+                <h3>الاعتراضات</h3>
+                <p>مراجعة اعتراضات الغياب من الطلاب مع القبول أو الرفض وإضافة الملاحظة.</p>
+                <span>إدارة الاعتراضات</span>
+            </div>
+        </a>
+
+    <!-- الحضور -->
+    <a href="/admin/attendance" class="card-link">
+        <div class="box">
+            <h3>الحضور</h3>
+            <p>جميع الحضور والانصراف</p>
+            <span>سجل الحضور</span>
+        </div>
+    </a>
+
+    <!-- السجلات -->
+    <a href="/admin/logs" class="card-link">
+        <div class="box">
+            <h3>السجلات</h3>
+            <p>سجل أنشطة النظام</p>
+            <span>Admin Logs</span>
+        </div>
+    </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تسجيل وجوه الطلاب — جامعة حائل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:     #0b3c5d;
+      --navy-mid: #0d4f7a;
+      --navy-lt:  #1a6494;
+      --bg:       #f0f4f8;
+      --white:    #ffffff;
+      --text:     #1a2332;
+      --muted:    #64748b;
+      --danger:   #dc2626;
+      --danger-lt:#fee2e2;
+      --success:  #16a34a;
+      --success-lt:#dcfce7;
+      --warning:  #d97706;
+      --warning-lt:#fef3c7;
+      --blue:     #2563eb;
+      --blue-lt:  #dbeafe;
+      --border:   #dde4ed;
+      --shadow:   0 4px 24px rgba(11,60,93,.10);
+      --shadow-lg:0 8px 40px rgba(11,60,93,.16);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    .top-header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-lt) 100%);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      box-shadow: 0 2px 20px rgba(0,0,0,.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo { display: flex; align-items: center; gap: 12px; color: var(--white); }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      border: 1px solid rgba(255,255,255,.2);
+    }
+    .logo-text { font-size: 18px; font-weight: 700; }
+    .logo-sub  { font-size: 12px; opacity: .7; font-weight: 400; }
+
+    .back-btn {
+      display: flex; align-items: center; gap: 8px;
+      color: rgba(255,255,255,.85); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 9px; padding: 8px 16px; transition: all .2s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.2); color: var(--white); }
+
+    /* ===== PAGE ===== */
+    .page {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 30px 24px;
+    }
+
+    /* ===== STATS ROW ===== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-card .stat-info small { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .stat-card .stat-info b    { display: block; font-size: 26px; font-weight: 800; color: var(--navy); margin: 4px 0 2px; }
+    .stat-card .stat-info span { font-size: 12px; color: var(--muted); }
+
+    .stat-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+
+    .stat-icon.blue    { background: var(--blue-lt); }
+    .stat-icon.green   { background: var(--success-lt); }
+    .stat-icon.gold    { background: var(--warning-lt); }
+    .stat-icon.navy    { background: #e0f2fe; }
+
+    /* ===== MAIN GRID ===== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--white);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .card:last-child { margin-bottom: 0; }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-header-icon {
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,.15);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    .card-header h3 { color: var(--white); font-size: 15px; font-weight: 700; }
+    .card-header p  { color: rgba(255,255,255,.65); font-size: 12px; margin-top: 1px; }
+
+    .card-body { padding: 22px; }
+
+    /* ===== FORM ===== */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
+    .form-group label span { color: var(--danger); margin-right: 2px; }
+
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute; right: 13px; top: 50%;
+      transform: translateY(-50%); font-size: 15px;
+      opacity: .45; pointer-events: none;
+    }
+
+    .form-group input {
+      width: 100%; padding: 10px 40px 10px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 14px; font-family: 'Tajawal', sans-serif;
+      color: var(--text); background: #f8fafc;
+      transition: all .2s; outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--navy); background: var(--white);
+      box-shadow: 0 0 0 3px rgba(11,60,93,.08);
+    }
+
+    .form-group input::placeholder { color: #a0aec0; }
+
+    /* ===== INFO TILES ===== */
+    .info-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+
+    .info-tile {
+      border-radius: 12px; padding: 12px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid;
+    }
+
+    .info-tile.blue  { background: #eff6ff; border-color: #bfdbfe; }
+    .info-tile.green { background: var(--success-lt); border-color: #bbf7d0; }
+
+    .info-tile .tile-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+    .info-tile .tile-value { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 2px; }
+    .info-tile .tile-icon  { font-size: 22px; }
+
+    /* ===== NOTICE ===== */
+    .notice {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #0369a1;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    /* ===== SAVE BTN ===== */
+    .save-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+      color: var(--white); border: none; border-radius: 12px;
+      padding: 13px; font-size: 15px; font-weight: 700;
+      font-family: 'Tajawal', sans-serif; cursor: pointer;
+      transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 14px rgba(11,60,93,.3);
+      margin-top: 6px;
+    }
+    .save-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(11,60,93,.4); }
+    .save-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    .test-btn {
+      width: 100%;
+      background: var(--blue-lt);
+      color: var(--blue); border: 1px solid #bfdbfe; border-radius: 12px;
+      padding: 11px; font-size: 14px; font-weight: 700;
+      font-family: 'Tajawal', sans-serif; cursor: pointer;
+      transition: all .2s; margin-top: 8px;
+    }
+    .test-btn:hover { background: var(--blue); color: var(--white); }
+    .test-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* ===== SAVE MSG ===== */
+    .save-msg {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 10px;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== TIPS ===== */
+    .tips-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .tip-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 500; color: var(--text);
+      padding: 8px 10px;
+      background: #f8fafc;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+    }
+    .tip-icon { font-size: 18px; flex-shrink: 0; }
+
+    /* ===== PREVIEW ===== */
+    .preview-wrap {
+      width: 100%; height: 160px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0b3c5d, #1a6494);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.6);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .preview-wrap img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+
+    .capture-status {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 600;
+    }
+
+    .status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--muted); flex-shrink: 0;
+    }
+    .status-dot.active { background: var(--success); }
+
+    /* ===== CAMERA CARD ===== */
+    .video-wrap {
+      position: relative;
+      border-radius: 14px;
+      background: #020617;
+      overflow: hidden;
+      height: 280px;
+    }
+
+    video {
+      width: 100%; height: 280px;
+      object-fit: cover; display: block;
+    }
+
+    #overlay {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 5; pointer-events: none;
+    }
+
+    .face-guide {
+      position: absolute;
+      inset: 30px 100px;
+      border-radius: 20px;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .face-guide::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(var(--navy-lt), var(--navy-lt)) top left/40px 3px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) top left/3px 40px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) top right/40px 3px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) top right/3px 40px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) bottom left/40px 3px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) bottom left/3px 40px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) bottom right/40px 3px no-repeat,
+        linear-gradient(var(--navy-lt), var(--navy-lt)) bottom right/3px 40px no-repeat;
+      border-radius: 20px;
+      filter: drop-shadow(0 0 10px rgba(26,100,148,.7));
+    }
+
+    canvas { display: none; }
+
+    /* ===== CAMERA CONTROLS ===== */
+    .cam-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .cam-btn {
+      border: none; border-radius: 10px;
+      height: 42px; font-weight: 700;
+      cursor: pointer; font-size: 13px;
+      font-family: 'Tajawal', sans-serif;
+      transition: all .2s; color: var(--white);
+    }
+    .cam-btn:hover { transform: translateY(-1px); }
+    .cam-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    .cam-btn.navy   { background: var(--navy); }
+    .cam-btn.blue   { background: linear-gradient(135deg, var(--blue), #1d4ed8); }
+    .cam-btn.danger { background: linear-gradient(135deg, #f43f5e, #dc2626); }
+
+    /* ===== COUNTER ===== */
+    .counter-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 16px; margin-bottom: 14px;
+    }
+
+    .counter-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .counter-value { font-size: 18px; font-weight: 800; color: var(--navy); }
+
+    .progress-bar-wrap {
+      background: #e2e8f0; border-radius: 999px; height: 6px; overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--navy), var(--navy-lt));
+      border-radius: 999px;
+      transition: width .4s ease;
+      width: 0%;
+    }
+
+    /* ===== INSTRUCTION BADGE ===== */
+    #instruction {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    /* ===== INTERVAL ===== */
+    .interval-row {
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .interval-row label { font-size: 13px; font-weight: 600; color: var(--navy); white-space: nowrap; }
+
+    .interval-row input {
+      width: 80px; padding: 8px 10px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: 'Tajawal', sans-serif;
+      text-align: center; outline: none;
+    }
+
+    .interval-row input:focus { border-color: var(--navy); }
+    .interval-row small { font-size: 12px; color: var(--muted); }
+
+    /* ===== PERF ===== */
+    .perf-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+      margin-top: 10px;
+    }
+
+    .perf-box {
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px;
+    }
+
+    .perf-box .perf-label { font-size: 11px; color: var(--muted); }
+    .perf-box .perf-val   { font-size: 17px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+
+    pre.perf-raw {
+      font-family: monospace; font-size: 11px;
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px;
+      overflow: auto; max-height: 120px;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1000px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .cam-controls { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="top-header">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <div>
+      <div class="logo-text">جامعة حائل</div>
+      <div class="logo-sub">نظام الحضور والغياب</div>
+    </div>
+  </div>
+  <a class="back-btn" href="/admin/dashboard">← العودة للوحة الأدمن</a>
+</header>
+
+<div class="page">
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-info">
+        <small>إجمالي الطلاب المسجلين</small>
+<<<<<<< HEAD
+        <b>{{ total_students }}</b>
+=======
+        <b>1,248</b>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
+        <span>هذا الفصل الدراسي</span>
+      </div>
+      <div class="stat-icon blue">👥</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-info">
+        <small>تسجيلات اليوم</small>
+<<<<<<< HEAD
+        <b>{{ today_registrations }}</b>
+=======
+        <b>86</b>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
+        <span>تم تسجيلها بنجاح</span>
+      </div>
+      <div class="stat-icon green">✅</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-info">
+        <small>دقة التعرف</small>
+<<<<<<< HEAD
+        <b>{{ recognition_accuracy }}%</b>
+=======
+        <b>98.7%</b>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
+        <span>متوسط دقة النموذج</span>
+      </div>
+      <div class="stat-icon gold">🎯</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-info">
+        <small>آخر تحديث للنموذج</small>
+<<<<<<< HEAD
+        <b>{{ last_update }}</b>
+        <span>اليوم</span>
+=======
+        <b>مايو 25</b>
+        <span>منذ ساعتين</span>
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
+      </div>
+      <div class="stat-icon navy">🔁</div>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Sidebar -->
+    <div>
+
+      <!-- Preview -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">🖼️</div>
+          <div>
+            <h3>آخر لقطة</h3>
+            <p>معاينة الصورة الملتقطة</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="preview-wrap" id="preview">
+            <span>لم يتم التقاط صور بعد</span>
+          </div>
+          <div class="capture-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="captureStatusText">بانتظار الالتقاط</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">💡</div>
+          <div>
+            <h3>نصائح للحصول على أفضل نتيجة</h3>
+            <p>اتبع هذه الإرشادات لدقة أعلى</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <ul class="tips-list">
+            <li class="tip-item"><span class="tip-icon">☀️</span> إضاءة أمامية جيدة، تجنب الضوء من الخلف</li>
+            <li class="tip-item"><span class="tip-icon">🔄</span> غيّر الزوايا يمين / يسار / فوق / تحت</li>
+            <li class="tip-item"><span class="tip-icon">👓</span> بدون نظارة شمسية أو قبعة</li>
+            <li class="tip-item"><span class="tip-icon">🎯</span> حافظ على وجهك داخل الإطار</li>
+            <li class="tip-item"><span class="tip-icon">🚫</span> لا تحرك رأسك كثيراً أثناء الالتقاط</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Main Content -->
+    <div>
+
+      <!-- Form + Camera row -->
+      <div style="display:grid; grid-template-columns: 1fr 1.1fr; gap: 20px; align-items: start;">
+
+        <!-- Student Form -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon">👤</div>
+            <div>
+              <h3>بيانات الطالب</h3>
+              <p>أدخل معلومات الطالب أدناه</p>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div class="form-group">
+              <label>اسم الطالب <span>*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">👤</span>
+                <input type="text" id="name" placeholder="مثال: أحمد محمد" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>الرقم الجامعي <span>*</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">🎓</span>
+                <input type="text" id="university_id" placeholder="مثال: 441234567" required>
+              </div>
+            </div>
+
+            <div class="info-tiles">
+              <div class="info-tile blue">
+                <div>
+                  <div class="tile-label">الصور المطلوبة</div>
+                  <div class="tile-value"><span id="needCount">...</span> صورة</div>
+                </div>
+                <div class="tile-icon">📷</div>
+              </div>
+              <div class="info-tile green">
+                <div>
+                  <div class="tile-label">وضع الالتقاط</div>
+                  <div class="tile-value">تلقائي</div>
+                </div>
+                <div class="tile-icon">🧿</div>
+              </div>
+            </div>
+
+            <div class="notice">
+              سيتم تدريب النموذج على عدة زوايا لزيادة دقة التعرف على الوجه.
+            </div>
+
+            <button class="save-btn" id="btnSave" type="button">✅ حفظ البيانات والوجه</button>
+            <button class="test-btn" id="btnTest" type="button" disabled>🧪 اختبار سرعة التعرف</button>
+
+            <div class="save-msg" id="saveMsg"></div>
+
+            <!-- Perf -->
+            <div class="perf-grid" id="perfKpi" style="display:none">
+              <div class="perf-box">
+                <div class="perf-label">ms_total</div>
+                <div class="perf-val" id="k_ms_total">-</div>
+              </div>
+              <div class="perf-box">
+                <div class="perf-label">min_dist</div>
+                <div class="perf-val" id="k_min_dist">-</div>
+              </div>
+              <div class="perf-box">
+                <div class="perf-label">recognized</div>
+                <div class="perf-val" id="k_rec">-</div>
+              </div>
+            </div>
+            <pre class="perf-raw" id="perfBox" style="display:none"></pre>
+
+          </div>
+        </div>
+
+        <!-- Camera -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon">📷</div>
+            <div>
+              <h3>الكاميرا المباشرة</h3>
+              <p>التقط وجه الطالب من زوايا متعددة</p>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div id="instruction">📸 انظر مباشرة للكاميرا</div>
+
+            <div class="video-wrap">
+              <video id="video" autoplay playsinline></video>
+              <canvas id="overlay"></canvas>
+              <div class="face-guide"></div>
+            </div>
+
+            <canvas id="canvas" width="640" height="480"></canvas>
+
+            <div class="cam-controls">
+              <button class="cam-btn danger" type="button" id="btnReset">🔄 إعادة</button>
+              <button class="cam-btn blue"  type="button" id="btnAuto">▶️ تلقائي</button>
+              <button class="cam-btn navy"  type="button" id="btnSnap">📸 لقطة</button>
+            </div>
+
+            <div class="counter-row">
+              <span class="counter-label">الصور الملتقطة</span>
+              <span class="counter-value"><span id="counter">0</span> / <span id="total">0</span></span>
+            </div>
+
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+
+            <div style="margin-top: 14px;">
+              <div class="interval-row">
+                <label>الفاصل الزمني</label>
+                <input type="number" id="intervalSec" value="1.2" step="0.1" min="0.4">
+                <small>ثانية بين كل لقطة</small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const video       = document.getElementById("video");
+const canvas      = document.getElementById("canvas");
+const ctx         = canvas.getContext("2d");
+const overlay     = document.getElementById("overlay");
+const octx        = overlay.getContext("2d");
+
+const needCountEl     = document.getElementById("needCount");
+const counterEl       = document.getElementById("counter");
+const totalEl         = document.getElementById("total");
+const instructionEl   = document.getElementById("instruction");
+const previewEl       = document.getElementById("preview");
+const saveMsgEl       = document.getElementById("saveMsg");
+const progressBar     = document.getElementById("progressBar");
+const statusDot       = document.getElementById("statusDot");
+const captureStatusText = document.getElementById("captureStatusText");
+
+const btnSnap  = document.getElementById("btnSnap");
+const btnAuto  = document.getElementById("btnAuto");
+const btnReset = document.getElementById("btnReset");
+const btnSave  = document.getElementById("btnSave");
+const btnTest  = document.getElementById("btnTest");
+const intervalSecEl = document.getElementById("intervalSec");
+
+const perfBox  = document.getElementById("perfBox");
+const perfKpi  = document.getElementById("perfKpi");
+const k_ms_total = document.getElementById("k_ms_total");
+const k_min_dist = document.getElementById("k_min_dist");
+const k_rec      = document.getElementById("k_rec");
+
+let images = [];
+let targetCount = 5;
+let autoTimer = null;
+let busy = false;
+let clearTimer = null;
+let lastTestAt = 0;
+let lastTiny = null;
+const SIMILARITY_THRESHOLD = 6.0;
+
+const instructions = [
+  "📸 انظر مباشرة للكاميرا",
+  "➡️ لف رأسك يمين",
+  "⬅️ لف رأسك يسار",
+  "⬆️ ارفع رأسك قليلاً",
+  "⬇️ انزل رأسك قليلاً",
+  "🙂 ابتسامة خفيفة",
+  "🔄 لف بسيط يمين",
+  "🔄 لف بسيط يسار",
+  "⬆️ رفع بسيط",
+  "⬇️ نزول بسيط",
+  "👀 قرب شوي",
+  "👀 ابعد شوي"
+];
+
+function setCounter() {
+  counterEl.textContent = images.length;
+  totalEl.textContent   = targetCount;
+  const pct = targetCount > 0 ? Math.min((images.length / targetCount) * 100, 100) : 0;
+  progressBar.style.width = pct + "%";
+
+  const idx = Math.min(images.length, instructions.length - 1);
+  instructionEl.textContent = (images.length >= targetCount)
+    ? "✅ تم التقاط جميع الصور"
+    : (instructions[idx] || "📸 غيّر زاوية الوجه");
+
+  if (images.length > 0) {
+    statusDot.classList.add("active");
+    captureStatusText.textContent = `تم التقاط ${images.length} صورة`;
+  }
+}
+
+function showPreview(dataUrl) {
+  previewEl.innerHTML = "";
+  const img = document.createElement("img");
+  img.src = dataUrl;
+  previewEl.appendChild(img);
+}
+
+function syncOverlaySize() {
+  const w = video.videoWidth  || 640;
+  const h = video.videoHeight || 480;
+  overlay.width = w;
+  overlay.height = h;
+}
+
+video.addEventListener("loadedmetadata", syncOverlaySize);
+video.addEventListener("loadeddata", syncOverlaySize);
+window.addEventListener("resize", syncOverlaySize);
+
+function clearOverlay() { octx.clearRect(0, 0, overlay.width, overlay.height); }
+
+function roundedRect(c, x, y, w, h, r) {
+  const radius = Math.min(r, w/2, h/2);
+  c.beginPath();
+  c.moveTo(x+radius, y);
+  c.arcTo(x+w, y, x+w, y+h, radius);
+  c.arcTo(x+w, y+h, x, y+h, radius);
+  c.arcTo(x, y+h, x, y, radius);
+  c.arcTo(x, y, x+w, y, radius);
+  c.closePath();
+}
+
+function drawFaceBox(box, labelText, ok=true) {
+  syncOverlaySize();
+  clearOverlay();
+  const color = ok ? "#22c55e" : "#ef4444";
+  octx.save();
+  octx.lineWidth = 3;
+  octx.strokeStyle = color;
+  roundedRect(octx, box[0], box[1], box[2], box[3], 12);
+  octx.stroke();
+  if (labelText) {
+    octx.font = "600 14px Arial";
+    const tw = octx.measureText(labelText).width;
+    const bw = tw + 24; const bh = 30;
+    let lx = box[0]; let ly = box[1] - bh - 8;
+    if (ly < 4) ly = box[1] + 6;
+    octx.fillStyle = "rgba(11,60,93,0.85)";
+    octx.strokeStyle = color;
+    octx.lineWidth = 1.5;
+    roundedRect(octx, lx, ly, bw, bh, 8);
+    octx.fill(); octx.stroke();
+    octx.fillStyle = "#fff";
+    octx.textAlign = "center";
+    octx.textBaseline = "middle";
+    octx.fillText(labelText, lx + bw/2, ly + bh/2);
+    octx.textAlign = "start";
+    octx.textBaseline = "alphabetic";
+  }
+  octx.restore();
+  if (clearTimer) clearTimeout(clearTimer);
+  clearTimer = setTimeout(clearOverlay, 2000);
+}
+
+async function init() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width:640, height:480 }, audio:false });
+    video.srcObject = stream;
+  } catch(e) {
+    alert("❌ لم يتم تشغيل الكاميرا");
+    console.error(e);
+  }
+  try {
+    const res  = await fetch("/admin/register_student_face/config");
+    const data = await res.json();
+    if (data && data.ok && data.min_images) targetCount = parseInt(data.min_images);
+  } catch(e) {}
+  needCountEl.textContent = targetCount;
+  setCounter();
+}
+
+function tinyFingerprint() {
+  const tmp = document.createElement("canvas");
+  tmp.width = 32; tmp.height = 24;
+  const tc = tmp.getContext("2d");
+  tc.drawImage(video, 0, 0, 32, 24);
+  const d = tc.getImageData(0,0,32,24).data;
+  const arr = new Uint8Array(32*24); let j=0;
+  for (let i=0; i<d.length; i+=4) arr[j++] = (d[i]*.299 + d[i+1]*.587 + d[i+2]*.114)|0;
+  return arr;
+}
+
+function diffTiny(a, b) {
+  if (!a || !b) return 999;
+  let s=0;
+  for (let i=0; i<a.length; i++) s += Math.abs(a[i]-b[i]);
+  return s / a.length;
+}
+
+async function runRecognitionTestAndDraw() {
+  const now = Date.now();
+  if (now - lastTestAt < 700) return;
+  lastTestAt = now;
+  canvas.width=640; canvas.height=480;
+  ctx.drawImage(video, 0, 0, 640, 480);
+  const image = canvas.toDataURL("image/jpeg", 0.75);
+  try {
+    const res  = await fetch("/admin/recognition_test", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ image })
+    });
+    const data = await res.json();
+    const perf = data.perf || {};
+    perfKpi.style.display = "grid";
+    k_ms_total.textContent = perf.ms_total ?? "-";
+    k_min_dist.textContent = perf.min_dist ?? "-";
+    k_rec.textContent = data.recognized ? "YES ✅" : "NO ❌";
+    if (data.box && Array.isArray(data.box)) {
+      syncOverlaySize();
+      const sx = overlay.width/640; const sy = overlay.height/480;
+      drawFaceBox([data.box[0]*sx, data.box[1]*sy, data.box[2]*sx, data.box[3]*sy],
+        data.recognized ? "Face OK ✅" : "Unknown ❌", data.recognized);
+    }
+  } catch(e) {}
+}
+
+function captureOne() {
+  if (busy || !video.videoWidth || images.length >= targetCount) return;
+  busy = true;
+  const fp = tinyFingerprint();
+  if (diffTiny(fp, lastTiny) < SIMILARITY_THRESHOLD) {
+    saveMsgEl.textContent = "⚠️ صورة مشابهة.. حرّك الوجه شوي";
+    saveMsgEl.style.color = "";
+    busy = false; return;
+  }
+  lastTiny = fp;
+  canvas.width=640; canvas.height=480;
+  ctx.drawImage(video, 0, 0, 640, 480);
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+  images.push(dataUrl);
+  showPreview(dataUrl);
+  setCounter();
+  runRecognitionTestAndDraw();
+  busy = false;
+  if (images.length >= targetCount) stopAuto();
+}
+
+function startAuto() {
+  if (autoTimer) return;
+  let sec = parseFloat(intervalSecEl.value || "1.2");
+  sec = Math.max(0.4, sec);
+  btnAuto.textContent = "⏸️ إيقاف";
+  autoTimer = setInterval(() => { if (images.length < targetCount) captureOne(); }, sec * 1000);
+}
+
+function stopAuto() {
+  if (autoTimer) clearInterval(autoTimer);
+  autoTimer = null;
+  btnAuto.textContent = "▶️ تلقائي";
+}
+
+function resetAll() {
+  stopAuto();
+  images = []; lastTiny = null;
+  previewEl.innerHTML = "<span>لم يتم التقاط صور بعد</span>";
+  saveMsgEl.textContent = "";
+  perfBox.style.display = "none";
+  perfKpi.style.display = "none";
+  btnTest.disabled = true;
+  statusDot.classList.remove("active");
+  captureStatusText.textContent = "بانتظار الالتقاط";
+  clearOverlay();
+  setCounter();
+}
+
+async function saveStudent() {
+  const name = document.getElementById("name").value.trim();
+  const uid  = document.getElementById("university_id").value.trim();
+  if (!name || !uid) { alert("❌ أدخل اسم الطالب والرقم الجامعي"); return; }
+  if (images.length < targetCount) { alert(`❌ لازم ${targetCount} صور`); return; }
+  btnSave.disabled = true;
+  saveMsgEl.textContent = "⏳ جاري الحفظ...";
+  saveMsgEl.style.color = "";
+  try {
+    const res  = await fetch("/admin/register_student_face", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ name, university_id: uid, images })
+    });
+    const data = await res.json();
+    if (res.status === 400 && data.message && data.message.includes("مسجل")) {
+      saveMsgEl.textContent = "⚠️ الطالب مسجل بالفعل";
+      saveMsgEl.style.color = "var(--warning)";
+    } else {
+      saveMsgEl.textContent = data.message || "✅ تم الحفظ بنجاح";
+      saveMsgEl.style.color = "var(--success)";
+      btnTest.disabled = false;
+    }
+  } catch(e) {
+    saveMsgEl.textContent = "❌ حصل خطأ أثناء الحفظ";
+    saveMsgEl.style.color = "var(--danger)";
+  } finally {
+    btnSave.disabled = false;
+  }
+}
+
+async function testRecognition() {
+  if (!video.videoWidth) return;
+  canvas.width=640; canvas.height=480;
+  ctx.drawImage(video, 0, 0, 640, 480);
+  const image = canvas.toDataURL("image/jpeg", 0.8);
+  btnTest.disabled = true;
+  saveMsgEl.textContent = "🧪 جاري اختبار التعرف...";
+  perfBox.style.display = "none";
+  perfKpi.style.display = "none";
+  try {
+    const res  = await fetch("/admin/recognition_test", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ image })
+    });
+    const data = await res.json();
+    const perf = data.perf || {};
+    perfKpi.style.display = "grid";
+    perfBox.style.display = "block";
+    k_ms_total.textContent = perf.ms_total ?? "-";
+    k_min_dist.textContent = perf.min_dist ?? "-";
+    k_rec.textContent      = data.recognized ? "YES ✅" : "NO ❌";
+    perfBox.textContent    = JSON.stringify(data, null, 2);
+    saveMsgEl.textContent  = "✅ انتهى الاختبار";
+    saveMsgEl.style.color  = "var(--success)";
+    if (data.box && Array.isArray(data.box)) {
+      syncOverlaySize();
+      const sx = overlay.width/640; const sy = overlay.height/480;
+      drawFaceBox([data.box[0]*sx, data.box[1]*sy, data.box[2]*sx, data.box[3]*sy],
+        data.recognized ? "Face OK ✅" : "Unknown ❌", data.recognized);
+    }
+  } catch(e) {
+    saveMsgEl.textContent = "❌ فشل الاختبار";
+    saveMsgEl.style.color = "var(--danger)";
+  } finally {
+    btnTest.disabled = false;
+  }
+}
+
+btnSnap.addEventListener("click", captureOne);
+btnAuto.addEventListener("click", () => autoTimer ? stopAuto() : startAuto());
+btnReset.addEventListener("click", resetAll);
+btnSave.addEventListener("click", saveStudent);
+btnTest.addEventListener("click", testRecognition);
+
+init();
+<<<<<<< HEAD
+
+=======
+>>>>>>> 05f6081404e21699d6015212cb3f6e97adb4a704
+</script>
+</body>
+</html>

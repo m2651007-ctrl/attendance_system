@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Updated Attendance Logic</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .controls { margin: 20px 0; display: flex; gap: 10px; }
+        .search-input { padding: 8px; width: 200px; }
+        .btn { padding: 8px 16px; border: none; cursor: pointer; margin-right: 10px; }
+        .delete-btn { background: #dc3545; color: white; }
+        .export-btn { background: #28a745; color: white; }
+        .export-selected-btn { background: #17a2b8; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; text-align: left; border: 1px solid #ddd; }
+        th { background: #f4f4f4; font-weight: bold; }
+        .status-late { color: red; font-weight: bold; }
+        .status-not-checked-out { color: orange; font-weight: bold; }
+        .checkbox { margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Updated Attendance Records - Logic Test</h1>
+        
+        <div class="controls">
+            <input type="text" id="course-search" class="search-input" placeholder="Search by course...">
+            <input type="text" id="student-search" class="search-input" placeholder="Search by student ID...">
+            <button id="delete-selected-btn" class="btn delete-btn" style="display: none;">Delete Selected</button>
+            <button id="export-selected-btn" class="btn export-selected-btn" style="display: none;">Export Selected</button>
+            <button id="export-all-btn" class="btn export-btn">Export All</button>
+        </div>
+        
+        <div id="attendance-container">
+            <p>Loading attendance data...</p>
+        </div>
+    </div>
+
+    <script>
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            return date.toLocaleString('en-US', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+            });
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'Late': return 'status-late';
+                case 'Not Checked Out': return 'status-not-checked-out';
+                default: return '';
+            }
+        }
+
+        function getSelectedIds() {
+            const checkboxes = document.querySelectorAll('.record-checkbox:checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.dataset.recordId)).filter(id => id);
+        }
+
+        function updateButtons() {
+            const selectedCount = document.querySelectorAll('.record-checkbox:checked').length;
+            document.getElementById('delete-selected-btn').style.display = selectedCount > 0 ? 'inline-block' : 'none';
+            document.getElementById('export-selected-btn').style.display = selectedCount > 0 ? 'inline-block' : 'none';
+        }
+
+        function setupCheckboxes() {
+            const selectAll = document.getElementById('select-all');
+            const checkboxes = document.querySelectorAll('.record-checkbox');
+            
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                    updateButtons();
+                });
+            }
+            
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateButtons);
+            });
+        }
+
+        async function loadData() {
+            try {
+                const courseSearch = document.getElementById('course-search').value;
+                const studentSearch = document.getElementById('student-search').value;
+                
+                let url = '/admin/attendance/data?';
+                const params = [];
+                if (courseSearch) params.push(`course_search=${encodeURIComponent(courseSearch)}`);
+                if (studentSearch) params.push(`student_search=${encodeURIComponent(studentSearch)}`);
+                url += params.join('&') || '/admin/attendance/data';
+
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                const container = document.getElementById('attendance-container');
+                
+                if (!result.ok) {
+                    container.innerHTML = '<p style="color: red;">Error: ' + result.message + '</p>';
+                    return;
+                }
+
+                if (!result.records || result.records.length === 0) {
+                    container.innerHTML = '<p>No attendance records found.</p>';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all"></th>
+                                <th>Student Name</th>
+                                <th>Student ID</th>
+                                <th>Course</th>
+                                <th>Session</th>
+                                <th>Instructor</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                result.records.forEach(record => {
+                    const statusClass = getStatusClass(record.status);
+                    html += `
+                        <tr data-record-id="${record.id}">
+                            <td><input type="checkbox" class="record-checkbox" data-record-id="${record.id}"></td>
+                            <td>${record.student_name}</td>
+                            <td>${record.university_id}</td>
+                            <td>${record.course_name}</td>
+                            <td>${record.session_id}</td>
+                            <td>${record.instructor_name}</td>
+                            <td>${formatTimestamp(record.check_in)}</td>
+                            <td>${formatTimestamp(record.check_out)}</td>
+                            <td class="${statusClass}">${record.status}</td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+                
+                // Setup checkbox functionality
+                setupCheckboxes();
+                updateButtons();
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('attendance-container').innerHTML = '<p style="color: red;">Error loading data</p>';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            
+            // Search with debounce
+            let searchTimeout;
+            ['course-search', 'student-search'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(loadData, 300);
+                });
+            });
+
+            // Export all
+            document.getElementById('export-all-btn').addEventListener('click', function() {
+                const courseSearch = document.getElementById('course-search').value;
+                const studentSearch = document.getElementById('student-search').value;
+                let url = '/admin/attendance/export?';
+                const params = [];
+                if (courseSearch) params.push(`course_search=${encodeURIComponent(courseSearch)}`);
+                if (studentSearch) params.push(`student_search=${encodeURIComponent(studentSearch)}`);
+                url += params.join('&') || '/admin/attendance/export';
+                window.open(url, '_blank');
+            });
+
+            // Delete selected
+            document.getElementById('delete-selected-btn').addEventListener('click', async function() {
+                const selectedIds = getSelectedIds();
+                if (selectedIds.length === 0) {
+                    alert('Please select records to delete.');
+                    return;
+                }
+                
+                if (confirm(`Delete ${selectedIds.length} record(s)?`)) {
+                    try {
+                        const response = await fetch('/admin/attendance/delete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ record_ids: selectedIds })
+                        });
+                        
+                        const result = await response.json();
+                        if (result.ok) {
+                            alert(`Deleted ${result.deleted_count} record(s)`);
+                            loadData();
+                        } else {
+                            alert('Delete failed: ' + result.message);
+                        }
+                    } catch (error) {
+                        alert('Error during delete');
+                    }
+                }
+            });
+
+            // Export selected
+            document.getElementById('export-selected-btn').addEventListener('click', function() {
+                const selectedIds = getSelectedIds();
+                if (selectedIds.length === 0) {
+                    alert('Please select records to export.');
+                    return;
+                }
+                
+                const courseSearch = document.getElementById('course-search').value;
+                const studentSearch = document.getElementById('student-search').value;
+                let url = '/admin/attendance/export?';
+                const params = [];
+                if (courseSearch) params.push(`course_search=${encodeURIComponent(courseSearch)}`);
+                if (studentSearch) params.push(`student_search=${encodeURIComponent(studentSearch)}`);
+                params.push(`selected_ids=${selectedIds.join(',')}`);
+                url += params.join('&');
+                window.open(url, '_blank');
+            });
+        });
+    </script>
+</body>
+</html>
