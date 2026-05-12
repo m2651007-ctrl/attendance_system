@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل الدخول — جامعة حائل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0b3c5d; --navy-mid: #0d4f7a; --navy-lt: #1a6494;
+            --bg: #f0f4f8; --white: #ffffff; --text: #1a2332;
+            --muted: #64748b; --danger: #dc2626; --danger-lt: #fee2e2;
+            --border: #dde4ed; --shadow: 0 8px 40px rgba(11,60,93,.16);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #0b3c5d 0%, #0d4f7a 50%, #1a6494 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+
+        .login-wrapper {
+            width: 100%; max-width: 420px;
+            animation: fadeUp .4s ease both;
+        }
+
+        /* Logo */
+        .logo-area {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .logo-icon {
+            width: 72px; height: 72px;
+            background: rgba(255,255,255,.12);
+            border: 2px solid rgba(255,255,255,.25);
+            border-radius: 20px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 34px; margin-bottom: 14px;
+        }
+        .logo-area h1 { color: #fff; font-size: 22px; font-weight: 800; }
+        .logo-area p  { color: rgba(255,255,255,.7); font-size: 13px; margin-top: 4px; }
+
+        /* Card */
+        .card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 36px 32px;
+        }
+
+        .card h2 {
+            font-size: 20px; font-weight: 800;
+            color: var(--navy); margin-bottom: 6px;
+        }
+        .card .subtitle {
+            font-size: 13px; color: var(--muted);
+            margin-bottom: 26px;
+        }
+
+        /* Error */
+        .error-box {
+            background: var(--danger-lt);
+            border: 1px solid #fecaca;
+            border-right: 4px solid var(--danger);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 13px; font-weight: 600; color: var(--danger);
+            animation: shake .3s ease;
+        }
+
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25%      { transform: translateX(-6px); }
+            75%      { transform: translateX(6px); }
+        }
+
+        /* Form */
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block; font-size: 13px; font-weight: 600;
+            color: var(--navy); margin-bottom: 7px;
+        }
+        .input-wrap { position: relative; }
+        .input-icon {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%); font-size: 16px;
+            opacity: .4; pointer-events: none;
+        }
+        .form-group input {
+            width: 100%; padding: 12px 44px 12px 14px;
+            border: 1.5px solid var(--border); border-radius: 11px;
+            font-size: 14px; font-family: 'Tajawal', sans-serif;
+            color: var(--text); background: #f8fafc;
+            transition: all .2s; outline: none;
+        }
+        .form-group input:focus {
+            border-color: var(--navy); background: var(--white);
+            box-shadow: 0 0 0 3px rgba(11,60,93,.08);
+        }
+        .form-group input::placeholder { color: #a0aec0; }
+
+        /* Submit */
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+            color: #fff; border: none; border-radius: 12px;
+            padding: 14px; font-size: 15px; font-weight: 700;
+            font-family: 'Tajawal', sans-serif; cursor: pointer;
+            transition: all .2s;
+            box-shadow: 0 4px 14px rgba(11,60,93,.35);
+            margin-top: 6px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(11,60,93,.45);
+        }
+        .submit-btn:active { transform: translateY(0); }
+
+        /* Footer */
+        .card-footer {
+            text-align: center; margin-top: 20px;
+            font-size: 12px; color: var(--muted);
+        }
+
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(20px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="logo-area">
+        <div class="logo-icon">🎓</div>
+        <h1>جامعة حائل</h1>
+        <p>نظام إدارة الحضور والغياب</p>
+    </div>
+
+    <div class="card">
+        <h2>تسجيل دخول الإدارة</h2>
+        <p class="subtitle">أدخل بيانات حسابك للمتابعة</p>
+
+        {% if error %}
+        <div class="error-box">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            <div class="form-group">
+                <label>اسم المستخدم</label>
+                <div class="input-wrap">
+                    <span class="input-icon">👤</span>
+                    <input type="text" name="username" placeholder="أدخل اسم المستخدم" required autofocus>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <div class="input-wrap">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button class="submit-btn" type="submit">دخول ←</button>
+        </form>
+
+        <div class="card-footer">
+            جامعة حائل &copy; 2026 — نظام الحضور الذكي
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

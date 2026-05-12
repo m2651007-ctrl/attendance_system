@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Check-out Logic</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .controls { margin: 20px 0; }
+        .search-input { padding: 8px; width: 200px; margin-right: 10px; }
+        .btn { padding: 8px 16px; border: none; cursor: pointer; background: #28a745; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; text-align: left; border: 1px solid #ddd; }
+        th { background: #f4f4f4; font-weight: bold; }
+        .checkout-not-checked-out { color: #ff8c00; font-weight: bold; }
+        .checkbox { margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Check-out Logic Test</h1>
+        <p><strong>Expected:</strong> "Not Checked Out" should appear in ORANGE in the Check-out column when student checked in but didn't check out.</p>
+        
+        <div class="controls">
+            <input type="text" id="course-search" class="search-input" placeholder="Search by course...">
+            <input type="text" id="student-search" class="search-input" placeholder="Search by student ID...">
+            <button id="load-btn" class="btn">Load Data</button>
+        </div>
+        
+        <div id="attendance-container">
+            <p>Loading attendance data...</p>
+        </div>
+    </div>
+
+    <script>
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            return date.toLocaleString('en-US', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+            });
+        }
+
+        async function loadData() {
+            try {
+                const courseSearch = document.getElementById('course-search').value;
+                const studentSearch = document.getElementById('student-search').value;
+                
+                let url = '/admin/attendance/data?';
+                const params = [];
+                if (courseSearch) params.push(`course_search=${encodeURIComponent(courseSearch)}`);
+                if (studentSearch) params.push(`student_search=${encodeURIComponent(studentSearch)}`);
+                url += params.join('&') || '/admin/attendance/data';
+
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                const container = document.getElementById('attendance-container');
+                
+                if (!result.ok) {
+                    container.innerHTML = '<p style="color: red;">Error: ' + result.message + '</p>';
+                    return;
+                }
+
+                if (!result.records || result.records.length === 0) {
+                    container.innerHTML = '<p>No attendance records found.</p>';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Student ID</th>
+                                <th>Course</th>
+                                <th>Session</th>
+                                <th>Instructor</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                result.records.forEach(record => {
+                    // Determine checkout display
+                    let checkoutDisplay = formatTimestamp(record.check_out);
+                    let checkoutClass = '';
+                    
+                    if (record.check_in && !record.check_out) {
+                        checkoutDisplay = 'Not Checked Out';
+                        checkoutClass = 'checkout-not-checked-out';
+                    }
+                    
+                    html += `
+                        <tr>
+                            <td>${record.student_name}</td>
+                            <td>${record.university_id}</td>
+                            <td>${record.course_name}</td>
+                            <td>${record.session_id}</td>
+                            <td>${record.instructor_name}</td>
+                            <td>${formatTimestamp(record.check_in)}</td>
+                            <td class="${checkoutClass}">${checkoutDisplay}</td>
+                            <td>${record.status}</td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('attendance-container').innerHTML = '<p style="color: red;">Error loading data</p>';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            
+            document.getElementById('load-btn').addEventListener('click', loadData);
+            
+            // Search with debounce
+            let searchTimeout;
+            ['course-search', 'student-search'].forEach(id => {
+                document.getElementById(id).addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(loadData, 300);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

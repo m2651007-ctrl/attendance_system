@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>التقاط الوجه</title>
+</head>
+<body>
+
+<h2>التقاط الوجه – جامعة حائل</h2>
+
+<video id="video" width="400" autoplay></video>
+<canvas id="canvas" style="display:none;"></canvas>
+
+<form method="POST" action="{{ url_for('student_register_face') }}">
+    <input type="hidden" name="image" id="image">
+    <button type="submit">حفظ الوجه</button>
+</form>
+
+<script>
+const video = document.getElementById("video");
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => video.srcObject = stream);
+
+document.querySelector("form").addEventListener("submit", () => {
+    const canvas = document.getElementById("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    document.getElementById("image").value =
+        canvas.toDataURL("image/jpeg");
+});
+</script>
+
+</body>
+</html>
