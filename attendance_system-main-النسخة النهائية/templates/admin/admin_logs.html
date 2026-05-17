@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Logs — University of Hail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--navy:#0b3c5d;--navy-mid:#0d4f7a;--navy-lt:#1a6494;--bg:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#64748b;--border:#dde4ed;--shadow:0 4px 24px rgba(11,60,93,.10);}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+        .header{background:linear-gradient(135deg,var(--navy),var(--navy-mid) 60%,var(--navy-lt));padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:70px;box-shadow:0 2px 20px rgba(0,0,0,.2);position:sticky;top:0;z-index:100}
+        .logo{display:flex;align-items:center;gap:12px;color:#fff}
+        .logo-icon{width:42px;height:42px;background:rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid rgba(255,255,255,.2)}
+        .logo-text{font-size:18px;font-weight:700}
+        .logo-sub{font-size:12px;opacity:.7}
+        .back-btn{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.85);text-decoration:none;font-size:14px;font-weight:500;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:8px 16px;transition:all .2s}
+        .back-btn:hover{background:rgba(255,255,255,.2);color:#fff}
+
+        .page{max-width:1350px;margin:0 auto;padding:28px 24px}
+
+        /* STATS */
+        .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+        .stat-card{background:var(--white);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between}
+        .stat-card.spoof{border:1.5px solid #ef4444;background:#fff5f5}
+        .stat-label{font-size:12px;color:var(--muted);margin-bottom:2px}
+        .stat-val{font-size:26px;font-weight:800;color:var(--navy);line-height:1}
+        .stat-val.red{color:#dc2626}
+        .stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
+        .stat-ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+
+        /* CARD */
+        .card{background:var(--white);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+        .card-hdr{background:linear-gradient(135deg,var(--navy),var(--navy-mid));padding:18px 28px;display:flex;align-items:center;gap:12px}
+        .card-hdr-icon{width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+        .card-hdr h2{color:#fff;font-size:16px;font-weight:700}
+        .card-hdr p{color:rgba(255,255,255,.65);font-size:12px;margin-top:2px}
+        .card-hdr-right{margin-right:auto;display:flex;gap:10px}
+
+        /* TOOLBAR */
+        .toolbar{padding:14px 22px;border-bottom:1px solid var(--border);background:#f8fafc;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+        .search-wrap{position:relative;flex:1;min-width:200px}
+        .search-wrap input{width:100%;padding:9px 38px 9px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:'Tajawal',sans-serif;outline:none;background:#fff;transition:all .2s}
+        .search-wrap input:focus{border-color:var(--navy);background:#fff}
+        .search-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.4}
+        .fbtn{padding:9px 16px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:600;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all .2s;color:var(--text)}
+        .fbtn:hover{border-color:var(--navy);color:var(--navy)}
+        .fbtn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+        .fbtn.spoof-f.active{background:#dc2626;border-color:#dc2626}
+        .tbtn{padding:9px 16px;border-radius:10px;border:none;font-size:13px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+        .tbtn-export{background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0}
+        .tbtn-export:hover{background:#16a34a;color:#fff}
+        .tbtn-del{background:#fee2e2;color:#dc2626;border:1px solid #fecaca;display:none}
+        .tbtn-del:hover{background:#dc2626;color:#fff}
+
+        /* TABLE */
+        .tbl-wrap{overflow-x:auto}
+        table{width:100%;border-collapse:collapse;min-width:860px}
+        thead th{background:#f1f5f9;color:var(--navy);font-size:12px;font-weight:700;padding:12px 16px;text-align:right;border-bottom:2px solid var(--border)}
+        tbody tr{transition:background .15s;border-bottom:1px solid #eef2f7}
+        tbody tr:hover{background:#f8fafc}
+        tbody tr:last-child{border-bottom:none}
+        td{padding:11px 16px;font-size:13px;vertical-align:middle}
+        tr.spoof-row{background:#fff8f8}
+        tr.spoof-row:hover{background:#fff0f0}
+        tr.spoof-row td:first-child{border-right:3px solid #ef4444}
+
+        /* AVATAR */
+        .stu-cell{display:flex;align-items:center;gap:10px}
+        .av{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--navy),var(--navy-lt));display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+        .av.av-spoof{background:linear-gradient(135deg,#dc2626,#ef4444)}
+        .stu-name{font-weight:600;color:var(--navy);font-size:13px}
+        .stu-id{font-size:11px;color:var(--muted)}
+        .unk-name{font-weight:700;color:#dc2626;font-size:13px}
+        .unk-id{font-size:11px;color:#ef4444}
+
+        /* BADGES */
+        .badge{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+        .b-ok{background:#dcfce7;color:#16a34a}
+        .b-dup{background:#fef3c7;color:#d97706}
+        .b-reg{background:#fee2e2;color:#991b1b}
+        .b-spoof{background:#1a1a2e;color:#ff6b6b;border:1px solid #dc2626}
+        .b-other{background:#f1f5f9;color:var(--muted)}
+
+        /* SESSION */
+        .ses-pill{display:inline-block;background:#e0f2fe;color:var(--navy-mid);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700}
+        .ses-pill.sp{background:#fee2e2;color:#dc2626}
+
+        /* TIME */
+        .ts-date{font-size:11px;color:var(--muted)}
+        .ts-time{font-size:13px;font-weight:600;color:#374151}
+
+        /* DETAILS */
+        .det{font-size:12px;color:var(--muted);max-width:200px}
+        .det-spoof{color:#dc2626;font-weight:600}
+
+        .empty{text-align:center;padding:60px;color:var(--muted)}
+        .empty-icon{font-size:48px;margin-bottom:12px}
+        .loading{text-align:center;padding:40px;color:var(--muted)}
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <div>
+            <div class="logo-text">University of Hail</div>
+            <div class="logo-sub">Attendance Management System</div>
+        </div>
+    </div>
+    <a class="back-btn" href="/admin/dashboard">← Back to Dashboard</a>
+</header>
+
+<div class="page">
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div><div class="stat-label">Successful Records</div><div class="stat-val" id="s1">—</div><div class="stat-sub">Successfully recorded</div></div>
+            <div class="stat-ico" style="background:#dcfce7">✅</div>
+        </div>
+        <div class="stat-card">
+            <div><div class="stat-label">Duplicate Attendance</div><div class="stat-val" id="s2">—</div><div class="stat-sub">Student already registered</div></div>
+            <div class="stat-ico" style="background:#fef3c7">🔄</div>
+        </div>
+        <div class="stat-card">
+            <div><div class="stat-label">Duplicate Registration</div><div class="stat-val" id="s3">—</div><div class="stat-sub">Face already registered</div></div>
+            <div class="stat-ico" style="background:#fee2e2">🚫</div>
+        </div>
+        <div class="stat-card">
+            <div><div class="stat-label">Other Events</div><div class="stat-val" id="s4">—</div><div class="stat-sub">System activities</div></div>
+            <div class="stat-ico" style="background:#e0f2fe">📋</div>
+        </div>
+        <div class="stat-card spoof">
+            <div><div class="stat-label">🚨 Spoof Attempts</div><div class="stat-val red" id="s5">—</div><div class="stat-sub">Spoof Detected</div></div>
+            <div class="stat-ico" style="background:#fee2e2">🎭</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-hdr">
+            <div class="card-hdr-icon">📋</div>
+            <div>
+                <h2>System Activity Logs</h2>
+                <p>Spoof shown first — auto-refresh every 30 seconds</p>
+            </div>
+            <div class="card-hdr-right">
+                <button class="tbtn tbtn-export" id="btnExport">📥 Export CSV</button>
+                <button class="tbtn" id="btnToggleSpoof" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd" onclick="toggleSpoofCol()">🔬 Spoof Analysis</button>
+                <button class="tbtn tbtn-del" id="btnDel">🗑 Delete Selected</button>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search by name, student ID or course...">
+            </div>
+            <button class="fbtn active" data-f="all">All</button>
+            <button class="fbtn spoof-f" data-f="SPOOF_ATTEMPT_DETECTED">🚨 احتيال</button>
+            <button class="fbtn" data-f="ATTENDANCE_MARKED">✅ Attendance</button>
+            <button class="fbtn" data-f="DUPLICATE_ATTENDANCE_ATTEMPT">🔄 مكرر</button>
+        </div>
+
+        <div class="tbl-wrap">
+            <div id="container"><div class="loading">⏳ Loading records...</div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+var allLogs = [];
+var curFilter = 'all';
+
+// ── تنسيق Time ──
+function fmtTime(ts) {
+    if (!ts) return '<span class="ts-date">—</span>';
+    try {
+        var clean = ts.trim().replace(' ', 'T');
+        if (!clean.includes('+') && !clean.endsWith('Z')) clean += 'Z';
+        var d = new Date(clean);
+        var y = d.getFullYear();
+        var mo = ('0'+(d.getMonth()+1)).slice(-2);
+        var dy = ('0'+d.getDate()).slice(-2);
+        var h  = ('0'+d.getHours()).slice(-2);
+        var mi = ('0'+d.getMinutes()).slice(-2);
+        var s  = ('0'+d.getSeconds()).slice(-2);
+        return '<div class="ts-date">'+y+'/'+mo+'/'+dy+'</div><div class="ts-time">'+h+':'+mi+':'+s+'</div>';
+    } catch(e) {
+        return '<span class="ts-date">'+ts+'</span>';
+    }
+}
+
+// ── Badge Action ──
+function fmtBadge(action) {
+    var map = {
+        'ATTENDANCE_MARKED':              '<span class="badge b-ok">✅ Register Attendance</span>',
+        'DUPLICATE_ATTENDANCE_ATTEMPT':   '<span class="badge b-dup">🔄 Duplicate Attendance</span>',
+        'DUPLICATE_REGISTRATION_ATTEMPT': '<span class="badge b-reg">🚫 Duplicate Registration</span>',
+        'SPOOF_ATTEMPT_DETECTED':         '<span class="badge b-spoof">🚨 Face Spoofing Detection </span>',
+        'STUDENT_REGISTERED':             '<span class="badge" style="background:#ede9fe;color:#7c3aed">👤 Register students</span>',
+        'STUDENT_PASSWORD_CHANGED':       '<span class="badge b-other">🔑 Password Changed</span>'
+    };
+    return map[action] || '<span class="badge b-other">'+action.replace(/_/g,' ')+'</span>';
+}
+
+// ── خلية Student ──
+function fmtStudent(log) {
+    var isSpoof   = (log.action === 'SPOOF_ATTEMPT_DETECTED');
+    var isUnknown = (!log.student_name || log.student_name === 'Unknown' || log.student_id === 'UNKNOWN');
+
+    if (isSpoof && isUnknown) {
+        return '<div class="stu-cell"><div class="av av-spoof">🎭</div><div>'
+             + '<div class="unk-name">⚠️Unknown User</div>'
+             + '<div class="unk-id">Identity not recognized</div>'
+             + '</div></div>';
+    }
+
+    var init = (log.student_name || '?').charAt(0).toUpperCase();
+    return '<div class="stu-cell"><div class="av">'+init+'</div><div>'
+         + '<div class="stu-name">'+(log.student_name||'—')+'</div>'
+         + '<div class="stu-id">'+(log.student_id||'—')+'</div>'
+         + '</div></div>';
+}
+
+// ── خلية الجلسة ──
+function fmtSession(log) {
+    var isSpoof = (log.action === 'SPOOF_ATTEMPT_DETECTED');
+    if (isSpoof && log.details) {
+        var m = log.details.match(/room=([^,]+)/);
+        var room = m ? m[1] : '—';
+        return '<span class="ses-pill sp">🏛️ ' + room + '</span>';
+    }
+    if (log.course_name) {
+        var txt = log.course_name + (log.session_number ? ' — ' + log.session_number : '');
+        return '<span class="ses-pill">'+txt+'</span>';
+    }
+    return '<span style="color:var(--muted);font-size:12px">—</span>';
+}
+
+// ── خلية Details ──
+function fmtDetails(log) {
+    var d = log.details || '';
+    if (!d) return '<span class="det">—</span>';
+
+    if (log.action === 'SPOOF_ATTEMPT_DETECTED') {
+        // للـ spoof نبيّن فقط "No رمش" أو "شاشة مكتشفة"
+        if (d.includes('no_blink')) return '<span class="det det-spoof">👁️ No blink detected</span>';
+        if (d.includes('no_face'))  return '<span class="det det-spoof">👤 No face detected</span>';
+        return '<span class="det det-spoof">⚠️ احتيال مكتشف</span>';
+    }
+
+    if (d.includes('status=')) {
+        var match = d.match(/status=(\w+)/);
+        var st = match ? match[1] : '';
+        var stAr = st==='Present'?'✅ Present':st==='Late'?'⏰ Late':st;
+        return '<span class="det">'+stAr+'</span>';
+    }
+
+    return '<span class="det" title="'+d+'">' + d.slice(0,35) + (d.length>35?'…':'') + '</span>';
+}
+
+// ── تحليل Anti-Spoofing ──
+function fmtSpoofAnalysis(log) {
+    if (log.action !== 'SPOOF_ATTEMPT_DETECTED') {
+        return '<span style="color:var(--muted);font-size:11px">—</span>';
+    }
+    var d = log.details || '';
+
+    var blink   = !d.includes('no_blink');
+    var skin    = d.includes('skin=True');
+    var wrinkle = d.includes('wrinkle=True');
+    var pore    = d.includes('pore=True');
+    var color   = d.includes('color=True');
+    var scoreM  = d.match(/score=([\.\d]+)/);
+    var score   = scoreM ? parseFloat(scoreM[1]) : 0;
+
+    var items = [
+        {label:'Blink', ok:blink},
+        {label:'Skin',  ok:skin},
+        {label:'Wrinkle',ok:wrinkle},
+        {label:'Pore',  ok:pore},
+        {label:'Color', ok:color}
+    ];
+
+    var chips = '';
+    for (var i=0; i<items.length; i++) {
+        var it = items[i];
+        var bg  = it.ok ? '#dcfce7' : '#fee2e2';
+        var col = it.ok ? '#16a34a' : '#dc2626';
+        chips += '<span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:'+bg+';color:'+col+';margin:1px 1px 1px 0">'
+               + (it.ok?'✅':'❌') + ' ' + it.label + '</span>';
+    }
+
+    var sc = score > 0.5 ? '#16a34a' : score > 0.35 ? '#d97706' : '#dc2626';
+    var passed = [blink,skin,wrinkle,pore,color].filter(Boolean).length;
+
+    return '<div style="line-height:1.8">'+chips+'</div>'
+         + '<div style="font-size:11px;margin-top:4px;display:flex;gap:8px;align-items:center">'
+         + '<span style="color:'+sc+';font-weight:700">Score: '+score.toFixed(3)+'</span>'
+         + '<span style="color:var(--muted)">('+passed+'/5 passed)</span>'
+         + '</div>';
+}
+
+// ── View الجدول ──
+function renderTable(logs) {
+    var c = document.getElementById('container');
+    if (!logs.length) {
+        c.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>No records found</p></div>';
+        return;
+    }
+
+    var html = '<table><thead><tr>'
+        + '<th><input type="checkbox" id="selAll"></th>'
+        + '<th>Student / Entity</th>'
+        + '<th>Action</th>'
+        + '<th>Course / Room</th>'
+        + '<th>Details</th>'
+        + '<th id="thSpoof" style="display:none">تحليل Anti-Spoofing</th>'
+        + '<th>Timestamp</th>'
+        + '</tr></thead><tbody>';
+
+    for (var i=0; i<logs.length; i++) {
+        var log = logs[i];
+        var isSpoof = (log.action === 'SPOOF_ATTEMPT_DETECTED');
+        html += '<tr class="'+(isSpoof?'spoof-row':'')+'">'
+            + '<td><input type="checkbox" class="cb" data-id="'+log.id+'"></td>'
+            + '<td>'+fmtStudent(log)+'</td>'
+            + '<td>'+fmtBadge(log.action)+'</td>'
+            + '<td>'+fmtSession(log)+'</td>'
+            + '<td>'+fmtDetails(log)+'</td>'
+            + '<td class="spoof-analysis" style="display:none">'+fmtSpoofAnalysis(log)+'</td>'
+            + '<td>'+fmtTime(log.timestamp)+'</td>'
+            + '</tr>';
+    }
+
+    html += '</tbody></table>';
+    c.innerHTML = html;
+
+    // Checkboxes
+    var selAll = document.getElementById('selAll');
+    if (selAll) selAll.addEventListener('change', function() {
+        document.querySelectorAll('.cb').forEach(function(cb){ cb.checked = selAll.checked; });
+        updateDelBtn();
+    });
+    document.querySelectorAll('.cb').forEach(function(cb){
+        cb.addEventListener('change', updateDelBtn);
+    });
+}
+
+// ── Refresh الإحصائيات ──
+function updateStats(logs) {
+    var c = {ok:0, dup:0, reg:0, spoof:0, other:0};
+    for (var i=0; i<logs.length; i++) {
+        var a = logs[i].action;
+        if      (a==='ATTENDANCE_MARKED')              c.ok++;
+        else if (a==='DUPLICATE_ATTENDANCE_ATTEMPT')   c.dup++;
+        else if (a==='DUPLICATE_REGISTRATION_ATTEMPT') c.reg++;
+        else if (a==='SPOOF_ATTEMPT_DETECTED')         c.spoof++;
+        else                                           c.other++;
+    }
+    document.getElementById('s1').textContent = c.ok;
+    document.getElementById('s2').textContent = c.dup;
+    document.getElementById('s3').textContent = c.reg;
+    document.getElementById('s4').textContent = c.other;
+    document.getElementById('s5').textContent = c.spoof;
+}
+
+// ── تطبيق الFilter ──
+function applyFilter() {
+    var search = document.getElementById('searchInput').value.trim().toLowerCase();
+    var filtered = allLogs.filter(function(l) {
+        if (curFilter !== 'all' && l.action !== curFilter) return false;
+        if (search) {
+            var hay = ((l.student_id||'')+(l.student_name||'')+(l.course_name||'')+(l.details||'')).toLowerCase();
+            if (!hay.includes(search)) return false;
+        }
+        return true;
+    });
+    renderTable(filtered);
+}
+
+// ── تحميل البيانات ──
+function loadLogs() {
+    fetch('/admin/logs/data')
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+            if (!data.ok) {
+                document.getElementById('container').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><p>Error في تحميل البيانات</p></div>';
+                return;
+            }
+            // رتّب: spoof أوNoً ثم Sundayث
+            allLogs = (data.logs||[]).sort(function(a,b) {
+                var as = a.action==='SPOOF_ATTEMPT_DETECTED' ? 0 : 1;
+                var bs = b.action==='SPOOF_ATTEMPT_DETECTED' ? 0 : 1;
+                if (as!==bs) return as-bs;
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+            updateStats(allLogs);
+            applyFilter();
+        })
+        .catch(function() {
+            document.getElementById('container').innerHTML = '<div class="empty"><div class="empty-icon">❌</div><p>Connection error</p></div>';
+        });
+}
+
+function updateDelBtn() {
+    var n = document.querySelectorAll('.cb:checked').length;
+    document.getElementById('btnDel').style.display = n ? 'flex' : 'none';
+}
+
+// ── فNoتر ──
+document.querySelectorAll('.fbtn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.fbtn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        curFilter = btn.dataset.f;
+        applyFilter();
+    });
+});
+
+// ── Search ──
+var st;
+document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(st);
+    st = setTimeout(applyFilter, 300);
+});
+
+// ── Export ──
+document.getElementById('btnExport').addEventListener('click', function() {
+    window.open('/admin/logs/export', '_blank');
+});
+
+// ── Delete ──
+document.getElementById('btnDel').addEventListener('click', function() {
+    var ids = Array.from(document.querySelectorAll('.cb:checked')).map(function(cb){ return parseInt(cb.dataset.id); });
+    if (!ids.length) return;
+    if (!confirm('Are you sure you want to delete '+ids.length+' record(s)?')) return;
+    fetch('/admin/logs/delete', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({log_ids:ids})
+    }).then(function(r){ return r.json(); })
+      .then(function(d){ if(d.ok) loadLogs(); });
+});
+
+// ── Toggle عمود التحليل ──
+var spoofColVisible = false;
+function toggleSpoofCol() {
+    spoofColVisible = !spoofColVisible;
+    var display = spoofColVisible ? '' : 'none';
+    var th = document.getElementById('thSpoof');
+    if (th) th.style.display = display;
+    document.querySelectorAll('.spoof-analysis').forEach(function(td) {
+        td.style.display = display;
+    });
+    var btn = document.getElementById('btnToggleSpoof');
+    if (btn) {
+        btn.style.background = spoofColVisible ? '#0369a1' : '#e0f2fe';
+        btn.style.color = spoofColVisible ? '#fff' : '#0369a1';
+    }
+}
+
+// ── تشغيل ──
+loadLogs();
+setInterval(loadLogs, 30000);
+</script>
+</body>
+</html>

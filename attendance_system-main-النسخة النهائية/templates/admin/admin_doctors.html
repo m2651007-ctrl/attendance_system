@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Doctors — University of Hail</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:     #0b3c5d;
+            --navy-mid: #0d4f7a;
+            --navy-lt:  #1a6494;
+            --gold:     #c9a84c;
+            --gold-lt:  #f0d080;
+            --bg:       #f0f4f8;
+            --white:    #ffffff;
+            --text:     #1a2332;
+            --muted:    #64748b;
+            --danger:   #dc2626;
+            --danger-lt:#fee2e2;
+            --success:  #16a34a;
+            --success-lt:#dcfce7;
+            --border:   #dde4ed;
+            --shadow:   0 4px 24px rgba(11,60,93,.10);
+            --shadow-lg:0 8px 40px rgba(11,60,93,.16);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        .top-header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-lt) 100%);
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            box-shadow: 0 2px 20px rgba(0,0,0,.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--white);
+        }
+
+        .top-header .logo-icon {
+            width: 42px; height: 42px;
+            background: rgba(255,255,255,.12);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            border: 1px solid rgba(255,255,255,.2);
+        }
+
+        .top-header .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: .3px;
+        }
+
+        .top-header .logo-sub {
+            font-size: 12px;
+            opacity: .7;
+            font-weight: 400;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,.85);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 9px;
+            padding: 8px 16px;
+            transition: all .2s;
+        }
+        .back-btn:hover {
+            background: rgba(255,255,255,.2);
+            color: var(--white);
+        }
+
+        /* ===== LAYOUT ===== */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 36px 24px;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--white);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+            padding: 22px 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header-icon {
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,.15);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+
+        .card-header h2 {
+            color: var(--white);
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .card-header p {
+            color: rgba(255,255,255,.65);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .card-body { padding: 28px; }
+
+        /* ===== FORM ===== */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 7px;
+        }
+
+        .form-group label span {
+            color: var(--danger);
+            margin-right: 2px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap .input-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            opacity: .5;
+            pointer-events: none;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 11px 42px 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Tajawal', sans-serif;
+            color: var(--text);
+            background: #f8fafc;
+            transition: all .2s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--navy);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(11,60,93,.08);
+        }
+
+        .form-group input::placeholder { color: #a0aec0; }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            padding: 13px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(11,60,93,.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(11,60,93,.4);
+        }
+
+        .submit-btn:active { transform: translateY(0); }
+
+        /* ===== FLASH MSG ===== */
+        {% if success_msg %}
+        .flash {
+            background: var(--success-lt);
+            border: 1px solid #bbf7d0;
+            color: var(--success);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        {% endif %}
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 28px;
+            border-bottom: 1px solid var(--border);
+            background: #f8fafc;
+        }
+
+        .stats-bar .count {
+            font-size: 14px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .stats-bar .count strong {
+            color: var(--navy);
+            font-size: 22px;
+            font-weight: 800;
+            margin-left: 6px;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: #f1f5f9;
+            color: var(--navy);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 13px 20px;
+            text-align: right;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border);
+        }
+
+        tbody tr {
+            transition: background .15s;
+            animation: fadeIn .3s ease both;
+        }
+
+        tbody tr:hover { background: #f8fafc; }
+
+        tbody tr:not(:last-child) td {
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        td {
+            padding: 14px 20px;
+            font-size: 14px;
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        /* avatar */
+        .doctor-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-lt) 100%);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--white);
+            font-size: 15px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .doctor-name { font-weight: 600; color: var(--navy); }
+        .doctor-id   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        .email-cell {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .username-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 7px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .delete-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--danger-lt);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .delete-btn:hover {
+            background: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
+        }
+
+        /* empty */
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty p    { font-size: 15px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* responsive */
+        @media (max-width: 900px) {
+            .page { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="top-header">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <div>
+            <div class="logo-text">University of Hail</div>
+            <div class="logo-sub">Attendance Management System</div>
+        </div>
+    </div>
+    <a class="back-btn" href="/admin/dashboard">
+        ← Back to Dashboard
+    </a>
+</header>
+
+<div class="page">
+
+    <!-- فورم الAdd -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">➕</div>
+            <div>
+                <h2>Add New Doctor</h2>
+                <p>Enter doctor information below</p>
+            </div>
+        </div>
+        <div class="card-body">
+
+            {% if error %}
+            <div style="background:var(--danger-lt);border:1px solid #fecaca;color:var(--danger);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:8px;">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/admin/doctors/add">
+
+                <div class="form-group">
+                    <label>Full Name <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">👤</span>
+                        <input type="text" name="name" placeholder="د. محمد أحمد" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" name="email" placeholder="doctor@uoh.edu.sa" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Username <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🏷️</span>
+                        <input type="text" name="username" placeholder="dr_username" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Password <span>*</span></label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" name="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button class="submit-btn" type="submit">
+                    ✅ Add Doctor
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- جدول Doctors -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">📋</div>
+            <div>
+                <h2>Doctors List</h2>
+                <p>All registered doctors in the system</p>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="count">
+                Total Doctors <strong>{{ doctors | length }}</strong>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            {% if doctors %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Instructor</th>
+                        <th>Email Address</th>
+                        <th>Username</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in doctors %}
+                    <tr style="animation-delay: {{ loop.index0 * 0.05 }}s">
+                        <td>
+                            <div class="doctor-cell">
+                                <div class="avatar">{{ d[1][0] if d[1] else '؟' }}</div>
+                                <div>
+                                    <div class="doctor-name">{{ d[1] }}</div>
+                                    <div class="doctor-id">#{{ d[0] }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="email-cell">{{ d[2] }}</span></td>
+                        <td><span class="username-badge">{{ d[3] }}</span></td>
+                        <td>
+                            <a class="delete-btn"
+                               href="/admin/doctors/delete/{{ d[0] }}"
+                               onclick="return confirm('Are you sure you want to delete Dr. {{ d[1] }}؟')">
+                                🗑 Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">
+                <div class="empty-icon">👨‍🏫</div>
+                <p>No doctors added yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

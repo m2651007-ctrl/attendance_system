@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Import Attendance CSV</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="header">لوحة الأدمن | Import Attendance</div>
+
+  <div class="card center" style="width: 700px; max-width: 95%;">
+    <h3 class="title">📥 Upload CSV File للAttendance</h3>
+
+    <p style="color:#666;">
+      الأعمدة المطلوبة داخل الملف:
+      <b>session_id, university_id, check_in, status</b>
+    </p>
+
+    <form method="POST" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".csv" required />
+      <button type="submit" style="margin-top:10px;">رفع وRegister في قاعدة البيانات</button>
+    </form>
+  </div>
+</body>
+</html>

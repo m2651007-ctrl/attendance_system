@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Record — University of Hail</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:#0b3c5d; --navy-mid:#0d4f7a; --navy-lt:#1a6494;
+            --bg:#f0f4f8; --white:#ffffff; --text:#1a2332; --muted:#64748b;
+            --danger:#dc2626; --danger-lt:#fee2e2;
+            --success:#16a34a; --success-lt:#dcfce7;
+            --warning:#d97706; --warning-lt:#fef3c7;
+            --border:#dde4ed; --shadow:0 4px 24px rgba(11,60,93,.10);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Tajawal',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+        .top-header {
+            background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--navy-lt) 100%);
+            padding:0 40px; display:flex; align-items:center;
+            justify-content:space-between; height:70px;
+            box-shadow:0 2px 20px rgba(0,0,0,.2); position:sticky; top:0; z-index:100;
+        }
+        .logo { display:flex; align-items:center; gap:12px; color:#fff; }
+        .logo-icon { width:42px; height:42px; background:rgba(255,255,255,.12); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid rgba(255,255,255,.2); }
+        .logo-text { font-size:18px; font-weight:700; }
+        .logo-sub  { font-size:12px; opacity:.7; }
+        .back-btn { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,.85); text-decoration:none; font-size:14px; font-weight:500; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:9px; padding:8px 16px; transition:all .2s; }
+        .back-btn:hover { background:rgba(255,255,255,.2); color:#fff; }
+
+        .page { max-width:1400px; margin:0 auto; padding:30px 24px; }
+
+        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+        .stat-card { background:var(--white); border-radius:14px; padding:16px 20px; box-shadow:var(--shadow); display:flex; align-items:center; justify-content:space-between; }
+        .stat-info small { font-size:12px; color:var(--muted); }
+        .stat-info b { display:block; font-size:22px; font-weight:800; color:var(--navy); margin:4px 0 2px; }
+        .stat-icon { width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+        .si-green{background:var(--success-lt);} .si-yellow{background:var(--warning-lt);} .si-red{background:var(--danger-lt);} .si-blue{background:#dbeafe;}
+
+        .card { background:var(--white); border-radius:18px; box-shadow:var(--shadow); overflow:hidden; }
+        .card-header { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%); padding:20px 28px; display:flex; align-items:center; gap:12px; }
+        .card-header-icon { width:38px; height:38px; background:rgba(255,255,255,.15); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+        .card-header h2 { color:#fff; font-size:16px; font-weight:700; }
+        .card-header p  { color:rgba(255,255,255,.65); font-size:12px; margin-top:2px; }
+
+        .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:16px 24px; border-bottom:1px solid var(--border); background:#f8fafc; }
+        .search-wrap { position:relative; flex:1; min-width:180px; }
+        .search-wrap input { width:100%; padding:9px 36px 9px 12px; border:1.5px solid var(--border); border-radius:10px; font-size:13px; font-family:'Tajawal',sans-serif; outline:none; background:#fff; transition:all .2s; }
+        .search-wrap input:focus { border-color:var(--navy); box-shadow:0 0 0 3px rgba(11,60,93,.08); }
+        .search-wrap input::placeholder { color:#a0aec0; }
+        .search-icon { position:absolute; right:10px; top:50%; transform:translateY(-50%); opacity:.4; font-size:13px; }
+
+        .toolbar-btn { display:flex; align-items:center; gap:5px; padding:9px 14px; border-radius:10px; border:none; font-size:13px; font-weight:700; font-family:'Tajawal',sans-serif; cursor:pointer; transition:all .2s; white-space:nowrap; }
+        .btn-export { background:var(--success-lt); color:var(--success); border:1px solid #bbf7d0; }
+        .btn-export:hover { background:var(--success); color:#fff; }
+        .btn-delete { background:var(--danger-lt); color:var(--danger); border:1px solid #fecaca; display:none; }
+        .btn-delete:hover { background:var(--danger); color:#fff; }
+
+        .table-wrap { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; min-width:1000px; }
+        thead th { background:#f1f5f9; color:var(--navy); font-size:12px; font-weight:700; padding:12px 14px; text-align:right; border-bottom:2px solid var(--border); }
+        tbody tr { transition:background .15s; animation:fadeIn .2s ease both; }
+        tbody tr:hover { background:#f8fafc; }
+        tbody tr:not(:last-child) td { border-bottom:1px solid #eef2f7; }
+        td { padding:12px 14px; font-size:13px; color:var(--text); vertical-align:middle; }
+
+        .student-cell { display:flex; align-items:center; gap:9px; }
+        .avatar { width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--navy),var(--navy-lt)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:700; flex-shrink:0; }
+        .s-name { font-weight:600; color:var(--navy); }
+        .s-id   { font-size:11px; color:var(--muted); }
+
+        .badge { display:inline-block; border-radius:7px; padding:3px 9px; font-size:11px; font-weight:700; }
+        .badge-present { background:var(--success-lt); color:var(--success); }
+        .badge-late    { background:var(--warning-lt); color:var(--warning); }
+        .badge-absent  { background:var(--danger-lt);  color:var(--danger); }
+        .badge-other   { background:#f1f5f9; color:var(--muted); }
+
+        .ts { font-family:monospace; font-size:11px; color:var(--muted); }
+        .course-cell { font-weight:600; color:var(--navy); font-size:12px; }
+
+        .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+        .empty-icon { font-size:48px; margin-bottom:12px; }
+        .loading { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+        @media(max-width:700px){ .stats-row{grid-template-columns:1fr 1fr;} }
+    </style>
+</head>
+<body>
+
+<header class="top-header">
+    <div class="logo">
+        <div class="logo-icon">🎓</div>
+        <div><div class="logo-text">University of Hail</div><div class="logo-sub">Attendance Management System</div></div>
+    </div>
+    <a class="back-btn" href="/admin/dashboard">← Back to Dashboard</a>
+</header>
+
+<div class="page">
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-info"><small>Total Attendance</small><b id="cnt-total">—</b><small>All Records</small></div>
+            <div class="stat-icon si-blue">📊</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>Present</small><b id="cnt-present">—</b><small>On time</small></div>
+            <div class="stat-icon si-green">✅</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>Late</small><b id="cnt-late">—</b><small>After 15 min</small></div>
+            <div class="stat-icon si-yellow">⏰</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info"><small>Absent</small><b id="cnt-absent">—</b><small>Not recorded</small></div>
+            <div class="stat-icon si-red">❌</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-header-icon">📋</div>
+            <div><h2>Attendance & Absence Record</h2><p>All Students Registered in the System</p></div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="course-search" placeholder="Search by course or section...">
+            </div>
+            <div class="search-wrap">
+                <span class="search-icon">👤</span>
+                <input type="text" id="student-search" placeholder="Search by student ID...">
+            </div>
+            <button class="toolbar-btn btn-export" id="export-btn">📥 Export CSV</button>
+            <button class="toolbar-btn btn-delete" id="delete-selected-btn">🗑 Delete Selected</button>
+        </div>
+
+        <div class="table-wrap">
+            <div id="attendance-container">
+                <div class="loading">⏳ Loading attendance records...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getBadge(status) {
+    switch((status||'').toLowerCase()) {
+        case 'present': return ['badge-present','✓ Present'];
+        case 'late':    return ['badge-late','⏰ Late'];
+        case 'absent':  return ['badge-absent','✗ Absent'];
+        default:        return ['badge-other', status || '—'];
+    }
+}
+function initial(n){ return (n||'?').trim()[0]; }
+function fmtTs(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    return d.toLocaleString('ar-SA',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+async function loadAttendance() {
+    const cs = document.getElementById('course-search').value.trim();
+    const ss = document.getElementById('student-search').value.trim();
+    let url = '/admin/attendance/data';
+    const params = [];
+    if (cs) params.push('course_search=' + encodeURIComponent(cs));
+    if (ss) params.push('student_search=' + encodeURIComponent(ss));
+    if (params.length) url += '?' + params.join('&');
+
+    const container = document.getElementById('attendance-container');
+    container.innerHTML = '<div class="loading">⏳ Loading...</div>';
+
+    try {
+        const res    = await fetch(url);
+        const result = await res.json();
+        if (!result.ok || !result.records || result.records.length === 0) {
+            container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>No records found</p></div>';
+            return;
+        }
+
+        let cT=0, cP=0, cL=0, cA=0;
+        result.records.forEach(r => {
+            cT++;
+            const s = (r.status||'').toLowerCase();
+            if (s==='present') cP++;
+            else if (s==='late') cL++;
+            else if (s==='absent') cA++;
+        });
+        document.getElementById('cnt-total').textContent   = cT;
+        document.getElementById('cnt-present').textContent = cP;
+        document.getElementById('cnt-late').textContent    = cL;
+        document.getElementById('cnt-absent').textContent  = cA;
+
+        let html = `<table><thead><tr>
+            <th><input type="checkbox" id="select-all"></th>
+            <th>Student</th><th>Course</th><th>Section</th>
+            <th>Instructor</th><th>Sign In</th><th>Logout</th><th>Status</th>
+        </tr></thead><tbody>`;
+
+        result.records.forEach((r,i) => {
+            const [bcls, blbl] = getBadge(r.status);
+            html += `<tr style="animation-delay:${i*0.02}s">
+                <td><input type="checkbox" class="att-checkbox" data-id="${r.id}"></td>
+                <td><div class="student-cell">
+                    <div class="avatar">${initial(r.student_name)}</div>
+                    <div><div class="s-name">${r.student_name}</div><div class="s-id">${r.university_id}</div></div>
+                </div></td>
+                <td><span class="course-cell">${r.course_name || '—'}</span></td>
+                <td><span style="font-size:12px;background:#e0f2fe;color:#0369a1;border-radius:6px;padding:2px 8px;font-weight:600;">${r.session_number || '—'}</span></td>
+                <td style="font-size:12px;color:var(--muted)">${r.instructor_name || '—'}</td>
+                <td><span class="ts">${fmtTs(r.check_in)}</span></td>
+                <td><span class="ts">${r.check_out ? fmtTs(r.check_out) : '<span style="color:#9ca3af">—</span>'}</span></td>
+                <td><span class="badge ${bcls}">${blbl}</span></td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+        setupListeners();
+    } catch(e) {
+        container.innerHTML = '<div class="empty"><div class="empty-icon">❌</div><p>Connection error</p></div>';
+    }
+}
+
+function setupListeners() {
+    const sa = document.getElementById('select-all');
+    if (sa) sa.addEventListener('change', function() {
+        document.querySelectorAll('.att-checkbox').forEach(cb => cb.checked = this.checked);
+        updateDeleteBtn();
+    });
+    document.querySelectorAll('.att-checkbox').forEach(cb => cb.addEventListener('change', updateDeleteBtn));
+}
+
+function updateDeleteBtn() {
+    const n = document.querySelectorAll('.att-checkbox:checked').length;
+    document.getElementById('delete-selected-btn').style.display = n > 0 ? 'flex' : 'none';
+}
+
+function getSelectedIds() {
+    return Array.from(document.querySelectorAll('.att-checkbox:checked')).map(cb => parseInt(cb.dataset.id)).filter(Boolean);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadAttendance();
+
+    let t1, t2;
+    document.getElementById('course-search').addEventListener('input', () => { clearTimeout(t1); t1 = setTimeout(loadAttendance, 300); });
+    document.getElementById('student-search').addEventListener('input', () => { clearTimeout(t2); t2 = setTimeout(loadAttendance, 300); });
+
+    document.getElementById('export-btn').addEventListener('click', () => {
+        const cs = document.getElementById('course-search').value.trim();
+        const ss = document.getElementById('student-search').value.trim();
+        const ids = getSelectedIds();
+        let url = '/admin/attendance/export';
+        const p = [];
+        if (cs)  p.push('course_search='  + encodeURIComponent(cs));
+        if (ss)  p.push('student_search=' + encodeURIComponent(ss));
+        if (ids.length) p.push('selected_ids=' + ids.join(','));
+        if (p.length) url += '?' + p.join('&');
+        window.open(url, '_blank');
+    });
+
+    document.getElementById('delete-selected-btn').addEventListener('click', async () => {
+        const ids = getSelectedIds();
+        if (!ids.length) return;
+        if (!confirm(`Are you sure you want to delete ${ids.length} record(s)?`)) return;
+        try {
+            const res = await fetch('/admin/attendance/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({record_ids:ids}) });
+            const r   = await res.json();
+            if (r.ok) loadAttendance();
+            else alert('Error: ' + r.message);
+        } catch(e) { alert('An error occurred'); }
+    });
+});
+</script>
+</body>
+</html>

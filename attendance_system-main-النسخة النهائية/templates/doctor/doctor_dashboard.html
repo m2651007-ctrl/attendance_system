@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doctor Dashboard — University of Hail</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0b3c5d;--navy-mid:#0d4f7a;--navy-lt:#1a6494;--bg:#f0f4f8;--white:#fff;--text:#1a2332;--muted:#64748b;--border:#dde4ed;--shadow:0 4px 24px rgba(11,60,93,.10);}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(135deg,var(--navy),var(--navy-mid) 55%,var(--navy-lt));padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:72px;box-shadow:0 2px 24px rgba(0,0,0,.2);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:14px;color:#fff}
+.logo-icon{width:46px;height:46px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid rgba(255,255,255,.25)}
+.logo-text{font-size:20px;font-weight:800}
+.logo-sub{font-size:12px;opacity:.65}
+.header-right{display:flex;align-items:center;gap:12px}
+.doctor-badge{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:8px 14px;color:rgba(255,255,255,.9);font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.nav-btn{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.85);text-decoration:none;font-size:13px;font-weight:600;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:8px 16px;transition:all .2s}
+.nav-btn:hover{background:rgba(255,255,255,.2);color:#fff}
+.logout-btn{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4)}
+.page{max-width:1280px;margin:0 auto;padding:36px 28px}
+.welcome{margin-bottom:32px}
+.welcome h1{font-size:26px;font-weight:800;color:var(--navy)}
+.welcome p{font-size:14px;color:var(--muted);margin-top:4px}
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:36px}
+.stat{background:var(--white);border-radius:16px;padding:22px 20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;border:1px solid var(--border);transition:transform .2s}
+.stat:hover{transform:translateY(-2px)}
+.stat-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.stat-body small{font-size:12px;color:var(--muted);font-weight:500}
+.stat-body b{display:block;font-size:26px;font-weight:800;color:var(--navy);margin:3px 0 2px}
+.stat-body span{font-size:12px;color:var(--muted)}
+/* Section */
+.section-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);margin-left:8px}
+/* Cards */
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.nav-card{background:var(--white);border-radius:18px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;text-decoration:none;color:inherit;transition:all .25s;display:flex;flex-direction:column}
+.nav-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(11,60,93,.15);border-color:var(--navy-lt)}
+.card-top{padding:24px 24px 18px;display:flex;align-items:flex-start;gap:16px}
+.card-ico{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.card-info h3{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.card-info p{font-size:13px;color:var(--muted);line-height:1.5}
+.card-footer{margin-top:auto;padding:14px 24px;border-top:1px solid var(--border);background:#f8fafc;display:flex;align-items:center;justify-content:space-between}
+.card-footer span{font-size:13px;font-weight:700;color:var(--navy-mid)}
+.card-arrow{font-size:16px;color:var(--muted);transition:transform .2s}
+.nav-card:hover .card-arrow{transform:translateX(4px);color:var(--navy)}
+@media(max-width:1024px){.stats-row{grid-template-columns:repeat(2,1fr)}.cards-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.cards-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}.header{padding:0 16px}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <div><div class="logo-text">University of Hail</div><div class="logo-sub">Smart Attendance System</div></div>
+  </div>
+  <div class="header-right">
+    <div class="doctor-badge"><div class="dot"></div><span>Dr. {{ doctor_name }}</span></div>
+    <a class="nav-btn" href="/doctor/courses">📚 My Courses</a>
+    <a class="nav-btn" href="/doctor/attendance">✅ Attendance</a>
+    <a class="nav-btn logout-btn" href="/doctor/logout">🚪 Logout</a>
+  </div>
+</header>
+
+<div class="page">
+  <div class="welcome">
+    <h1>👋 Welcome, Dr. {{ doctor_name }}</h1>
+    <p>Here is your current attendance activity summary</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-ico" style="background:#dbeafe">📚</div>
+      <div class="stat-body"><small>Total Sessions</small><b>{{ total_sessions }}</b><span>This semester</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico" style="background:#dcfce7">📋</div>
+      <div class="stat-body"><small>Total Records</small><b>{{ total_attendance }}</b><span>All logs</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico" style="background:#dcfce7">✅</div>
+      <div class="stat-body"><small>Present Today</small><b>{{ today_present }}</b><span>Today</span></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico" style="background:#fee2e2">⚠️</div>
+      <div class="stat-body"><small>At Risk</small><b>{{ total_deprived }}</b><span>Above 25% absence</span></div>
+    </div>
+  </div>
+
+  <div class="section-title">⚡ Quick Access</div>
+  <div class="cards-grid">
+    <a href="/doctor/courses" class="nav-card">
+      <div class="card-top">
+        <div class="card-ico" style="background:#dbeafe">📚</div>
+        <div class="card-info"><h3>My Courses</h3><p>View assigned courses, schedule, room details and session info</p></div>
+      </div>
+      <div class="card-footer"><span>View Courses</span><span class="card-arrow">→</span></div>
+    </a>
+    <a href="/doctor/attendance" class="nav-card">
+      <div class="card-top">
+        <div class="card-ico" style="background:#dcfce7">✅</div>
+        <div class="card-info"><h3>Record Attendance</h3><p>Monitor attendance, view analytics and manage student records per session</p></div>
+      </div>
+      <div class="card-footer"><span>Go to Attendance</span><span class="card-arrow">→</span></div>
+    </a>
+    <a href="/doctor/attendance/checkout_page" class="nav-card">
+      <div class="card-top">
+        <div class="card-ico" style="background:#e0f2fe">🚪</div>
+        <div class="card-info"><h3>Record Checkout</h3><p>Register and monitor student checkouts from lecture sessions</p></div>
+      </div>
+      <div class="card-footer"><span>Go to Checkout</span><span class="card-arrow">→</span></div>
+    </a>
+  </div>
+</div>
+</body>
+</html>
